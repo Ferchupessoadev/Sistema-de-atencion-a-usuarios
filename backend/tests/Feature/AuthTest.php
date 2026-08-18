@@ -180,4 +180,63 @@ class AuthTest extends TestCase
         // Verificar que el token fue revocado
         $this->assertDatabaseCount('personal_access_tokens', 0);
     }
+
+    // ─── Tests de Autenticación con Google / Gmail ─────────────────────────────
+
+    /** @test */
+    public function test_login_con_google_usuario_existente(): void
+    {
+        $user = $this->crearUsuario([
+            'nombre' => 'Pedro Gmail',
+            'correo' => 'pedro@gmail.com',
+        ]);
+
+        $response = $this->postJson('/api/auth/google', [
+            'correo'    => 'pedro@gmail.com',
+            'nombre'    => 'Pedro Gmail',
+            'google_id' => 'google_sub_998877',
+            'avatar'    => 'https://google.com/avatar.png',
+        ]);
+
+        $response->assertStatus(200)
+                 ->assertJsonStructure([
+                     'message', 'token', 'token_type',
+                     'user' => ['id', 'nombre', 'correo', 'es_tecnico'],
+                 ])
+                 ->assertJsonPath('user.correo', 'pedro@gmail.com');
+
+        $this->assertNotEmpty($response->json('token'));
+        $this->assertEquals('google_sub_998877', $user->fresh()->google_id);
+    }
+
+    /** @test */
+    public function test_login_con_google_nuevo_usuario_se_autoregistra(): void
+    {
+        $response = $this->postJson('/api/auth/google', [
+            'correo'    => 'nuevo.usuario@gmail.com',
+            'nombre'    => 'Nuevo Usuario Google',
+            'google_id' => 'google_sub_112233',
+            'avatar'    => 'https://lh3.googleusercontent.com/photo.jpg',
+        ]);
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('user.correo', 'nuevo.usuario@gmail.com')
+                 ->assertJsonPath('user.es_tecnico', false);
+
+        $this->assertDatabaseHas('users', [
+            'correo'    => 'nuevo.usuario@gmail.com',
+            'nombre'    => 'Nuevo Usuario Google',
+            'google_id' => 'google_sub_112233',
+        ]);
+    }
+
+    /** @test */
+    public function test_login_con_google_falla_sin_correo_o_nombre(): void
+    {
+        $response = $this->postJson('/api/auth/google', []);
+
+        $response->assertStatus(422)
+                 ->assertJsonValidationErrors(['correo', 'nombre']);
+    }
 }
+

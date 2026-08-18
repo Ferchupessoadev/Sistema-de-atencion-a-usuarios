@@ -265,7 +265,7 @@ class IncidentesTest extends TestCase
     }
 
     /** @test */
-    public function test_rn_002_tecnico_puede_marcar_resuelto_con_solucion_texto(): void
+    public function test_rn_002_tecnico_puede_marcar_resuelto_con_solucion_texto_y_crea_receta_reutilizable(): void
     {
         $tecnico = $this->crearUsuario(true);
         $usuario = $this->crearUsuario(false);
@@ -281,13 +281,22 @@ class IncidentesTest extends TestCase
         $response = $this->actingAs($tecnico, 'sanctum')
                          ->putJson("/api/incidentes/{$inc->id}", [
                              'estado'         => 'RESUELTO',
-                             'solucion_texto' => 'Se reinició el servicio Apache y se renovó el certificado SSL.',
+                             'titulo_receta'  => 'Procedimiento de reinicio de Apache',
+                             'solucion_texto' => "1. Detener servicio Apache\n2. Renovar certificado SSL\n3. Iniciar servicio",
                          ]);
 
         $response->assertStatus(200)
-                 ->assertJsonPath('incidente.estado', 'RESUELTO');
+                 ->assertJsonPath('incidente.estado', 'RESUELTO')
+                 ->assertJsonPath('incidente.receta.titulo', 'Procedimiento de reinicio de Apache');
+
         $this->assertNotNull($response->json('incidente.resolucion'));
+        $this->assertDatabaseHas('recetas', [
+            'titulo'       => 'Procedimiento de reinicio de Apache',
+            'id_categoria' => $cat->id,
+            'usos'         => 1,
+        ]);
     }
+
 
     // ─── Tests de Derivación y RN-003 ─────────────────────────────────────────
 

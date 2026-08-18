@@ -19,7 +19,10 @@ class User extends Authenticatable
         'correo',
         'contrasena',
         'es_tecnico',
+        'google_id',
+        'avatar',
     ];
+
 
     protected $hidden = [
         'contrasena',

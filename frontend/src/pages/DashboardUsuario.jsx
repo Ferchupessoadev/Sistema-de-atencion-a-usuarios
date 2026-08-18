@@ -4,8 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
+import SaltoGrandeLogo from '../components/SaltoGrandeLogo';
 
 export default function DashboardUsuario() {
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -91,26 +93,30 @@ export default function DashboardUsuario() {
   return (
     <div className="dashboard">
       <nav className="dashboard-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '1.4rem' }}>🎫</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <span style={{ fontSize: '1.6rem' }}>🎫</span>
           <div>
             <h1>Mesa de Ayuda CTM</h1>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Portal de Usuario</span>
+            <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
+              Portal de Usuario
+            </span>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <NotificationBell />
-          <span className="badge badge-usuario">Usuario</span>
-          <span style={{ fontSize: '0.9rem', color: '#334155', fontWeight: 600 }}>{user?.nombre}</span>
+          <span className="badge badge-usuario" style={{ background: '#CCFBF1', color: '#0F766E' }}>Usuario</span>
+          <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
           <button
             id="btn-logout-usuario"
-            className="btn btn-secondary btn-sm"
+            className="btn btn-outline-header btn-sm"
             onClick={handleLogout}
           >
             Cerrar sesión
           </button>
         </div>
       </nav>
+
+
 
       <div className="dashboard-body">
         {/* Navegación por Pestañas Principales */}

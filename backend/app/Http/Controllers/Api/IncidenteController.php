@@ -172,8 +172,21 @@ class IncidenteController extends Controller
 
                 $incidente->resolucion = now();
 
-                // Si se asoció una nueva receta, incrementar contador de uso
-                if ($request->filled('id_receta') && $request->id_receta != $incidente->id_receta) {
+                // Si ingresó una solución personalizada, guardarla automáticamente como nueva Receta en la Base de Conocimientos
+                if ($tieneSolucion && ! $request->filled('id_receta')) {
+                    $tituloReceta = $request->input('titulo_receta') 
+                        ?: ('Solución para: ' . \Illuminate\Support\Str::limit($incidente->descripcion, 50));
+
+                    $nuevaReceta = Receta::create([
+                        'titulo'       => $tituloReceta,
+                        'solucion'     => $request->solucion_texto,
+                        'id_categoria' => $request->input('id_categoria', $incidente->id_categoria),
+                        'usos'         => 1,
+                    ]);
+
+                    $incidente->id_receta = $nuevaReceta->id;
+                } elseif ($request->filled('id_receta') && $request->id_receta != $incidente->id_receta) {
+                    // Si se asoció una receta existente, incrementar contador de uso
                     $receta = Receta::find($request->id_receta);
                     if ($receta) {
                         $receta->incrementarUsos();
@@ -183,6 +196,7 @@ class IncidenteController extends Controller
             } elseif ($request->filled('estado') && $nuevoEstado !== Incidente::ESTADO_RESUELTO) {
                 $incidente->resolucion = null;
             }
+
 
             if ($request->filled('estado')) {
                 $incidente->estado = $request->estado;

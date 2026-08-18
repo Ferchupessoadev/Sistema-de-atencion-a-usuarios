@@ -4,8 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
+import SaltoGrandeLogo from '../components/SaltoGrandeLogo';
 
 export default function DashboardTecnico() {
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -25,7 +27,10 @@ export default function DashboardTecnico() {
   const [modalResolver, setModalResolver] = useState(null); // incidente seleccionado
   const [tipoSolucion, setTipoSolucion] = useState('RECETA'); // 'RECETA' o 'TEXTO'
   const [recetaSeleccionada, setRecetaSeleccionada] = useState('');
-  const [solucionTexto, setSolucionTexto] = useState('');
+  
+  // Solución Personalizada (Lista Ordenada & Título)
+  const [tituloReceta, setTituloReceta] = useState('');
+  const [pasos, setPasos] = useState(['', '', '']);
 
   // Modal Derivar (RN-003)
   const [modalDerivar, setModalDerivar] = useState(null);
@@ -69,6 +74,35 @@ export default function DashboardTecnico() {
     navigate('/login', { replace: true });
   };
 
+  // Manejo de pasos en solución personalizada
+  const handleCambiarPaso = (index, valor) => {
+    const nuevosPasos = [...pasos];
+    nuevosPasos[index] = valor;
+    setPasos(nuevosPasos);
+  };
+
+  const handleAgregarPaso = () => {
+    setPasos([...pasos, '']);
+  };
+
+  const handleEliminarPaso = (index) => {
+    if (pasos.length <= 1) return;
+    const nuevosPasos = pasos.filter((_, i) => i !== index);
+    setPasos(nuevosPasos);
+  };
+
+  // Abrir modal resolver
+  const abrirModalResolver = (inc) => {
+    setErrorAccion('');
+    setModalResolver(inc);
+    setTipoSolucion('RECETA');
+    setTituloReceta(`Solución: ${inc.descripcion.substring(0, 45)}${inc.descripcion.length > 45 ? '...' : ''}`);
+    setPasos(['', '', '']);
+    if (recetas.length > 0) {
+      setRecetaSeleccionada(recetas[0].id);
+    }
+  };
+
   // Tomar incidente (asignarse a sí mismo)
   const handleTomarIncidente = async (incidente) => {
     try {
@@ -98,7 +132,7 @@ export default function DashboardTecnico() {
     }
   };
 
-  // Resolver incidente (RN-002)
+  // Resolver incidente (RN-002 y guardado de receta)
   const handleResolverIncidente = async (e) => {
     e.preventDefault();
     setErrorAccion('');
@@ -112,16 +146,29 @@ export default function DashboardTecnico() {
       if (tipoSolucion === 'RECETA') {
         payload.id_receta = recetaSeleccionada;
       } else {
-        payload.solucion_texto = solucionTexto;
+        const pasosValidos = pasos.map(p => p.trim()).filter(p => p.length > 0);
+        if (pasosValidos.length === 0) {
+          setErrorAccion('Debes ingresar al menos un paso para la solución.');
+          setGuardando(false);
+          return;
+        }
+
+        payload.titulo_receta = tituloReceta || `Solución para Incidente #${modalResolver.id}`;
+        payload.solucion_texto = pasosValidos.map((p, i) => `${i + 1}. ${p}`).join('\n');
       }
 
       await api.put(`/incidentes/${modalResolver.id}`, payload);
 
-      setMensajeExito(`¡Incidente #${modalResolver.id} marcado como RESUELTO (RN-002)!`);
+      setMensajeExito(
+        tipoSolucion === 'TEXTO'
+          ? `¡Incidente #${modalResolver.id} resuelto y solución guardada como nueva Receta en la Base de Conocimientos!`
+          : `¡Incidente #${modalResolver.id} marcado como RESUELTO!`
+      );
+
       setModalResolver(null);
-      setSolucionTexto('');
+      setPasos(['', '', '']);
       cargarDatos();
-      setTimeout(() => setMensajeExito(''), 4000);
+      setTimeout(() => setMensajeExito(''), 5000);
     } catch (err) {
       const msg = err.response?.data?.errors?.resolucion?.[0]
                || err.response?.data?.message
@@ -174,26 +221,30 @@ export default function DashboardTecnico() {
   return (
     <div className="dashboard">
       <nav className="dashboard-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '1.4rem' }}>🛠️</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <span style={{ fontSize: '1.6rem' }}>🛠️</span>
           <div>
             <h1>Mesa de Ayuda CTM</h1>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Consola Técnica de Gestión</span>
+            <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
+              Consola Técnica de Gestión
+            </span>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <NotificationBell />
-          <span className="badge badge-tecnico">Técnico</span>
-          <span style={{ fontSize: '0.9rem', color: '#334155', fontWeight: 600 }}>{user?.nombre}</span>
+          <span className="badge badge-tecnico" style={{ background: '#DBEAFE', color: '#022E5B' }}>Técnico</span>
+          <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
           <button
             id="btn-logout-tecnico"
-            className="btn btn-secondary btn-sm"
+            className="btn btn-outline-header btn-sm"
             onClick={handleLogout}
           >
             Cerrar sesión
           </button>
         </div>
       </nav>
+
+
 
       <div className="dashboard-body">
         {/* Banner de Alerta Crítica RN-004 si hay casos vencidos > 2h */}
@@ -222,7 +273,7 @@ export default function DashboardTecnico() {
             className={`btn ${seccionActiva === 'INCIDENTES' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
             onClick={() => setSeccionActiva('INCIDENTES')}
           >
-            🛠️ Incidentes del Sistema
+            🛠️ Incidentes del Sistema ({incidentes.length})
           </button>
           <button
             className={`btn ${seccionActiva === 'RECETAS' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
@@ -286,7 +337,7 @@ export default function DashboardTecnico() {
                       className="btn btn-success btn-sm"
                       onClick={() => {
                         setSeccionActiva('INCIDENTES');
-                        setModalResolver(inc);
+                        abrirModalResolver(inc);
                       }}
                     >
                       ✅ Resolver Caso Urgente
@@ -401,7 +452,9 @@ export default function DashboardTecnico() {
                     {inc.receta && (
                       <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem', padding: '0.75rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '0.85rem' }}>
                         <strong style={{ color: '#166534' }}>💡 Solución aplicada (Receta #{inc.receta.id}):</strong> {inc.receta.titulo}
-                        <p style={{ marginTop: '0.25rem', color: '#334155' }}>{inc.receta.solucion}</p>
+                        <div style={{ marginTop: '0.35rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5, background: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          {inc.receta.solucion}
+                        </div>
                       </div>
                     )}
 
@@ -432,10 +485,7 @@ export default function DashboardTecnico() {
 
                         <button
                           className="btn btn-success btn-sm"
-                          onClick={() => {
-                            setErrorAccion('');
-                            setModalResolver(inc);
-                          }}
+                          onClick={() => abrirModalResolver(inc)}
                         >
                           ✅ Resolver (RN-002)
                         </button>
@@ -477,7 +527,7 @@ export default function DashboardTecnico() {
         {/* Modal Resolver Incidente (RN-002) */}
         {modalResolver && (
           <div className="modal-overlay">
-            <div className="modal-content">
+            <div className="modal-content" style={{ maxWidth: '580px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <h2 style={{ fontSize: '1.25rem', color: '#1e293b' }}>Resolver Incidente #{modalResolver.id}</h2>
                 <button
@@ -488,17 +538,17 @@ export default function DashboardTecnico() {
                 </button>
               </div>
 
-              <div className="alert alert-info" style={{ fontSize: '0.825rem' }}>
-                ℹ️ <strong>Regla de Negocio RN-002:</strong> Para cerrar un caso se requiere vincular una receta de la base de conocimientos o ingresar una solución detallada.
+              <div className="alert alert-info" style={{ fontSize: '0.825rem', marginBottom: '1.25rem' }}>
+                ℹ️ <strong>Regla de Negocio RN-002:</strong> Puedes seleccionar una receta existente de la base de conocimientos o redactar una solución personalizada que se <strong>guardará automáticamente como nueva receta</strong> para futuros casos.
               </div>
 
               {errorAccion && <div className="alert alert-error">{errorAccion}</div>}
 
               <form onSubmit={handleResolverIncidente}>
-                <div className="form-group">
-                  <label>Tipo de Solución</label>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500, cursor: 'pointer' }}>
+                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                  <label style={{ marginBottom: '0.5rem' }}>Tipo de Solución</label>
+                  <div style={{ display: 'flex', gap: '1.5rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, cursor: 'pointer', color: '#1e293b' }}>
                       <input
                         type="radio"
                         name="tipoSolucion"
@@ -507,9 +557,9 @@ export default function DashboardTecnico() {
                         onChange={() => setTipoSolucion('RECETA')}
                         style={{ width: 'auto' }}
                       />
-                      Usar Receta de Base de Conocimiento
+                      📚 Usar Receta Existente
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500, cursor: 'pointer' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, cursor: 'pointer', color: '#1e293b' }}>
                       <input
                         type="radio"
                         name="tipoSolucion"
@@ -518,14 +568,14 @@ export default function DashboardTecnico() {
                         onChange={() => setTipoSolucion('TEXTO')}
                         style={{ width: 'auto' }}
                       />
-                      Solución Personalizada
+                      ✨ Solución Personalizada (Nueva Receta)
                     </label>
                   </div>
                 </div>
 
                 {tipoSolucion === 'RECETA' ? (
                   <div className="form-group">
-                    <label htmlFor="modal-receta">Seleccionar Receta</label>
+                    <label htmlFor="modal-receta">Seleccionar Guía / Receta</label>
                     <select
                       id="modal-receta"
                       value={recetaSeleccionada}
@@ -539,23 +589,105 @@ export default function DashboardTecnico() {
                       ))}
                     </select>
                     {recetas.find(r => String(r.id) === String(recetaSeleccionada)) && (
-                      <div style={{ marginTop: '0.5rem', padding: '0.65rem', background: '#f8fafc', borderRadius: '6px', fontSize: '0.8rem', color: '#475569', border: '1px solid #e2e8f0' }}>
-                        <strong>Procedimiento:</strong> {recetas.find(r => String(r.id) === String(recetaSeleccionada)).solucion}
+                      <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', fontSize: '0.825rem', color: '#334155', border: '1px solid #e2e8f0', whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                        <strong style={{ color: '#047857' }}>Procedimiento a aplicar:</strong>
+                        <div style={{ marginTop: '0.25rem' }}>
+                          {recetas.find(r => String(r.id) === String(recetaSeleccionada)).solucion}
+                        </div>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="form-group">
-                    <label htmlFor="modal-solucion-texto">Detalle de la Solución Aplicada</label>
-                    <textarea
-                      id="modal-solucion-texto"
-                      rows="4"
-                      value={solucionTexto}
-                      onChange={(e) => setSolucionTexto(e.target.value)}
-                      placeholder="Explica qué pasos o acciones se realizaron para solventar el problema..."
-                      required
-                      minLength={5}
-                    />
+                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    {/* Título de la Solución */}
+                    <div className="form-group" style={{ marginBottom: '1rem' }}>
+                      <label htmlFor="modal-titulo-receta" style={{ color: '#1e293b' }}>
+                        Título de la Nueva Receta / Solución
+                      </label>
+                      <input
+                        id="modal-titulo-receta"
+                        type="text"
+                        value={tituloReceta}
+                        onChange={(e) => setTituloReceta(e.target.value)}
+                        placeholder="Ej. Configuración de puertos y VLAN para switch HP"
+                        required
+                      />
+                    </div>
+
+                    {/* Lista Ordenada de Pasos */}
+                    <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#1e293b' }}>
+                        <span>Pasos de la Solución (Lista Ordenada)</span>
+                        <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal' }}>
+                          {pasos.filter(p => p.trim()).length} paso(s) definidos
+                        </span>
+                      </label>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {pasos.map((paso, index) => (
+                          <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span
+                              style={{
+                                width: '26px',
+                                height: '26px',
+                                borderRadius: '50%',
+                                background: '#4f46e5',
+                                color: '#fff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                flexShrink: 0,
+                              }}
+                            >
+                              {index + 1}
+                            </span>
+                            <input
+                              type="text"
+                              value={paso}
+                              onChange={(e) => handleCambiarPaso(index, e.target.value)}
+                              placeholder={`Paso ${index + 1}: Detalle de la acción realizada...`}
+                              required={index === 0}
+                              style={{ flex: 1 }}
+                            />
+                            {pasos.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleEliminarPaso(index)}
+                                title="Eliminar este paso"
+                                style={{
+                                  background: '#fee2e2',
+                                  border: 'none',
+                                  color: '#dc2626',
+                                  borderRadius: '6px',
+                                  width: '28px',
+                                  height: '28px',
+                                  cursor: 'pointer',
+                                  fontWeight: 700,
+                                  flexShrink: 0,
+                                }}
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleAgregarPaso}
+                        className="btn btn-secondary btn-sm"
+                        style={{ marginTop: '0.75rem', width: '100%' }}
+                      >
+                        ➕ Agregar Siguiente Paso
+                      </button>
+                    </div>
+
+                    <div style={{ fontSize: '0.775rem', color: '#047857', background: '#ecfdf5', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #a7f3d0' }}>
+                      💾 <strong>Auto-guardado:</strong> Esta solución quedará registrada en la Base de Conocimientos con 1 uso y podrá ser seleccionada en futuros incidentes de la categoría <strong>{modalResolver.categoria?.nombre || 'General'}</strong>.
+                    </div>
                   </div>
                 )}
 
