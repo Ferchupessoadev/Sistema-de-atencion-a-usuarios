@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,14 +18,9 @@ class UserController extends Controller
      * POST /api/register
      * Registro de un nuevo usuario con credenciales estándar.
      */
-    public function register(Request $request): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'nombre'     => 'required|string|max:255',
-            'correo'     => 'required|email|unique:users,correo',
-            'contrasena' => 'required|string|min:6',
-            'es_tecnico' => 'sometimes|boolean',
-        ]);
+        $validated = $request->validated();
 
         $user = User::create([
             'nombre'     => $validated['nombre'],
@@ -51,16 +48,13 @@ class UserController extends Controller
      * POST /api/login
      * Login con correo y contraseña. Devuelve token Sanctum + rol.
      */
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $request->validate([
-            'correo'     => 'required|email',
-            'contrasena' => 'required|string',
-        ]);
+        $validated = $request->validated();
 
-        $user = User::where('correo', $request->correo)->first();
+        $user = User::where('correo', $validated['correo'])->first();
 
-        if (! $user || ! Hash::check($request->contrasena, $user->contrasena)) {
+        if (! $user || ! Hash::check($validated['contrasena'], $user->contrasena)) {
             throw ValidationException::withMessages([
                 'correo' => ['Las credenciales proporcionadas son incorrectas.'],
             ]);
