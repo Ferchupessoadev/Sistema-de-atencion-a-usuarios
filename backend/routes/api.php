@@ -38,17 +38,20 @@ Route::middleware('auth:sanctum')->group(function () {
     // Categorías
     Route::post('/categorias', [CategoriaController::class, 'store']);
 
-    // Base de Conocimientos - Recetas (Fase 4)
-    Route::post('/recetas',       [RecetaController::class, 'store']);
-    Route::put('/recetas/{id}',    [RecetaController::class, 'update']);
-    Route::delete('/recetas/{id}', [RecetaController::class, 'destroy']);
+    // Base de Conocimientos - Recetas (Fase 4 y Mejoras)
+    Route::post('/recetas',            [RecetaController::class, 'store']);
+    Route::put('/recetas/{id}',         [RecetaController::class, 'update']);
+    Route::delete('/recetas/{id}',      [RecetaController::class, 'destroy']);
+    Route::post('/recetas/{id}/votar',  [RecetaController::class, 'votar']);
 
     // Incidentes & Reglas de Negocio (RN-001 .. RN-005)
-    Route::get('/incidentes',              [IncidenteController::class, 'index']);
-    Route::post('/incidentes',             [IncidenteController::class, 'store']);
-    Route::get('/incidentes/{id}',         [IncidenteController::class, 'show']);
-    Route::put('/incidentes/{id}',         [IncidenteController::class, 'update']);
-    Route::put('/incidentes/{id}/derivar', [IncidenteController::class, 'derivar']);
+    Route::get('/incidentes',                   [IncidenteController::class, 'index']);
+    Route::post('/incidentes',                  [IncidenteController::class, 'store']);
+    Route::get('/incidentes/{id}',              [IncidenteController::class, 'show']);
+    Route::put('/incidentes/{id}',              [IncidenteController::class, 'update']);
+    Route::put('/incidentes/{id}/derivar',      [IncidenteController::class, 'derivar']);
+    Route::get('/reportes/incidentes/exportar', [IncidenteController::class, 'exportar']);
+
 
     // Notificaciones y Alertas (Fase 5 - RN-003 & RN-004)
     Route::get('/notificaciones',                 [NotificationController::class, 'index']);

@@ -4,10 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
-import SaltoGrandeLogo from '../components/SaltoGrandeLogo';
 
 export default function DashboardUsuario() {
-
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -21,6 +19,7 @@ export default function DashboardUsuario() {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [idCategoria, setIdCategoria] = useState('');
   const [descripcion, setDescripcion] = useState('');
+  const [interno, setInterno] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [errorCreacion, setErrorCreacion] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
@@ -48,6 +47,12 @@ export default function DashboardUsuario() {
     cargarDatos();
   }, []);
 
+  useEffect(() => {
+    if (user?.interno && !interno) {
+      setInterno(user.interno);
+    }
+  }, [user]);
+
   const handleLogout = async () => {
     await logout();
     navigate('/login', { replace: true });
@@ -62,6 +67,7 @@ export default function DashboardUsuario() {
       await api.post('/incidentes', {
         id_categoria: idCategoria,
         descripcion,
+        interno: interno || user?.interno || null,
       });
 
       setMensajeExito('¡Incidente creado con éxito! El equipo de soporte lo atenderá a la brevedad.');
@@ -71,9 +77,9 @@ export default function DashboardUsuario() {
       setTimeout(() => setMensajeExito(''), 4000);
     } catch (err) {
       const msg = err.response?.data?.errors?.id_usuario?.[0]
-               || err.response?.data?.errors?.descripcion?.[0]
-               || err.response?.data?.message
-               || 'Error al crear el incidente.';
+        || err.response?.data?.errors?.descripcion?.[0]
+        || err.response?.data?.message
+        || 'Error al crear el incidente.';
       setErrorCreacion(msg);
     } finally {
       setGuardando(false);
@@ -82,7 +88,7 @@ export default function DashboardUsuario() {
 
   // Conteo de estados
   const totalAbiertos = incidentes.filter(i => i.estado === 'ABIERTO').length;
-  const totalEnCurso  = incidentes.filter(i => i.estado === 'EN_CURSO').length;
+  const totalEnCurso = incidentes.filter(i => i.estado === 'EN_CURSO').length;
   const totalResueltos = incidentes.filter(i => i.estado === 'RESUELTO').length;
 
   const incidentesFiltrados = incidentes.filter(i => {
@@ -98,7 +104,7 @@ export default function DashboardUsuario() {
           <div>
             <h1>Mesa de Ayuda CTM</h1>
             <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
-              Portal de Usuario
+              Portal de Usuario {user?.interno && `· Int. ${user.interno}`}
             </span>
           </div>
         </div>
@@ -116,8 +122,6 @@ export default function DashboardUsuario() {
         </div>
       </nav>
 
-
-
       <div className="dashboard-body">
         {/* Navegación por Pestañas Principales */}
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
@@ -125,13 +129,13 @@ export default function DashboardUsuario() {
             className={`btn ${seccionActiva === 'INCIDENTES' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
             onClick={() => setSeccionActiva('INCIDENTES')}
           >
-            🎫 Mis Incidentes
+            Mis Incidentes ({incidentes.length})
           </button>
           <button
             className={`btn ${seccionActiva === 'RECETAS' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
             onClick={() => setSeccionActiva('RECETAS')}
           >
-            📚 Base de Conocimientos
+            Base de Conocimientos
           </button>
         </div>
 
@@ -182,14 +186,16 @@ export default function DashboardUsuario() {
                 ))}
               </div>
 
+              {/* Botón para crear incidente (RN-005 bloquea si tiene >= 3 abiertos) */}
               <button
-                id="btn-nuevo-incidente"
+                id="btn-crear-incidente"
                 className="btn btn-primary"
                 disabled={totalAbiertos >= 3}
                 onClick={() => {
                   setErrorCreacion('');
                   setModalAbierto(true);
                 }}
+                title={totalAbiertos >= 3 ? 'Bloqueado por RN-005 (máximo 3 abiertos)' : 'Reportar nuevo incidente'}
               >
                 ➕ Nuevo Incidente
               </button>
@@ -200,11 +206,9 @@ export default function DashboardUsuario() {
               <div className="spinner">Cargando incidentes…</div>
             ) : incidentesFiltrados.length === 0 ? (
               <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748b' }}>
-                <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>No se encontraron incidentes</p>
+                <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>No tienes incidentes en esta sección</p>
                 <p style={{ fontSize: '0.85rem' }}>
-                  {filtroEstado === 'TODOS'
-                    ? 'Aún no has reportado ningún incidente. Haz clic en "Nuevo Incidente" para comenzar.'
-                    : `No tienes incidentes con estado "${filtroEstado}".`}
+                  {totalAbiertos < 3 ? 'Presioná "Nuevo Incidente" para reportar un problema al equipo técnico.' : ''}
                 </p>
               </div>
             ) : (
@@ -216,26 +220,34 @@ export default function DashboardUsuario() {
                         <span className={`badge badge-${inc.estado}`}>{inc.estado.replace('_', ' ')}</span>
                         <span className={`badge badge-prioridad-${inc.prioridad}`}>Prioridad {inc.prioridad}</span>
                         <span className="badge badge-cat">📁 {inc.categoria?.nombre || 'General'}</span>
+                        {(inc.interno || user?.interno) && (
+                          <span style={{ fontSize: '0.75rem', background: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px', color: '#475569', fontWeight: 600, border: '1px solid #cbd5e1' }}>
+                            ☎️ Int: {inc.interno || user?.interno}
+                          </span>
+                        )}
                       </div>
                       <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
                         #{inc.id} · {new Date(inc.created_at).toLocaleDateString()} {new Date(inc.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
 
-                    <p style={{ color: '#1e293b', fontSize: '0.95rem', marginBottom: '0.5rem', whiteSpace: 'pre-line' }}>
+                    <p style={{ color: '#1e293b', fontSize: '0.95rem', marginBottom: '0.75rem', whiteSpace: 'pre-line' }}>
                       {inc.descripcion}
                     </p>
 
                     {inc.receta && (
-                      <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '0.85rem' }}>
-                        <strong style={{ color: '#166534' }}>💡 Solución aplicada:</strong> {inc.receta.titulo}
-                        <p style={{ marginTop: '0.25rem', color: '#334155' }}>{inc.receta.solucion}</p>
+                      <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem', padding: '0.75rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '0.85rem' }}>
+                        <strong style={{ color: '#166534' }}>💡 Solución aplicada (Receta #{inc.receta.id}):</strong> {inc.receta.titulo}
+                        <div style={{ marginTop: '0.35rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5, background: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          {inc.receta.solucion}
+                        </div>
                       </div>
                     )}
 
                     <div className="incident-meta">
-                      <span>👤 Creado por: <strong>Tú</strong></span>
-                      <span>🛠️ Técnico asignado: <strong>{inc.tecnico ? inc.tecnico.nombre : 'En espera de asignación'}</strong></span>
+                      <span>
+                        🛠️ Técnico: <strong>{inc.tecnico ? inc.tecnico.nombre : 'Sin asignar (en espera)'}</strong>
+                      </span>
                       {inc.resolucion && (
                         <span style={{ color: '#047857' }}>
                           ✅ Resuelto el: {new Date(inc.resolucion).toLocaleDateString()} {new Date(inc.resolucion).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -252,7 +264,7 @@ export default function DashboardUsuario() {
               <div className="modal-overlay">
                 <div className="modal-content">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                    <h2 style={{ fontSize: '1.25rem', color: '#1e293b' }}>Reportar Nuevo Incidente</h2>
+                    <h2 style={{ fontSize: '1.25rem', color: '#022E5B', fontWeight: 800 }}>Reportar Nuevo Incidente</h2>
                     <button
                       onClick={() => setModalAbierto(false)}
                       style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94a3b8' }}
@@ -278,6 +290,20 @@ export default function DashboardUsuario() {
                           </option>
                         ))}
                       </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="modal-interno">Teléfono / Interno de contacto (Opcional)</label>
+                      <input
+                        id="modal-interno"
+                        type="text"
+                        value={interno}
+                        onChange={(e) => setInterno(e.target.value)}
+                        placeholder="Ej. 3105, 3777, 3422..."
+                      />
+                      <span style={{ fontSize: '0.725rem', color: '#64748B' }}>
+                        Permite que el técnico de soporte se comunique directamente a tu puesto.
+                      </span>
                     </div>
 
                     <div className="form-group">

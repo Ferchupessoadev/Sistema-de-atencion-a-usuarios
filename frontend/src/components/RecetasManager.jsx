@@ -16,10 +16,15 @@ export default function RecetasManager() {
   const [recetaEditandoId, setRecetaEditandoId] = useState(null);
   const [titulo, setTitulo] = useState('');
   const [solucion, setSolucion] = useState('');
+  const [keywords, setKeywords] = useState('');
   const [idCategoria, setIdCategoria] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [mensajeExito, setMensajeExito] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Votación feedback
+  const [votandoId, setVotandoId] = useState(null);
+  const [mensajeVoto, setMensajeVoto] = useState({});
 
   const cargarRecetas = async () => {
     try {
@@ -53,6 +58,7 @@ export default function RecetasManager() {
     setRecetaEditandoId(null);
     setTitulo('');
     setSolucion('');
+    setKeywords('');
     if (categorias.length > 0) setIdCategoria(categorias[0].id);
     setErrorMsg('');
     setModalAbierto(true);
@@ -63,6 +69,7 @@ export default function RecetasManager() {
     setRecetaEditandoId(receta.id);
     setTitulo(receta.titulo);
     setSolucion(receta.solucion);
+    setKeywords(receta.keywords || '');
     setIdCategoria(receta.id_categoria);
     setErrorMsg('');
     setModalAbierto(true);
@@ -78,6 +85,7 @@ export default function RecetasManager() {
         await api.put(`/recetas/${recetaEditandoId}`, {
           titulo,
           solucion,
+          keywords,
           id_categoria: idCategoria,
         });
         setMensajeExito('Receta actualizada con éxito.');
@@ -85,9 +93,10 @@ export default function RecetasManager() {
         await api.post('/recetas', {
           titulo,
           solucion,
+          keywords,
           id_categoria: idCategoria,
         });
-        setMensajeExito('Receta creada y publicada en la Base de Conocimiento.');
+        setMensajeExito('Receta creada y publicada en la Base de Conocimientos.');
       }
       setModalAbierto(false);
       cargarRecetas();
@@ -111,17 +120,37 @@ export default function RecetasManager() {
     }
   };
 
+  const handleVotar = async (recetaId, tipo) => {
+    setVotandoId(recetaId);
+    try {
+      const res = await api.post(`/recetas/${recetaId}/votar`, { tipo });
+      setRecetas(prev => prev.map(r => (r.id === recetaId ? res.data.receta : r)));
+      setMensajeVoto(prev => ({ ...prev, [recetaId]: tipo === 'UTIL' ? '¡Gracias por valorar! 👍' : 'Gracias por el reporte' }));
+      setTimeout(() => {
+        setMensajeVoto(prev => {
+          const next = { ...prev };
+          delete next[recetaId];
+          return next;
+        });
+      }, 3000);
+    } catch (err) {
+      console.error('Error al votar receta:', err);
+    } finally {
+      setVotandoId(null);
+    }
+  };
+
   return (
     <div>
       {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
 
-      <div className="card" style={{ marginBottom: '1.5rem', padding: '1.25rem' }}>
+      <div className="card" style={{ marginBottom: '1.5rem', padding: '1.25rem', borderLeft: '4px solid #022E5B' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div>
-            <h2 style={{ fontSize: '1.25rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h2 style={{ fontSize: '1.25rem', color: '#022E5B', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800 }}>
               📚 Base de Conocimientos & Guías Técnicas
             </h2>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.2rem' }}>
+            <p style={{ fontSize: '0.85rem', color: '#64748B', marginTop: '0.2rem' }}>
               Soluciones paso a paso para resolver incidentes comunes.
             </p>
           </div>
@@ -142,7 +171,7 @@ export default function RecetasManager() {
           <div style={{ flex: '2 1 250px' }}>
             <input
               type="text"
-              placeholder="🔍 Buscar por palabra clave (ej. impresora, wifi, contraseña, correo)..."
+              placeholder="🔍 Buscar por palabra clave, modelo, interno o título (ej. 3777, toshiba, k2b, wifi, vpn)..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
@@ -163,52 +192,133 @@ export default function RecetasManager() {
 
       {/* Lista de Recetas */}
       {loading ? (
-        <div className="spinner">Cargando base de conocimiento…</div>
+        <div className="spinner">Cargando base de conocimientos…</div>
       ) : recetas.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748b' }}>
+        <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748B' }}>
           <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>No se encontraron recetas</p>
           <p style={{ fontSize: '0.85rem' }}>Prueba con otro término de búsqueda o categoría.</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
           {recetas.map(r => (
-            <div key={r.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div key={r.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderTop: '3px solid #022E5B' }}>
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <span className="badge badge-cat">📁 {r.categoria?.nombre || 'General'}</span>
-                  <span style={{ fontSize: '0.75rem', color: '#059669', background: '#ecfdf5', padding: '0.2rem 0.5rem', borderRadius: '6px', fontWeight: 600 }}>
-                    ⭐ {r.usos} {r.usos === 1 ? 'uso' : 'usos'}
-                  </span>
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#047857', background: '#ECFDF5', padding: '0.2rem 0.5rem', borderRadius: '6px', fontWeight: 700, border: '1px solid #A7F3D0' }}>
+                      ⭐ {r.usos} {r.usos === 1 ? 'uso' : 'usos'}
+                    </span>
+                  </div>
                 </div>
 
-                <h3 style={{ fontSize: '1.05rem', color: '#1e293b', marginBottom: '0.75rem', fontWeight: 700 }}>
+                <h3 style={{ fontSize: '1.05rem', color: '#022E5B', marginBottom: '0.65rem', fontWeight: 800 }}>
                   {r.titulo}
                 </h3>
 
-                <div style={{ background: '#f8fafc', padding: '0.85rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.875rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                {/* Chips de Palabras Clave / Keywords */}
+                {r.keywords && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.75rem' }}>
+                    {r.keywords.split(',').map((kw, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          fontSize: '0.7rem',
+                          background: '#EFF6FF',
+                          color: '#1D4ED8',
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: '4px',
+                          border: '1px solid #DBEAFE',
+                          fontWeight: 600,
+                        }}
+                      >
+                        #{kw.trim()}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div style={{ background: '#F8FAFC', padding: '0.85rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.85rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5 }}>
                   {r.solucion}
                 </div>
               </div>
 
-              {user?.es_tecnico && (
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem' }}>
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    style={{ flex: 1 }}
-                    onClick={() => abrirModalEditar(r)}
-                  >
-                    ✏️ Editar
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    style={{ padding: '0.4rem 0.6rem' }}
-                    onClick={() => handleEliminarReceta(r.id)}
-                    title="Eliminar receta"
-                  >
-                    🗑️
-                  </button>
+              <div>
+                {/* Sección de Votación / Utilidad */}
+                <div style={{ marginTop: '0.85rem', paddingTop: '0.65rem', borderTop: '1px dashed #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#64748B' }}>¿Te sirvió?</span>
+                    <button
+                      type="button"
+                      disabled={votandoId === r.id}
+                      onClick={() => handleVotar(r.id, 'UTIL')}
+                      style={{
+                        background: '#F0FDF4',
+                        border: '1px solid #BBF7D0',
+                        color: '#166534',
+                        borderRadius: '6px',
+                        padding: '0.2rem 0.5rem',
+                        fontSize: '0.75rem',
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                      }}
+                      title="Esta solución me fue útil"
+                    >
+                      👍 {r.votos_util || 0}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={votandoId === r.id}
+                      onClick={() => handleVotar(r.id, 'NO_UTIL')}
+                      style={{
+                        background: '#FEF2F2',
+                        border: '1px solid #FECACA',
+                        color: '#991B1B',
+                        borderRadius: '6px',
+                        padding: '0.2rem 0.5rem',
+                        fontSize: '0.75rem',
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                      }}
+                      title="No me sirvió esta solución"
+                    >
+                      👎 {r.votos_no_util || 0}
+                    </button>
+                  </div>
+
+                  {mensajeVoto[r.id] && (
+                    <span style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 600 }}>
+                      {mensajeVoto[r.id]}
+                    </span>
+                  )}
                 </div>
-              )}
+
+                {user?.es_tecnico && (
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', borderTop: '1px solid #F1F5F9', paddingTop: '0.65rem' }}>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      style={{ flex: 1 }}
+                      onClick={() => abrirModalEditar(r)}
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      style={{ padding: '0.4rem 0.6rem' }}
+                      onClick={() => handleEliminarReceta(r.id)}
+                      title="Eliminar receta"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -219,12 +329,12 @@ export default function RecetasManager() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h2 style={{ fontSize: '1.25rem', color: '#1e293b' }}>
+              <h2 style={{ fontSize: '1.25rem', color: '#022E5B', fontWeight: 800 }}>
                 {modoEdicion ? 'Editar Receta Técnica' : 'Publicar Nueva Receta en Base de Conocimientos'}
               </h2>
               <button
                 onClick={() => setModalAbierto(false)}
-                style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94a3b8' }}
+                style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94A3B8' }}
               >
                 ✕
               </button>
@@ -260,7 +370,20 @@ export default function RecetasManager() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="receta-solucion">Procedimiento / Pasos de Solución</label>
+                <label htmlFor="receta-keywords">
+                  Palabras Clave / Etiquetas (separadas por comas)
+                </label>
+                <input
+                  id="receta-keywords"
+                  type="text"
+                  value={keywords}
+                  onChange={(e) => setKeywords(e.target.value)}
+                  placeholder="Ej. 3777, toshiba, toner, impresion, hojas, atasco"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="receta-solucion">Procedimiento / Pasos de Solución (Lista Ordenada)</label>
                 <textarea
                   id="receta-solucion"
                   rows="6"

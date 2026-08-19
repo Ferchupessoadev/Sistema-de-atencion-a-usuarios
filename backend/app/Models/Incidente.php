@@ -14,12 +14,14 @@ class Incidente extends Model
         'estado',
         'prioridad',
         'resolucion',
+        'interno',
         'id_usuario',
         'id_consulta',
         'id_tecnico',
         'id_categoria',
         'id_receta',
     ];
+
 
     /** Valores por defecto al crear instancias vía Eloquent */
     protected $attributes = [

@@ -345,4 +345,34 @@ class IncidentesTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    /** @test */
+    public function test_crear_incidente_guarda_interno_telefonico(): void
+    {
+        $usuario = $this->crearUsuario(false);
+        $usuario->update(['interno' => '3210']);
+        $cat     = $this->crearCategoria();
+
+        // 1. Usar interno provisto en request
+        $res = $this->actingAs($usuario, 'sanctum')
+                    ->postJson('/api/incidentes', [
+                        'descripcion'  => 'Problema con interno específico',
+                        'id_categoria' => $cat->id,
+                        'interno'      => '3777',
+                    ]);
+
+        $res->assertStatus(201)
+            ->assertJsonPath('incidente.interno', '3777');
+
+        // 2. Fallback al interno por defecto del usuario
+        $res2 = $this->actingAs($usuario, 'sanctum')
+                     ->postJson('/api/incidentes', [
+                         'descripcion'  => 'Otro problema sin especificar interno',
+                         'id_categoria' => $cat->id,
+                     ]);
+
+        $res2->assertStatus(201)
+             ->assertJsonPath('incidente.interno', '3210');
+    }
 }
+

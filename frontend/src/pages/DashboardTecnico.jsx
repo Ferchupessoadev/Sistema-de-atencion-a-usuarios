@@ -4,10 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
-import SaltoGrandeLogo from '../components/SaltoGrandeLogo';
 
 export default function DashboardTecnico() {
-
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -41,6 +39,7 @@ export default function DashboardTecnico() {
   const [guardando, setGuardando] = useState(false);
   const [errorAccion, setErrorAccion] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
+  const [exportando, setExportando] = useState(false);
 
   const cargarDatos = async () => {
     try {
@@ -72,6 +71,28 @@ export default function DashboardTecnico() {
   const handleLogout = async () => {
     await logout();
     navigate('/login', { replace: true });
+  };
+
+  // Exportar reporte de incidentes en CSV
+  const handleExportarReporte = async () => {
+    try {
+      setExportando(true);
+      const res = await api.get('/reportes/incidentes/exportar', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'text/csv;charset=utf-8;' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `reporte_incidentes_ctm_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setMensajeExito('Reporte de incidentes exportado correctamente a CSV / Excel.');
+      setTimeout(() => setMensajeExito(''), 4000);
+    } catch (err) {
+      console.error('Error al exportar reporte:', err);
+      setErrorAccion('Error al exportar el reporte de incidentes.');
+    } finally {
+      setExportando(false);
+    }
   };
 
   // Manejo de pasos en solución personalizada
@@ -226,7 +247,7 @@ export default function DashboardTecnico() {
           <div>
             <h1>Mesa de Ayuda CTM</h1>
             <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
-              Consola Técnica de Gestión
+              Consola Técnica de Gestión {user?.interno && `· Int. ${user.interno}`}
             </span>
           </div>
         </div>
@@ -243,8 +264,6 @@ export default function DashboardTecnico() {
           </button>
         </div>
       </nav>
-
-
 
       <div className="dashboard-body">
         {/* Banner de Alerta Crítica RN-004 si hay casos vencidos > 2h */}
@@ -268,24 +287,37 @@ export default function DashboardTecnico() {
         )}
 
         {/* Pestañas de Navegación del Panel Técnico */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button
+              className={`btn ${seccionActiva === 'INCIDENTES' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+              onClick={() => setSeccionActiva('INCIDENTES')}
+            >
+              🛠️ Incidentes del Sistema ({incidentes.length})
+            </button>
+            <button
+              className={`btn ${seccionActiva === 'RECETAS' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+              onClick={() => setSeccionActiva('RECETAS')}
+            >
+              📚 Base de Conocimientos ({recetas.length})
+            </button>
+            <button
+              className={`btn ${seccionActiva === 'ALERTAS' ? 'btn-danger' : 'btn-secondary'} btn-sm`}
+              onClick={() => setSeccionActiva('ALERTAS')}
+            >
+              ⚠️ Alertas Críticas RN-004 {alertasCriticas.length > 0 && `(${alertasCriticas.length})`}
+            </button>
+          </div>
+
           <button
-            className={`btn ${seccionActiva === 'INCIDENTES' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-            onClick={() => setSeccionActiva('INCIDENTES')}
+            id="btn-exportar-csv"
+            className="btn btn-secondary btn-sm"
+            onClick={handleExportarReporte}
+            disabled={exportando}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700 }}
+            title="Descargar historial de incidentes y tiempos de atención en formato CSV / Excel"
           >
-            🛠️ Incidentes del Sistema ({incidentes.length})
-          </button>
-          <button
-            className={`btn ${seccionActiva === 'RECETAS' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-            onClick={() => setSeccionActiva('RECETAS')}
-          >
-            📚 Base de Conocimientos ({recetas.length})
-          </button>
-          <button
-            className={`btn ${seccionActiva === 'ALERTAS' ? 'btn-danger' : 'btn-secondary'} btn-sm`}
-            onClick={() => setSeccionActiva('ALERTAS')}
-          >
-            ⚠️ Alertas Críticas RN-004 {alertasCriticas.length > 0 && `(${alertasCriticas.length})`}
+            {exportando ? 'Generando CSV…' : '📥 Exportar Incidentes (CSV)'}
           </button>
         </div>
 
@@ -317,6 +349,11 @@ export default function DashboardTecnico() {
                       <span className="badge badge-prioridad-ALTA">⚠️ ALTA PRIORIDAD VENCIDA</span>
                       <span className={`badge badge-${inc.estado}`}>{inc.estado}</span>
                       <span className="badge badge-cat">📁 {inc.categoria?.nombre}</span>
+                      {(inc.interno || inc.usuario?.interno) && (
+                        <span style={{ fontSize: '0.75rem', background: '#fef2f2', padding: '0.2rem 0.5rem', borderRadius: '4px', color: '#dc2626', fontWeight: 700, border: '1px solid #fecaca' }}>
+                          ☎️ Int: {inc.interno || inc.usuario?.interno}
+                        </span>
+                      )}
                     </div>
                     <span style={{ fontSize: '0.8rem', color: '#b91c1c', fontWeight: 700 }}>
                       Abierto hace {Math.round((new Date() - new Date(inc.created_at)) / (1000 * 60 * 60))} horas
@@ -329,6 +366,7 @@ export default function DashboardTecnico() {
 
                   <div className="incident-meta">
                     <span>👤 Afectado: <strong>{inc.usuario?.nombre}</strong> ({inc.usuario?.correo})</span>
+                    <span>☎️ Contacto: <strong>Int. {inc.interno || inc.usuario?.interno || 'S/D'}</strong></span>
                     <span>🛠️ Responsable: <strong>{inc.tecnico ? inc.tecnico.nombre : '⚠️ Sin asignar'}</strong></span>
                   </div>
 
@@ -439,6 +477,11 @@ export default function DashboardTecnico() {
                         <span className={`badge badge-${inc.estado}`}>{inc.estado.replace('_', ' ')}</span>
                         <span className={`badge badge-prioridad-${inc.prioridad}`}>Prioridad {inc.prioridad}</span>
                         <span className="badge badge-cat">📁 {inc.categoria?.nombre || 'General'}</span>
+                        {(inc.interno || inc.usuario?.interno) && (
+                          <span style={{ fontSize: '0.75rem', background: '#e0f2fe', color: '#0369a1', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 700, border: '1px solid #bae6fd' }}>
+                            ☎️ Int: {inc.interno || inc.usuario?.interno}
+                          </span>
+                        )}
                       </div>
                       <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
                         #{inc.id} · {new Date(inc.created_at).toLocaleDateString()} {new Date(inc.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -460,6 +503,7 @@ export default function DashboardTecnico() {
 
                     <div className="incident-meta">
                       <span>👤 Usuario: <strong>{inc.usuario?.nombre}</strong> ({inc.usuario?.correo})</span>
+                      <span>☎️ Interno: <strong>{inc.interno || inc.usuario?.interno || 'Sin registrar'}</strong></span>
                       <span>
                         🛠️ Técnico: <strong>{inc.tecnico ? inc.tecnico.nombre : 'Sin asignar'}</strong>
                         {inc.tecnico?.id === user.id && <span style={{ color: '#4f46e5', marginLeft: '4px' }}>(Tú)</span>}
@@ -529,7 +573,7 @@ export default function DashboardTecnico() {
           <div className="modal-overlay">
             <div className="modal-content" style={{ maxWidth: '580px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                <h2 style={{ fontSize: '1.25rem', color: '#1e293b' }}>Resolver Incidente #{modalResolver.id}</h2>
+                <h2 style={{ fontSize: '1.25rem', color: '#022E5B', fontWeight: 800 }}>Resolver Incidente #{modalResolver.id}</h2>
                 <button
                   onClick={() => setModalResolver(null)}
                   style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94a3b8' }}
@@ -631,7 +675,7 @@ export default function DashboardTecnico() {
                                 width: '26px',
                                 height: '26px',
                                 borderRadius: '50%',
-                                background: '#4f46e5',
+                                background: '#022E5B',
                                 color: '#fff',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -719,7 +763,7 @@ export default function DashboardTecnico() {
           <div className="modal-overlay">
             <div className="modal-content">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                <h2 style={{ fontSize: '1.25rem', color: '#1e293b' }}>Derivar Incidente #{modalDerivar.id}</h2>
+                <h2 style={{ fontSize: '1.25rem', color: '#022E5B', fontWeight: 800 }}>Derivar Incidente #{modalDerivar.id}</h2>
                 <button
                   onClick={() => setModalDerivar(null)}
                   style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94a3b8' }}
@@ -742,7 +786,7 @@ export default function DashboardTecnico() {
                     type="text"
                     value={unidadEspecializada}
                     onChange={(e) => setUnidadEspecializada(e.target.value)}
-                    placeholder="Ej. Redes y Servidores, Seguridad Informática, Infraestructura"
+                    placeholder="Ej. Redes y Comunicaciones, Sistemas ERP K2B, Infraestructura"
                     required
                   />
                 </div>

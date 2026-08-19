@@ -13,12 +13,17 @@ class Receta extends Model
     protected $fillable = [
         'titulo',
         'solucion',
+        'keywords',
         'id_categoria',
         'usos',
+        'votos_util',
+        'votos_no_util',
     ];
 
     protected $casts = [
-        'usos' => 'integer',
+        'usos'          => 'integer',
+        'votos_util'    => 'integer',
+        'votos_no_util' => 'integer',
     ];
 
     // ─── Relaciones ──────────────────────────────────────────
@@ -43,4 +48,21 @@ class Receta extends Model
     {
         $this->increment('usos');
     }
+
+    /**
+     * Registra un voto positivo.
+     */
+    public function votarUtil(): void
+    {
+        $this->increment('votos_util');
+    }
+
+    /**
+     * Registra un voto negativo.
+     */
+    public function votarNoUtil(): void
+    {
+        $this->increment('votos_no_util');
+    }
 }
+

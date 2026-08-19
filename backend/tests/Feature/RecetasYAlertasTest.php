@@ -221,4 +221,81 @@ class RecetasYAlertasTest extends TestCase
              ->getJson('/api/alertas/criticas')
              ->assertStatus(403);
     }
+
+    // ─── MEJORAS AVANZADAS: Keywords, Votación y Exportación ─────────────────
+
+    /** @test */
+    public function test_recetas_busqueda_por_keywords_e_internos(): void
+    {
+        $cat = $this->crearCategoria();
+        Receta::create([
+            'titulo'       => 'Cambio de Toner',
+            'solucion'     => 'Pasos para cambiar toner...',
+            'keywords'     => '3777, toshiba, 287, impresion',
+            'id_categoria' => $cat->id,
+        ]);
+
+        // Buscar por keyword '3777'
+        $res = $this->getJson('/api/recetas?q=3777');
+        $res->assertStatus(200);
+        $this->assertCount(1, $res->json());
+        $this->assertEquals('Cambio de Toner', $res->json()[0]['titulo']);
+
+        // Buscar por keyword 'toshiba'
+        $res2 = $this->getJson('/api/recetas?q=toshiba');
+        $res2->assertStatus(200);
+        $this->assertCount(1, $res2->json());
+    }
+
+    /** @test */
+    public function test_receta_votacion_util_e_inutil(): void
+    {
+        $usuario = $this->crearUsuario(false);
+        $cat     = $this->crearCategoria();
+        $receta  = Receta::create([
+            'titulo'       => 'Guía de VPN',
+            'solucion'     => 'Conectarse al servidor vpn.ctm.com.ar',
+            'id_categoria' => $cat->id,
+        ]);
+
+        $this->assertEquals(0, $receta->votos_util);
+        $this->assertEquals(0, $receta->votos_no_util);
+
+        // Votar UTIL
+        $res = $this->actingAs($usuario, 'sanctum')
+                    ->postJson("/api/recetas/{$receta->id}/votar", ['tipo' => 'UTIL']);
+        $res->assertStatus(200)
+            ->assertJsonPath('votos_util', 1)
+            ->assertJsonPath('votos_no_util', 0);
+
+        // Votar NO_UTIL
+        $res2 = $this->actingAs($usuario, 'sanctum')
+                     ->postJson("/api/recetas/{$receta->id}/votar", ['tipo' => 'NO_UTIL']);
+        $res2->assertStatus(200)
+             ->assertJsonPath('votos_util', 1)
+             ->assertJsonPath('votos_no_util', 1);
+    }
+
+    /** @test */
+    public function test_exportar_reporte_incidentes_csv(): void
+    {
+        $tecnico = $this->crearUsuario(true);
+        $usuario = $this->crearUsuario(false);
+        $usuario->update(['interno' => '3105']);
+        $cat     = $this->crearCategoria();
+
+        Incidente::create([
+            'descripcion'  => 'Problema con impresora de red',
+            'id_usuario'   => $usuario->id,
+            'id_categoria' => $cat->id,
+            'interno'      => '3105',
+        ]);
+
+        $res = $this->actingAs($tecnico, 'sanctum')
+                    ->get('/api/reportes/incidentes/exportar');
+
+        $res->assertStatus(200);
+        $res->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+    }
 }
+

@@ -100,6 +100,7 @@ class IncidenteController extends Controller
             'descripcion'  => 'required|string|min:5|max:2000',
             'id_categoria' => 'required|exists:categorias,id',
             'id_consulta'  => 'nullable|exists:consultas,id',
+            'interno'      => 'nullable|string|max:20',
         ];
 
         if ($user->es_tecnico) {
@@ -117,11 +118,13 @@ class IncidenteController extends Controller
             'descripcion'  => $validated['descripcion'],
             'id_categoria' => $validated['id_categoria'],
             'id_usuario'   => $targetUserId,
+            'interno'      => $validated['interno'] ?? ($targetUser->interno ?? null),
             'prioridad'    => $validated['prioridad'] ?? Incidente::PRIORIDAD_MEDIA,
             'estado'       => Incidente::ESTADO_ABIERTO,
             'id_consulta'  => $validated['id_consulta'] ?? null,
             'id_tecnico'   => $user->es_tecnico ? ($validated['id_tecnico'] ?? null) : null,
         ]);
+
 
         return response()->json([
             'message'   => 'Incidente registrado exitosamente.',
@@ -283,4 +286,68 @@ class IncidenteController extends Controller
             'notificacion' => $notificacion,
         ]);
     }
+
+    /**
+     * GET /api/reportes/incidentes/exportar
+     * Exporta todos los incidentes a formato CSV estructurado para auditoría y Excel.
+     */
+    public function exportar(Request $request)
+    {
+        $incidentes = Incidente::with(['categoria', 'usuario', 'tecnico', 'receta'])
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="reporte_incidentes_ctm_' . date('Ymd_His') . '.csv"',
+        ];
+
+        $callback = function () use ($incidentes) {
+            $file = fopen('php://output', 'w');
+            // BOM UTF-8 para visualización correcta de acentos en Microsoft Excel
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, [
+                'ID',
+                'Fecha Creacion',
+                'Estado',
+                'Prioridad',
+                'Categoria',
+                'Usuario Afectado',
+                'Interno / Telefono',
+                'Tecnico Asignado',
+                'Descripcion',
+                'Fecha Resolucion',
+                'Tiempo Atencion (Horas)',
+                'Receta / Solucion Aplicada',
+            ], ';');
+
+            foreach ($incidentes as $inc) {
+                $tiempoHoras = '';
+                if ($inc->resolucion && $inc->created_at) {
+                    $tiempoHoras = round($inc->created_at->diffInMinutes($inc->resolucion) / 60, 2);
+                }
+
+                fputcsv($file, [
+                    $inc->id,
+                    $inc->created_at ? $inc->created_at->format('d/m/Y H:i') : '',
+                    $inc->estado,
+                    $inc->prioridad,
+                    $inc->categoria ? $inc->categoria->nombre : 'Sin Categoria',
+                    $inc->usuario ? $inc->usuario->nombre . ' (' . $inc->usuario->correo . ')' : '',
+                    $inc->interno ?? ($inc->usuario->interno ?? 'Sin registrar'),
+                    $inc->tecnico ? $inc->tecnico->nombre : 'Sin Asignar',
+                    str_replace(["\r", "\n"], ' ', $inc->descripcion),
+                    $inc->resolucion ? $inc->resolucion->format('d/m/Y H:i') : 'Pendiente',
+                    $tiempoHoras !== '' ? $tiempoHoras . ' h' : 'N/A',
+                    $inc->receta ? $inc->receta->titulo : 'N/A',
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }
+

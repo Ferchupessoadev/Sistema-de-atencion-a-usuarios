@@ -11,7 +11,7 @@ class RecetaController extends Controller
 {
     /**
      * GET /api/recetas
-     * Listar y buscar recetas en la base de conocimientos.
+     * Listar y buscar recetas en la base de conocimientos (incluyendo keywords).
      */
     public function index(Request $request): JsonResponse
     {
@@ -25,11 +25,14 @@ class RecetaController extends Controller
             $search = '%' . $request->q . '%';
             $query->where(function ($q) use ($search) {
                 $q->where('titulo', 'like', $search)
-                  ->orWhere('solucion', 'like', $search);
+                  ->orWhere('solucion', 'like', $search)
+                  ->orWhere('keywords', 'like', $search);
             });
         }
 
-        $recetas = $query->orderBy('usos', 'desc')->get();
+        $recetas = $query->orderBy('usos', 'desc')
+                         ->orderBy('votos_util', 'desc')
+                         ->get();
 
         return response()->json($recetas);
     }
@@ -58,6 +61,7 @@ class RecetaController extends Controller
         $validated = $request->validate([
             'titulo'       => 'required|string|max:255',
             'solucion'     => 'required|string|min:10',
+            'keywords'     => 'nullable|string|max:1000',
             'id_categoria' => 'required|exists:categorias,id',
         ]);
 
@@ -84,6 +88,7 @@ class RecetaController extends Controller
         $validated = $request->validate([
             'titulo'       => 'sometimes|string|max:255',
             'solucion'     => 'sometimes|string|min:10',
+            'keywords'     => 'nullable|string|max:1000',
             'id_categoria' => 'sometimes|exists:categorias,id',
         ]);
 
@@ -92,6 +97,32 @@ class RecetaController extends Controller
         return response()->json([
             'message' => 'Receta actualizada con éxito.',
             'receta'  => $receta->fresh()->load('categoria'),
+        ]);
+    }
+
+    /**
+     * POST /api/recetas/{id}/votar
+     * Permite a usuarios o técnicos calificar si la solución fue útil o no.
+     */
+    public function votar($id, Request $request): JsonResponse
+    {
+        $request->validate([
+            'tipo' => 'required|in:UTIL,NO_UTIL',
+        ]);
+
+        $receta = Receta::findOrFail($id);
+
+        if ($request->tipo === 'UTIL') {
+            $receta->votarUtil();
+        } else {
+            $receta->votarNoUtil();
+        }
+
+        return response()->json([
+            'message'       => '¡Gracias por tu valoración!',
+            'votos_util'    => $receta->fresh()->votos_util,
+            'votos_no_util' => $receta->fresh()->votos_no_util,
+            'receta'        => $receta->fresh()->load('categoria'),
         ]);
     }
 

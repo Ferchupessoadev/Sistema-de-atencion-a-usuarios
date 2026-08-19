@@ -17,11 +17,13 @@ class User extends Authenticatable
     protected $fillable = [
         'nombre',
         'correo',
+        'interno',
         'contrasena',
         'es_tecnico',
         'google_id',
         'avatar',
     ];
+
 
 
     protected $hidden = [
