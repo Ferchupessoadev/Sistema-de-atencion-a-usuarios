@@ -250,9 +250,10 @@ class RecetasYAlertasTest extends TestCase
     /** @test */
     public function test_receta_votacion_util_e_inutil(): void
     {
-        $usuario = $this->crearUsuario(false);
-        $cat     = $this->crearCategoria();
-        $receta  = Receta::create([
+        $usuario1 = $this->crearUsuario(false);
+        $usuario2 = $this->crearUsuario(false);
+        $cat      = $this->crearCategoria();
+        $receta   = Receta::create([
             'titulo'       => 'Guía de VPN',
             'solucion'     => 'Conectarse al servidor vpn.ctm.com.ar',
             'id_categoria' => $cat->id,
@@ -261,19 +262,36 @@ class RecetasYAlertasTest extends TestCase
         $this->assertEquals(0, $receta->votos_util);
         $this->assertEquals(0, $receta->votos_no_util);
 
-        // Votar UTIL
-        $res = $this->actingAs($usuario, 'sanctum')
+        // 1. Usuario 1 vota UTIL
+        $res = $this->actingAs($usuario1, 'sanctum')
                     ->postJson("/api/recetas/{$receta->id}/votar", ['tipo' => 'UTIL']);
         $res->assertStatus(200)
             ->assertJsonPath('votos_util', 1)
-            ->assertJsonPath('votos_no_util', 0);
+            ->assertJsonPath('votos_no_util', 0)
+            ->assertJsonPath('mi_voto', 'UTIL');
 
-        // Votar NO_UTIL
-        $res2 = $this->actingAs($usuario, 'sanctum')
+        $this->assertDatabaseHas('votos_recetas', [
+            'id_usuario' => $usuario1->id,
+            'id_receta'  => $receta->id,
+            'tipo'       => 'UTIL',
+        ]);
+
+        // 2. Usuario 2 vota NO_UTIL
+        $res2 = $this->actingAs($usuario2, 'sanctum')
                      ->postJson("/api/recetas/{$receta->id}/votar", ['tipo' => 'NO_UTIL']);
         $res2->assertStatus(200)
              ->assertJsonPath('votos_util', 1)
-             ->assertJsonPath('votos_no_util', 1);
+             ->assertJsonPath('votos_no_util', 1)
+             ->assertJsonPath('mi_voto', 'NO_UTIL');
+
+        // 3. Usuario 1 cambia su voto de UTIL a NO_UTIL (no duplica registro, actualiza)
+        $res3 = $this->actingAs($usuario1, 'sanctum')
+                     ->postJson("/api/recetas/{$receta->id}/votar", ['tipo' => 'NO_UTIL']);
+        $res3->assertStatus(200)
+             ->assertJsonPath('votos_util', 0)
+             ->assertJsonPath('votos_no_util', 2);
+
+        $this->assertDatabaseCount('votos_recetas', 2);
     }
 
     /** @test */

@@ -85,66 +85,6 @@ class UserController extends Controller
     }
 
     /**
-     * POST /api/auth/google
-     * Login y Auto-registro rápido mediante Google / Gmail.
-     */
-    public function loginWithGoogle(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'correo'    => 'required|email',
-            'nombre'    => 'required|string|max:255',
-            'google_id' => 'nullable|string|max:255',
-            'avatar'    => 'nullable|string|max:1000',
-        ]);
-
-        $correo = strtolower(trim($validated['correo']));
-
-        // Buscar usuario existente por correo o google_id
-        $user = User::where('correo', $correo)
-            ->orWhere(function ($query) use ($validated) {
-                if (! empty($validated['google_id'])) {
-                    $query->where('google_id', $validated['google_id']);
-                }
-            })->first();
-
-        if ($user) {
-            // Actualizar datos de Google si no los tenía
-            $user->update([
-                'google_id' => $validated['google_id'] ?? $user->google_id,
-                'avatar'    => $validated['avatar'] ?? $user->avatar,
-            ]);
-        } else {
-            // Auto-registro instantáneo
-            $user = User::create([
-                'nombre'     => $validated['nombre'],
-                'correo'     => $correo,
-                'google_id'  => $validated['google_id'] ?? null,
-                'avatar'     => $validated['avatar'] ?? null,
-                'contrasena' => Hash::make(Str::random(32)),
-                'es_tecnico' => false,
-            ]);
-        }
-
-        // Revocar tokens anteriores para sesión limpia
-        $user->tokens()->delete();
-
-        $token = $user->createToken('auth_token_google')->plainTextToken;
-
-        return response()->json([
-            'message'    => 'Autenticación con Google exitosa.',
-            'token'      => $token,
-            'token_type' => 'Bearer',
-            'user'       => [
-                'id'         => $user->id,
-                'nombre'     => $user->nombre,
-                'correo'     => $user->correo,
-                'es_tecnico' => $user->es_tecnico,
-                'avatar'     => $user->avatar,
-            ],
-        ]);
-    }
-
-    /**
      * POST /api/logout
      * Revoca el token actual del usuario autenticado.
      */
@@ -169,8 +109,8 @@ class UserController extends Controller
             'id'         => $user->id,
             'nombre'     => $user->nombre,
             'correo'     => $user->correo,
+            'interno'    => $user->interno,
             'es_tecnico' => $user->es_tecnico,
-            'avatar'     => $user->avatar,
         ]);
     }
 }

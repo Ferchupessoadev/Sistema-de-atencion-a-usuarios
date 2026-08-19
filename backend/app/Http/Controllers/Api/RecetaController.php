@@ -102,7 +102,7 @@ class RecetaController extends Controller
 
     /**
      * POST /api/recetas/{id}/votar
-     * Permite a usuarios o técnicos calificar si la solución fue útil o no.
+     * Permite a usuarios o técnicos calificar si la solución fue útil o no (registra voto por usuario).
      */
     public function votar($id, Request $request): JsonResponse
     {
@@ -111,17 +111,15 @@ class RecetaController extends Controller
         ]);
 
         $receta = Receta::findOrFail($id);
+        $usuarioId = $request->user()->id;
 
-        if ($request->tipo === 'UTIL') {
-            $receta->votarUtil();
-        } else {
-            $receta->votarNoUtil();
-        }
+        $receta->registrarVoto($usuarioId, $request->tipo);
 
         return response()->json([
             'message'       => '¡Gracias por tu valoración!',
-            'votos_util'    => $receta->fresh()->votos_util,
-            'votos_no_util' => $receta->fresh()->votos_no_util,
+            'votos_util'    => $receta->votos_util,
+            'votos_no_util' => $receta->votos_no_util,
+            'mi_voto'       => $request->tipo,
             'receta'        => $receta->fresh()->load('categoria'),
         ]);
     }

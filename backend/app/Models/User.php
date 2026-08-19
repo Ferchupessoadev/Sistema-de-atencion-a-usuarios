@@ -20,11 +20,7 @@ class User extends Authenticatable
         'interno',
         'contrasena',
         'es_tecnico',
-        'google_id',
-        'avatar',
     ];
-
-
 
     protected $hidden = [
         'contrasena',
@@ -60,6 +56,12 @@ class User extends Authenticatable
     public function consultas(): HasMany
     {
         return $this->hasMany(Consulta::class, 'id_usuario');
+    }
+
+    /** Votos emitidos por este usuario en recetas */
+    public function votosRecetas(): HasMany
+    {
+        return $this->hasMany(VotoReceta::class, 'id_usuario');
     }
 
     // ─── Helpers ─────────────────────────────────────────────

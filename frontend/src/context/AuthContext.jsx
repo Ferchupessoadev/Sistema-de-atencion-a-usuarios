@@ -37,17 +37,6 @@ export function AuthProvider({ children }) {
     return userData;
   };
 
-  const loginWithGoogle = async (googlePayload) => {
-    const res = await api.post('/auth/google', googlePayload);
-    const { token: newToken, user: userData } = res.data;
-
-    localStorage.setItem('auth_token', newToken);
-    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-    setToken(newToken);
-    setUser(userData);
-    return userData;
-  };
-
   const logout = async () => {
     try {
       await api.post('/logout');
@@ -63,7 +52,7 @@ export function AuthProvider({ children }) {
   const isAuthenticated = !!token && !!user;
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
