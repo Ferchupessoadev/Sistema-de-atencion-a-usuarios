@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register',    [UserController::class, 'register']);
 Route::post('/login',       [UserController::class, 'login']);
-Route::post('/auth/google', [UserController::class, 'loginWithGoogle']);
 
 
 // Base de conocimiento pública (Fase 4)
