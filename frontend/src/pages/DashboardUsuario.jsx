@@ -96,7 +96,7 @@ export default function DashboardUsuario() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <span style={{ fontSize: '1.6rem' }}>🎫</span>
           <div>
-            <h1>Mesa de Ayuda CTM</h1>
+            <h1>Sistema de Soluciones</h1>
             <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
               Portal de Usuario
             </span>
