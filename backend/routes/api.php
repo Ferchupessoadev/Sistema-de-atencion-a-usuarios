@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes — Mesa de Ayuda CTM
+| API Routes — Mesa de Ayuda
 |--------------------------------------------------------------------------
 | Rutas públicas (sin autenticación requerida)
 */

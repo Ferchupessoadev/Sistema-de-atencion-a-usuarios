@@ -55,7 +55,7 @@ export default function SaltoGrandeLogo({ size = 36, showText = false, light = f
               lineHeight: 1.1,
             }}
           >
-            SALTO GRANDE
+            MESA DE AYUDA
           </span>
           <span
             style={{
@@ -66,7 +66,7 @@ export default function SaltoGrandeLogo({ size = 36, showText = false, light = f
               textTransform: 'uppercase',
             }}
           >
-            Argentina - Uruguay · Sistema de Soluciones
+            Sistema de Soluciones e Incidentes
           </span>
         </div>
       )}

@@ -81,7 +81,7 @@ export default function DashboardTecnico() {
       const url = window.URL.createObjectURL(new Blob([res.data], { type: 'text/csv;charset=utf-8;' }));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `reporte_incidentes_ctm_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute('download', `reporte_incidentes_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();

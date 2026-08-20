@@ -255,7 +255,7 @@ class RecetasYAlertasTest extends TestCase
         $cat      = $this->crearCategoria();
         $receta   = Receta::create([
             'titulo'       => 'Guía de VPN',
-            'solucion'     => 'Conectarse al servidor vpn.ctm.com.ar',
+            'solucion'     => 'Conectarse al servidor vpn.empresa.com',
             'id_categoria' => $cat->id,
         ]);
 

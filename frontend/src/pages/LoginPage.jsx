@@ -60,7 +60,7 @@ export default function LoginPage() {
               type="email"
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
-              placeholder="usuario@ctm.com"
+              placeholder="usuario@empresa.com"
               required
               autoComplete="email"
             />
