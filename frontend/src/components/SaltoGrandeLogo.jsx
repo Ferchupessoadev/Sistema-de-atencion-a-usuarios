@@ -66,7 +66,7 @@ export default function SaltoGrandeLogo({ size = 36, showText = false, light = f
               textTransform: 'uppercase',
             }}
           >
-            Argentina - Uruguay · CTM
+            Argentina - Uruguay · Sistema de Soluciones
           </span>
         </div>
       )}

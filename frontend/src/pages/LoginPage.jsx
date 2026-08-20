@@ -43,10 +43,10 @@ export default function LoginPage() {
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '0.25rem' }}>🎫</div>
           <h1 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#022E5B', letterSpacing: '-0.02em' }}>
-            Mesa de Ayuda CTM
+            Sistema de Soluciones
           </h1>
           <p style={{ color: '#64748B', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-            Sistema de Gestión y Atención a Usuarios
+            Gestión y Atención a Usuarios
           </p>
         </div>
 

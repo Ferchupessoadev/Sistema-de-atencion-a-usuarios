@@ -50,7 +50,7 @@ export default function RegisterPage() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.title}>Mesa de Ayuda — CTM</h1>
+        <h1 style={styles.title}>Sistema de Soluciones</h1>
         <h2 style={styles.subtitle}>Crear Cuenta</h2>
 
         <form onSubmit={handleSubmit} style={styles.form}>

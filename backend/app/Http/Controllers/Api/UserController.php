@@ -78,6 +78,10 @@ class UserController extends Controller
         ]);
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 625daac60acdb0fa4e67fa9629ac2008e528049b
     /**
      * POST /api/logout
      * Revoca el token actual del usuario autenticado.
