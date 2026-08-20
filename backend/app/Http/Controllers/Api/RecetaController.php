@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Receta;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class RecetaController extends Controller
 {
@@ -54,9 +55,7 @@ class RecetaController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        if (! $request->user()->es_tecnico) {
-            return response()->json(['message' => 'Solo técnicos pueden crear recetas.'], 403);
-        }
+        Gate::authorize('create', Receta::class);
 
         $validated = $request->validate([
             'titulo'       => 'required|string|max:255',
@@ -79,11 +78,8 @@ class RecetaController extends Controller
      */
     public function update($id, Request $request): JsonResponse
     {
-        if (! $request->user()->es_tecnico) {
-            return response()->json(['message' => 'Solo técnicos pueden editar recetas.'], 403);
-        }
-
         $receta = Receta::findOrFail($id);
+        Gate::authorize('update', $receta);
 
         $validated = $request->validate([
             'titulo'       => 'sometimes|string|max:255',
@@ -130,11 +126,8 @@ class RecetaController extends Controller
      */
     public function destroy($id, Request $request): JsonResponse
     {
-        if (! $request->user()->es_tecnico) {
-            return response()->json(['message' => 'Solo técnicos pueden eliminar recetas.'], 403);
-        }
-
         $receta = Receta::findOrFail($id);
+        Gate::authorize('delete', $receta);
         $receta->delete();
 
         return response()->json(['message' => 'Receta eliminada con éxito.']);

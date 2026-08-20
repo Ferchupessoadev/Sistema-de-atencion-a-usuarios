@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(RolesAndPermissionsSeeder::class);
+
         // ── 1. Usuarios y Especialistas de CTM ──────────────────────────────────
 
         // Administrador y Técnicos AICO / Soporte
@@ -23,32 +25,32 @@ class DatabaseSeeder extends Seeder
             'correo'     => 'admin@ctm.com',
             'interno'    => '3700',
             'contrasena' => Hash::make('admin123'),
-            'es_tecnico' => true,
         ]);
+        $admin->assignRole('tecnico');
 
         $tecnicoAico = User::create([
             'nombre'     => 'Técnico Soporte AICO (Int. 3777)',
             'correo'     => 'tecnico@ctm.com',
             'interno'    => '3777',
             'contrasena' => Hash::make('tecnico123'),
-            'es_tecnico' => true,
         ]);
+        $tecnicoAico->assignRole('tecnico');
 
         $tecnicoRedes = User::create([
             'nombre'     => 'Especialista en Redes y Comunicaciones',
             'correo'     => 'redes@ctm.com',
             'interno'    => '3750',
             'contrasena' => Hash::make('tecnico123'),
-            'es_tecnico' => true,
         ]);
+        $tecnicoRedes->assignRole('tecnico');
 
         $tecnicoSistemas = User::create([
             'nombre'     => 'Administrador de Sistemas ERP y K2B',
             'correo'     => 'sistemas@ctm.com',
             'interno'    => '3780',
             'contrasena' => Hash::make('tecnico123'),
-            'es_tecnico' => true,
         ]);
+        $tecnicoSistemas->assignRole('tecnico');
 
         // Usuarios Normales de distintas áreas con sus internos de puesto
         $uJuan = User::create([
@@ -56,48 +58,48 @@ class DatabaseSeeder extends Seeder
             'correo'     => 'juan@ctm.com',
             'interno'    => '3105',
             'contrasena' => Hash::make('usuario123'),
-            'es_tecnico' => false,
         ]);
+        $uJuan->assignRole('default');
 
         $uMaria = User::create([
             'nombre'     => 'María González (Recursos Humanos)',
             'correo'     => 'maria@ctm.com',
             'interno'    => '3210',
             'contrasena' => Hash::make('usuario123'),
-            'es_tecnico' => false,
         ]);
+        $uMaria->assignRole('default');
 
         $uCarlos = User::create([
             'nombre'     => 'Carlos Rodríguez (Comercial y Facturación)',
             'correo'     => 'carlos.ventas@ctm.com',
             'interno'    => '3340',
             'contrasena' => Hash::make('usuario123'),
-            'es_tecnico' => false,
         ]);
+        $uCarlos->assignRole('default');
 
         $uLucia = User::create([
             'nombre'     => 'Lucía Méndez (Compras y Suministros)',
             'correo'     => 'lucia.compras@ctm.com',
             'interno'    => '3415',
             'contrasena' => Hash::make('usuario123'),
-            'es_tecnico' => false,
         ]);
+        $uLucia->assignRole('default');
 
         $uDiego = User::create([
             'nombre'     => 'Diego Morales (Operaciones y Mantenimiento)',
             'correo'     => 'diego.logistica@ctm.com',
             'interno'    => '3550',
             'contrasena' => Hash::make('usuario123'),
-            'es_tecnico' => false,
         ]);
+        $uDiego->assignRole('default');
 
         $uAna = User::create([
             'nombre'     => 'Ana Fernández (Relaciones Institucionales)',
             'correo'     => 'ana.marketing@ctm.com',
             'interno'    => '3620',
             'contrasena' => Hash::make('usuario123'),
-            'es_tecnico' => false,
         ]);
+        $uAna->assignRole('default');
 
         // ── 2. Categorías Oficiales ─────────────────────────────────────────────
 

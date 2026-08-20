@@ -20,12 +20,16 @@ class ModelosTest extends TestCase
 
     private function crearUsuario(bool $esTecnico = false): User
     {
-        return User::create([
+        $user = User::create([
             'nombre'     => $esTecnico ? 'Técnico Test' : 'Usuario Test',
             'correo'     => $esTecnico ? 'tecnico_'.uniqid().'@test.com' : 'usuario_'.uniqid().'@test.com',
             'contrasena' => Hash::make('password123'),
             'es_tecnico' => $esTecnico,
         ]);
+
+        $user->assignRole($esTecnico ? 'tecnico' : 'default');
+
+        return $user;
     }
 
     private function crearCategoria(string $nombre = 'Software'): Categoria

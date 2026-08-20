@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Categoria;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class CategoriaController extends Controller
 {
@@ -26,9 +27,7 @@ class CategoriaController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        if (! $request->user()->es_tecnico) {
-            return response()->json(['message' => 'Solo técnicos pueden crear categorías.'], 403);
-        }
+        Gate::authorize('create', Categoria::class);
 
         $validated = $request->validate([
             'nombre' => 'required|string|max:100|unique:categorias,nombre',

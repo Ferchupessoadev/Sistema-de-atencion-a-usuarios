@@ -33,7 +33,7 @@ class RevisarAlertasIncidentes extends Command
 
         $this->warn("⚠️ Se detectaron {$totalCriticos} incidente(s) crítico(s) sin resolver (RN-004).");
 
-        $tecnicos = User::where('es_tecnico', true)->get();
+        $tecnicos = User::role('tecnico')->get();
 
         foreach ($incidentesCriticos as $incidente) {
             $horasTranscurridas = (int) $incidente->created_at->diffInHours(now());

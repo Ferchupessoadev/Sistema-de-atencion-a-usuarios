@@ -58,7 +58,7 @@ class NotificationController extends Controller
      */
     public function incidentesCriticos(Request $request): JsonResponse
     {
-        if (! $request->user()->es_tecnico) {
+        if (! $request->user()->hasRole('tecnico')) {
             return response()->json(['message' => 'Acceso denegado.'], 403);
         }
 

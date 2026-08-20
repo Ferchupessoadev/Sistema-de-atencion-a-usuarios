@@ -32,6 +32,7 @@ class E2EFlowTest extends TestCase
             'contrasena' => Hash::make('usuario123'),
             'es_tecnico' => false,
         ]);
+        $usuario->assignRole('default');
 
         $tecnico = User::create([
             'nombre'     => 'Carlos Técnico',
@@ -39,6 +40,7 @@ class E2EFlowTest extends TestCase
             'contrasena' => Hash::make('tecnico123'),
             'es_tecnico' => true,
         ]);
+        $tecnico->assignRole('tecnico');
 
         // ── 2. Login de Usuario ───────────────────────────────────
         $loginRes = $this->postJson('/api/login', [

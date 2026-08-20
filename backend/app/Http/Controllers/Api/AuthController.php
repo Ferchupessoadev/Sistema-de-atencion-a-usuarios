@@ -21,15 +21,14 @@ class AuthController extends Controller
             'nombre'     => 'required|string|max:255',
             'correo'     => 'required|email|unique:users,correo',
             'contrasena' => 'required|string|min:6',
-            'es_tecnico' => 'sometimes|boolean',
         ]);
 
         $user = User::create([
             'nombre'     => $request->nombre,
             'correo'     => $request->correo,
             'contrasena' => Hash::make($request->contrasena),
-            'es_tecnico' => $request->boolean('es_tecnico', false),
         ]);
+        $user->assignRole('default');
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -41,7 +40,7 @@ class AuthController extends Controller
                 'id'         => $user->id,
                 'nombre'     => $user->nombre,
                 'correo'     => $user->correo,
-                'es_tecnico' => $user->es_tecnico,
+                'es_tecnico' => $user->hasRole('tecnico'),
             ],
         ], 201);
     }
@@ -78,7 +77,7 @@ class AuthController extends Controller
                 'id'         => $user->id,
                 'nombre'     => $user->nombre,
                 'correo'     => $user->correo,
-                'es_tecnico' => $user->es_tecnico,
+                'es_tecnico' => $user->hasRole('tecnico'),
             ],
         ]);
     }
@@ -108,7 +107,7 @@ class AuthController extends Controller
             'id'         => $user->id,
             'nombre'     => $user->nombre,
             'correo'     => $user->correo,
-            'es_tecnico' => $user->es_tecnico,
+                'es_tecnico' => $user->hasRole('tecnico'),
         ]);
     }
 }
