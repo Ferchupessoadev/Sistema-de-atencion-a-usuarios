@@ -23,7 +23,7 @@ export default function HeaderPublico() {
           <div className="portal-header-titles">
             <h1 className="portal-header-title">Sistema de Soluciones</h1>
             <span className="portal-header-subtitle">
-              CTM Salto Grande · Mesa de Ayuda
+              Portal de Soporte · Mesa de Ayuda
             </span>
           </div>
         </div>

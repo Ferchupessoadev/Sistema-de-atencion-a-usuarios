@@ -193,7 +193,7 @@ input:focus, select:focus, textarea:focus {
   background: var(--c-bg);
 }
 
-/* Header estilizado con el Azul Salto Grande #022E5B */
+/* Header estilizado con Azul Corporativo #022E5B */
 .dashboard-nav {
   background-color: var(--c-navy);
   padding: 0.75rem 2rem;
