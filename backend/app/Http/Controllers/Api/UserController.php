@@ -26,8 +26,9 @@ class UserController extends Controller
             'nombre'     => $validated['nombre'],
             'correo'     => $validated['correo'],
             'contrasena' => Hash::make($validated['contrasena']),
-            'es_tecnico' => $validated['es_tecnico'] ?? false,
         ]);
+
+        $user->assignRole('default'); // Asignar rol por defecto
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -39,7 +40,7 @@ class UserController extends Controller
                 'id'         => $user->id,
                 'nombre'     => $user->nombre,
                 'correo'     => $user->correo,
-                'es_tecnico' => $user->es_tecnico,
+                'es_tecnico' => $user->HasRole(['tecnico']),
             ],
         ], 201);
     }
@@ -73,7 +74,7 @@ class UserController extends Controller
                 'id'         => $user->id,
                 'nombre'     => $user->nombre,
                 'correo'     => $user->correo,
-                'es_tecnico' => $user->es_tecnico,
+                'es_tecnico' => $user->HasRole(['tecnico']),
             ],
         ]);
     }
@@ -105,7 +106,7 @@ class UserController extends Controller
             'nombre'     => $user->nombre,
             'correo'     => $user->correo,
             'interno'    => $user->interno,
-            'es_tecnico' => $user->es_tecnico,
+            'es_tecnico' => $user->HasRole(['tecnico']),
         ]);
     }
 }

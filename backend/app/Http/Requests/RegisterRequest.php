@@ -25,7 +25,6 @@ class RegisterRequest extends FormRequest
             'nombre'     => 'required|string|max:255',
             'correo'     => 'required|email|unique:users,correo',
             'contrasena' => 'required|string|min:6',
-            'es_tecnico' => 'sometimes|boolean',
         ];
     }
 }

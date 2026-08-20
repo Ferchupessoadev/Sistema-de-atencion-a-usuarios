@@ -8,6 +8,7 @@ use App\Models\Receta;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class IncidenteController extends Controller
 {
@@ -20,10 +21,11 @@ class IncidenteController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
+        Gate::authorize('viewAny', Incidente::class);
 
         $query = Incidente::with(['usuario', 'tecnico', 'categoria', 'receta', 'consulta']);
 
-        if (! $user->es_tecnico) {
+        if (!$user->HasRole(['tecnico'])) {
             $query->where('id_usuario', $user->id);
         } else {
             // Filtros para técnicos
@@ -60,10 +62,7 @@ class IncidenteController extends Controller
     {
         $user = $request->user();
         $incidente = Incidente::with(['usuario', 'tecnico', 'categoria', 'receta', 'consulta'])->findOrFail($id);
-
-        if (! $user->es_tecnico && $incidente->id_usuario !== $user->id) {
-            return response()->json(['message' => 'No tienes permiso para ver este incidente.'], 403);
-        }
+        Gate::authorize('view', $incidente);
 
         return response()->json($incidente);
     }
@@ -77,10 +76,11 @@ class IncidenteController extends Controller
     public function store(Request $request): JsonResponse
     {
         $user = $request->user();
+        Gate::authorize('create', Incidente::class);
 
         // Determinar el usuario titular del incidente
         $targetUserId = $user->id;
-        if ($user->es_tecnico && $request->filled('id_usuario')) {
+        if ($user->HasRole(['tecnico']) && $request->filled('id_usuario')) {
             $targetUserId = $request->id_usuario;
         }
 
@@ -103,7 +103,7 @@ class IncidenteController extends Controller
             'interno'      => 'nullable|string|max:20',
         ];
 
-        if ($user->es_tecnico) {
+        if ($user->HasRole(['tecnico'])) {
             // Técnicos deben especificar obligatoriamente prioridad y categoría (RN-001)
             $rules['prioridad']  = 'required|in:BAJA,MEDIA,ALTA';
             $rules['id_usuario'] = 'sometimes|exists:users,id';
@@ -122,7 +122,7 @@ class IncidenteController extends Controller
             'prioridad'    => $validated['prioridad'] ?? Incidente::PRIORIDAD_MEDIA,
             'estado'       => Incidente::ESTADO_ABIERTO,
             'id_consulta'  => $validated['id_consulta'] ?? null,
-            'id_tecnico'   => $user->es_tecnico ? ($validated['id_tecnico'] ?? null) : null,
+            'id_tecnico'   => $user->HasRole(['tecnico']) ? ($validated['id_tecnico'] ?? null) : null,
         ]);
 
 
@@ -141,12 +141,9 @@ class IncidenteController extends Controller
     {
         $user = $request->user();
         $incidente = Incidente::findOrFail($id);
+        Gate::authorize('update', $incidente);
 
-        if (! $user->es_tecnico && $incidente->id_usuario !== $user->id) {
-            return response()->json(['message' => 'No autorizado para modificar este incidente.'], 403);
-        }
-
-        if ($user->es_tecnico) {
+        if ($user->HasRole(['tecnico'])) {
             $request->validate([
                 'estado'         => 'sometimes|in:ABIERTO,EN_CURSO,RESUELTO',
                 'prioridad'      => 'sometimes|in:BAJA,MEDIA,ALTA',
@@ -244,13 +241,8 @@ class IncidenteController extends Controller
      */
     public function derivar($id, Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        if (! $user->es_tecnico) {
-            return response()->json(['message' => 'Solo los técnicos pueden derivar incidentes.'], 403);
-        }
-
         $incidente = Incidente::with('usuario')->findOrFail($id);
+        Gate::authorize('derive', $incidente);
 
         $validated = $request->validate([
             'id_tecnico'            => 'nullable|exists:users,id',
@@ -293,6 +285,8 @@ class IncidenteController extends Controller
      */
     public function exportar(Request $request)
     {
+        Gate::authorize('export', Incidente::class);
+
         $incidentes = Incidente::with(['categoria', 'usuario', 'tecnico', 'receta'])
             ->orderBy('id', 'desc')
             ->get();

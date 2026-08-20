@@ -15,12 +15,17 @@ class AuthTest extends TestCase
 
     private function crearUsuario(array $overrides = []): User
     {
-        return User::create(array_merge([
+        $attributes = array_merge([
             'nombre'     => 'Juan Pérez',
             'correo'     => 'juan@example.com',
             'contrasena' => Hash::make('password123'),
             'es_tecnico' => false,
-        ], $overrides));
+        ], $overrides);
+
+        $user = User::create($attributes);
+        $user->assignRole($user->es_tecnico ? 'tecnico' : 'default');
+
+        return $user;
     }
 
     // ─── Tests de Registro ────────────────────────────────────────────────────

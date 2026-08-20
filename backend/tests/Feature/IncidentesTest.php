@@ -18,12 +18,17 @@ class IncidentesTest extends TestCase
 
     private function crearUsuario(bool $esTecnico = false, array $overrides = []): User
     {
-        return User::create(array_merge([
+        $attributes = array_merge([
             'nombre'     => $esTecnico ? 'Técnico '.uniqid() : 'Usuario '.uniqid(),
             'correo'     => ($esTecnico ? 'tecnico_' : 'usuario_').uniqid().'@test.com',
             'contrasena' => Hash::make('password123'),
             'es_tecnico' => $esTecnico,
-        ], $overrides));
+        ], $overrides);
+
+        $user = User::create($attributes);
+        $user->assignRole($esTecnico ? 'tecnico' : 'default');
+
+        return $user;
     }
 
     private function crearCategoria(string $nombre = 'Soporte General'): Categoria

@@ -15,7 +15,7 @@ class IncidentePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('incidentes.ver') && $user->HasRole('tecnico');
+        return $user->can('incidentes.ver');
     }
 
     /**
@@ -31,7 +31,7 @@ class IncidentePolicy
      */
     public function view(User $user, Incidente $incidente): bool
     {
-        if ($user->can('incidentes.ver') && $user->HasRole('tecnico')) {
+        if ($user->can('incidentes.ver') && $user->hasAnyRole(['tecnico', 'administrador'])) {
             return true;
         }
 
@@ -68,7 +68,7 @@ class IncidentePolicy
      */
     public function update(User $user, Incidente $incidente): bool
     {
-        if ($user->can('incidentes.actualizar') && $user->HasRole('tecnico')) {
+        if ($user->can('incidentes.actualizar') && $user->hasAnyRole(['tecnico', 'administrador'])) {
             return true;
         }
 
@@ -86,7 +86,7 @@ class IncidentePolicy
      */
     public function derive(User $user, Incidente $incidente): bool
     {
-        return$user->can('incidentes.derivar') && $user->hasRole('tecnico');
+        return $user->can('incidentes.derivar') && $user->hasRole('tecnico');
     }
 
     /**
@@ -99,6 +99,11 @@ class IncidentePolicy
      */
     public function export(User $user): bool
     {
-        return $user->HasRole('tecnico');
+        return $user->can('incidentes.exportar') && $user->hasAnyRole(['tecnico', 'administrador']);
+    }
+
+    public function assign(User $user, Incidente $incidente): bool
+    {
+        return $user->can('incidentes.asignar') && $user->hasRole('administrador');
     }
 }
