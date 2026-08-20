@@ -26,7 +26,7 @@ class UserController extends Controller
             'nombre'     => $validated['nombre'],
             'correo'     => $validated['correo'],
             'contrasena' => Hash::make($validated['contrasena']),
-            'es_tecnico' => false,
+            'es_tecnico' => $validated['es_tecnico'] ?? false,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;

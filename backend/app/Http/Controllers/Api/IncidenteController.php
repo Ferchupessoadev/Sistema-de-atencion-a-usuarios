@@ -299,7 +299,7 @@ class IncidenteController extends Controller
 
         $headers = [
             'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="reporte_incidentes_' . date('Ymd_His') . '.csv"',
+            'Content-Disposition' => 'attachment; filename="reporte_incidentes_ctm_' . date('Ymd_His') . '.csv"',
         ];
 
         $callback = function () use ($incidentes) {

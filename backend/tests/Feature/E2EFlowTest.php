@@ -28,21 +28,21 @@ class E2EFlowTest extends TestCase
 
         $usuario = User::create([
             'nombre'     => 'Juan Pérez',
-            'correo'     => 'juan@empresa.com',
+            'correo'     => 'juan@ctm.com',
             'contrasena' => Hash::make('usuario123'),
             'es_tecnico' => false,
         ]);
 
         $tecnico = User::create([
             'nombre'     => 'Carlos Técnico',
-            'correo'     => 'tecnico@empresa.com',
+            'correo'     => 'tecnico@ctm.com',
             'contrasena' => Hash::make('tecnico123'),
             'es_tecnico' => true,
         ]);
 
         // ── 2. Login de Usuario ───────────────────────────────────
         $loginRes = $this->postJson('/api/login', [
-            'correo'     => 'juan@empresa.com',
+            'correo'     => 'juan@ctm.com',
             'contrasena' => 'usuario123',
         ]);
         $loginRes->assertStatus(200)
@@ -78,7 +78,7 @@ class E2EFlowTest extends TestCase
 
         // ── 5. Login de Técnico ───────────────────────────────────
         $loginTec = $this->postJson('/api/login', [
-            'correo'     => 'tecnico@empresa.com',
+            'correo'     => 'tecnico@ctm.com',
             'contrasena' => 'tecnico123',
         ]);
         $loginTec->assertStatus(200)
@@ -140,7 +140,7 @@ class E2EFlowTest extends TestCase
                            ]);
         $derivarRes->assertStatus(200)
                    ->assertJsonPath('incidente.estado', 'EN_CURSO')
-                   ->assertJsonPath('notificacion.destinatario', 'juan@empresa.com')
+                   ->assertJsonPath('notificacion.destinatario', 'juan@ctm.com')
                    ->assertJsonPath('notificacion.unidad_especializada', 'Laboratorio Central de Hardware');
     }
 }

@@ -15,20 +15,20 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── 1. Usuarios y Especialistas de Soporte ──────────────────────────────────
+        // ── 1. Usuarios y Especialistas de CTM ──────────────────────────────────
 
-        // Administrador y Técnicos de Soporte
+        // Administrador y Técnicos AICO / Soporte
         $admin = User::create([
-            'nombre'     => 'Administrador General',
-            'correo'     => 'admin@empresa.com',
+            'nombre'     => 'Administrador General AICO',
+            'correo'     => 'admin@ctm.com',
             'interno'    => '3700',
             'contrasena' => Hash::make('admin123'),
             'es_tecnico' => true,
         ]);
 
         $tecnicoAico = User::create([
-            'nombre'     => 'Técnico Soporte (Int. 3777)',
-            'correo'     => 'tecnico@empresa.com',
+            'nombre'     => 'Técnico Soporte AICO (Int. 3777)',
+            'correo'     => 'tecnico@ctm.com',
             'interno'    => '3777',
             'contrasena' => Hash::make('tecnico123'),
             'es_tecnico' => true,
@@ -36,15 +36,15 @@ class DatabaseSeeder extends Seeder
 
         $tecnicoRedes = User::create([
             'nombre'     => 'Especialista en Redes y Comunicaciones',
-            'correo'     => 'redes@empresa.com',
+            'correo'     => 'redes@ctm.com',
             'interno'    => '3750',
             'contrasena' => Hash::make('tecnico123'),
             'es_tecnico' => true,
         ]);
 
         $tecnicoSistemas = User::create([
-            'nombre'     => 'Administrador de Sistemas ERP',
-            'correo'     => 'sistemas@empresa.com',
+            'nombre'     => 'Administrador de Sistemas ERP y K2B',
+            'correo'     => 'sistemas@ctm.com',
             'interno'    => '3780',
             'contrasena' => Hash::make('tecnico123'),
             'es_tecnico' => true,
@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
         // Usuarios Normales de distintas áreas con sus internos de puesto
         $uJuan = User::create([
             'nombre'     => 'Juan Pérez (Contabilidad)',
-            'correo'     => 'juan@empresa.com',
+            'correo'     => 'juan@ctm.com',
             'interno'    => '3105',
             'contrasena' => Hash::make('usuario123'),
             'es_tecnico' => false,
@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
 
         $uMaria = User::create([
             'nombre'     => 'María González (Recursos Humanos)',
-            'correo'     => 'maria@empresa.com',
+            'correo'     => 'maria@ctm.com',
             'interno'    => '3210',
             'contrasena' => Hash::make('usuario123'),
             'es_tecnico' => false,
@@ -69,7 +69,7 @@ class DatabaseSeeder extends Seeder
 
         $uCarlos = User::create([
             'nombre'     => 'Carlos Rodríguez (Comercial y Facturación)',
-            'correo'     => 'carlos.ventas@empresa.com',
+            'correo'     => 'carlos.ventas@ctm.com',
             'interno'    => '3340',
             'contrasena' => Hash::make('usuario123'),
             'es_tecnico' => false,
@@ -77,7 +77,7 @@ class DatabaseSeeder extends Seeder
 
         $uLucia = User::create([
             'nombre'     => 'Lucía Méndez (Compras y Suministros)',
-            'correo'     => 'lucia.compras@empresa.com',
+            'correo'     => 'lucia.compras@ctm.com',
             'interno'    => '3415',
             'contrasena' => Hash::make('usuario123'),
             'es_tecnico' => false,
@@ -85,7 +85,7 @@ class DatabaseSeeder extends Seeder
 
         $uDiego = User::create([
             'nombre'     => 'Diego Morales (Operaciones y Mantenimiento)',
-            'correo'     => 'diego.logistica@empresa.com',
+            'correo'     => 'diego.logistica@ctm.com',
             'interno'    => '3550',
             'contrasena' => Hash::make('usuario123'),
             'es_tecnico' => false,
@@ -93,7 +93,7 @@ class DatabaseSeeder extends Seeder
 
         $uAna = User::create([
             'nombre'     => 'Ana Fernández (Relaciones Institucionales)',
-            'correo'     => 'ana.marketing@empresa.com',
+            'correo'     => 'ana.marketing@ctm.com',
             'interno'    => '3620',
             'contrasena' => Hash::make('usuario123'),
             'es_tecnico' => false,
@@ -139,7 +139,7 @@ class DatabaseSeeder extends Seeder
                 'votos_util'    => 31,
                 'votos_no_util' => 3,
                 'keywords'      => 'telefono, interno, transfer, conferencia, no suena, dnd, manos libres, redial, captura',
-                'solucion'      => "1. Derivaciones: Presionar la tecla 'Transfer / Transf', marcar el número de interno de destino y colgar.\n2. Conferencias: Con una llamada en curso presionar 'Conf', marcar el tercer interno y pulsar 'Conf' nuevamente.\n3. No suena el interno: Verificar que la luz de 'No Molestar / DND' esté apagada y ajustar el volumen del timbre con las teclas de flecha.\n4. Captura de llamadas: Para capturar la llamada sonando en otro puesto, descolgar y marcar *8.\n5. Manos libres y re-discado: Presionar la tecla 'Speaker' para altavoz y 'Redial' para marcar el último número.\n(Instructivos en video disponibles en la Intranet Corporativa).",
+                'solucion'      => "1. Derivaciones: Presionar la tecla 'Transfer / Transf', marcar el número de interno de destino y colgar.\n2. Conferencias: Con una llamada en curso presionar 'Conf', marcar el tercer interno y pulsar 'Conf' nuevamente.\n3. No suena el interno: Verificar que la luz de 'No Molestar / DND' esté apagada y ajustar el volumen del timbre con las teclas de flecha.\n4. Captura de llamadas: Para capturar la llamada sonando en otro puesto, descolgar y marcar *8.\n5. Manos libres y re-discado: Presionar la tecla 'Speaker' para altavoz y 'Redial' para marcar el último número.\n(Instructivos en video disponibles en Intranet CTM).",
             ],
             [
                 'titulo'        => 'CONTRASEÑA PARA RED "WLAN_Invitados"',
@@ -148,7 +148,7 @@ class DatabaseSeeder extends Seeder
                 'votos_util'    => 42,
                 'votos_no_util' => 0,
                 'keywords'      => 'wifi, wlan, invitados, clave, password, internet, celular, notebook',
-                'solucion'      => "1. Seleccionar la red inalámbrica 'WLAN_Invitados' en el dispositivo móvil o portátil.\n2. Ingresar la contraseña: internetWifi\n(Importante: la palabra 'internet' debe ingresarse en minúsculas y 'Wifi' en mayúsculas / minúsculas según corresponda).\n3. Abrir el navegador web para aceptar los términos de uso si el portal de acceso lo solicita.",
+                'solucion'      => "1. Seleccionar la red inalámbrica 'WLAN_Invitados' en el dispositivo móvil o portátil.\n2. Ingresar la contraseña: internetCTM\n(Importante: la palabra 'internet' debe ingresarse en minúsculas y 'CTM' en mayúsculas).\n3. Abrir el navegador web para aceptar los términos de uso si el portal de acceso lo solicita.",
             ],
             [
                 'titulo'        => 'EQUIPO LENTO EN SU FUNCIONAMIENTO - Windows Update',
@@ -166,7 +166,7 @@ class DatabaseSeeder extends Seeder
                 'votos_util'    => 135,
                 'votos_no_util' => 4,
                 'keywords'      => 'contraseña, password, clave, active directory, ctrl alt supr, vpn, escritorio remoto, 172.16.3.123',
-                'solucion'      => "--- Caso 1: En la Oficina (Red Corporativa) ---\n1. Presionar simultáneamente las teclas Ctrl + Alt + Supr (Del).\n2. En el menú de seguridad seleccionar 'Cambiar una contraseña'.\n3. Ingresar la contraseña actual y luego la nueva contraseña propuesta dos veces.\n(Requisitos: Mínimo 8 caracteres, mayúsculas, minúsculas y números, sin incluir el nombre de usuario).\n\n--- Caso 2: En Teletrabajo / Remoto ---\n1. Conectar la VPN corporativa.\n2. Abrir la aplicación 'Conexión a Escritorio remoto' (escribir 'escritorio' en la barra de búsqueda).\n3. En el campo 'Equipo' ingresar: 172.16.3.123 y presionar 'Mostrar opciones'.\n4. En 'Usuario' colocar: empresa\\tu_usuario_de_red y conectar.\n5. Ingresar la contraseña actual para acceder a la máquina virtual.\n6. Dentro de la sesión remota, hacer clic en Inicio > 'Seguridad de Windows' > 'Cambiar una contraseña'.\n7. Guardar la nueva clave y desconectar la sesión remota.",
+                'solucion'      => "--- Caso 1: En la Oficina (Red Corporativa) ---\n1. Presionar simultáneamente las teclas Ctrl + Alt + Supr (Del).\n2. En el menú de seguridad seleccionar 'Cambiar una contraseña'.\n3. Ingresar la contraseña actual y luego la nueva contraseña propuesta dos veces.\n(Requisitos: Mínimo 8 caracteres, mayúsculas, minúsculas y números, sin incluir el nombre de usuario).\n\n--- Caso 2: En Teletrabajo / Remoto ---\n1. Conectar la VPN corporativa de CTM.\n2. Abrir la aplicación 'Conexión a Escritorio remoto' (escribir 'escritorio' en la barra de búsqueda).\n3. En el campo 'Equipo' ingresar: 172.16.3.123 y presionar 'Mostrar opciones'.\n4. En 'Usuario' colocar: ctmgag\\tu_usuario_de_red y conectar.\n5. Ingresar la contraseña actual para acceder a la máquina virtual.\n6. Dentro de la sesión remota, hacer clic en Inicio > 'Seguridad de Windows' > 'Cambiar una contraseña'.\n7. Guardar la nueva clave y desconectar la sesión remota.",
             ],
             [
                 'titulo'        => 'CONEXIÓN A VPN CORPORATIVA CISCO / FORTICLIENT',
@@ -174,8 +174,8 @@ class DatabaseSeeder extends Seeder
                 'usos'          => 38,
                 'votos_util'    => 35,
                 'votos_no_util' => 2,
-                'keywords'      => 'vpn, cisco, forticlient, teletrabajo, vpn.empresa.com, otp, authenticator, remoto',
-                'solucion'      => "1. Abrir el cliente VPN corporativo desde la barra de tareas de Windows.\n2. Servidor de conexión: vpn.empresa.com\n3. Ingresar el usuario de red y contraseña de dominio institucional.\n4. Introducir el código OTP de doble factor provisto por Microsoft Authenticator.\n5. Comprobar que el estado figure como 'Connected' antes de intentar acceder a carpetas de red.",
+                'keywords'      => 'vpn, cisco, forticlient, teletrabajo, vpn.ctm.com.ar, otp, authenticator, remoto',
+                'solucion'      => "1. Abrir el cliente VPN corporativo desde la barra de tareas de Windows.\n2. Servidor de conexión: vpn.ctm.com.ar\n3. Ingresar el usuario de red y contraseña de dominio institucional.\n4. Introducir el código OTP de doble factor provisto por Microsoft Authenticator.\n5. Comprobar que el estado figure como 'Connected' antes de intentar acceder a carpetas de red o K2B.",
             ],
             [
                 'titulo'        => 'DESBLOQUEO DE CUENTA DE ACTIVE DIRECTORY POR INTENTOS FALLIDOS',
@@ -193,7 +193,7 @@ class DatabaseSeeder extends Seeder
                 'votos_util'    => 22,
                 'votos_no_util' => 1,
                 'keywords'      => 'outlook, correo, mail, exchange, perfil, sincronizar, bandeja de entrada',
-                'solucion'      => "1. Cerrar Microsoft Outlook completamente.\n2. Ir a Panel de Control > 'Correo (Microsoft Outlook)'.\n3. Hacer clic en 'Mostrar perfiles' y presionar 'Agregar...'.\n4. Asignar un nombre al perfil (ej. 'Perfil-Principal') y completar nombre y correo institucional.\n5. Validar con credenciales de dominio empresa\\usuario.\n6. Establecer el nuevo perfil como predeterminado y abrir Outlook para iniciar la sincronización.",
+                'solucion'      => "1. Cerrar Microsoft Outlook completamente.\n2. Ir a Panel de Control > 'Correo (Microsoft Outlook)'.\n3. Hacer clic en 'Mostrar perfiles' y presionar 'Agregar...'.\n4. Asignar un nombre al perfil (ej. 'CTM-Principal') y completar nombre y correo institucional.\n5. Validar con credenciales de dominio ctmgag\\usuario.\n6. Establecer el nuevo perfil como predeterminado y abrir Outlook para iniciar la sincronización.",
             ],
             [
                 'titulo'        => 'CONFIGURACIÓN DE CARTELERA DIGITAL INFORMATIVA XIBO',
@@ -202,7 +202,7 @@ class DatabaseSeeder extends Seeder
                 'votos_util'    => 11,
                 'votos_no_util' => 0,
                 'keywords'      => 'xibo, cartelera, pantalla, tv, videos, institucional, transmision, 1080p',
-                'solucion'      => "1. Ingresar al panel web Xibo en http://cartelera.empresa.local con usuario de operador.\n2. Ir a la sección 'Layouts' y seleccionar la pantalla destino (Comedor, Recepción, Sala de Control).\n3. Cargar el contenido institucional en resolución Full HD 1080p (1920x1080).\n4. Configurar el cronograma y presionar 'Publicar cambios'.\n5. En la pantalla física receptora forzar actualización desde el menú de opciones con la tecla 'i'.",
+                'solucion'      => "1. Ingresar al panel web Xibo en http://xibo.ctm.local con usuario de operador.\n2. Ir a la sección 'Layouts' y seleccionar la pantalla destino (Comedor, Recepción, Sala de Control).\n3. Cargar el contenido institucional en resolución Full HD 1080p (1920x1080).\n4. Configurar el cronograma y presionar 'Publicar cambios'.\n5. En la pantalla física receptora forzar actualización desde el menú de opciones con la tecla 'i'.",
             ],
             [
                 'titulo'        => 'MAPEO DE UNIDAD DE RED COMPARTIDA (DISCO Z: / SERVIDOR)',
@@ -211,7 +211,7 @@ class DatabaseSeeder extends Seeder
                 'votos_util'    => 29,
                 'votos_no_util' => 1,
                 'keywords'      => 'disco z, carpeta compartida, servidor, archivos, smb, red, mapeo',
-                'solucion'      => "1. Abrir 'Este equipo' en el Explorador de archivos de Windows.\n2. Hacer clic en 'Conectar a unidad de red'.\n3. Seleccionar la letra Z: (o la requerida por el área).\n4. En la ruta ingresar la dirección del servidor (ej. \\\\192.168.1.10\\Contabilidad).\n5. Marcar 'Conectar de nuevo al iniciar sesión' y validar con usuario empresa\\usuario y contraseña.",
+                'solucion'      => "1. Abrir 'Este equipo' en el Explorador de archivos de Windows.\n2. Hacer clic en 'Conectar a unidad de red'.\n3. Seleccionar la letra Z: (o la requerida por el área).\n4. En la ruta ingresar la dirección del servidor (ej. \\\\192.168.1.10\\Contabilidad).\n5. Marcar 'Conectar de nuevo al iniciar sesión' y validar con usuario ctmgag\\usuario y contraseña.",
             ],
             [
                 'titulo'        => 'RENOVACIÓN DE IP Y LIMPIEZA DE CACHÉ DNS EN WINDOWS',
@@ -220,7 +220,7 @@ class DatabaseSeeder extends Seeder
                 'votos_util'    => 17,
                 'votos_no_util' => 1,
                 'keywords'      => 'ipconfig, flushdns, dns, renew, release, ip, red, conexion, internet',
-                'solucion'      => "1. Abrir CMD o PowerShell como Administrador.\n2. Ejecutar el comando: ipconfig /flushdns\n3. Ejecutar el comando: ipconfig /release\n4. Ejecutar el comando: ipconfig /renew\n5. Probar respuesta con el comando: ping intranet.empresa.local",
+                'solucion'      => "1. Abrir CMD o PowerShell como Administrador.\n2. Ejecutar el comando: ipconfig /flushdns\n3. Ejecutar el comando: ipconfig /release\n4. Ejecutar el comando: ipconfig /renew\n5. Probar respuesta con el comando: ping intranet.ctm.local",
             ],
         ];
 
@@ -345,7 +345,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Boceto::create([
-            'titulo'          => 'Procedimiento para despliegue de certificados SSL wildcard *.empresa.com',
+            'titulo'          => 'Procedimiento para despliegue de certificados SSL wildcard *.ctm.com.ar',
             'solucion_previa' => "1. Generar CSR en IIS/Nginx.\n2. Validar challenge DNS con registro TXT en el proveedor.\n3. Descargar bundle fullchain.pem.\n4. Instalar y forzar redirección HTTPS en puerto 443.",
         ]);
 

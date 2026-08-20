@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
+import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
 
 export default function DashboardUsuario() {
   const { user, logout } = useAuth();
@@ -141,8 +142,9 @@ export default function DashboardUsuario() {
 
   return (
     <div className="dashboard">
+      <DashboardResponsiveStyles />
       <nav className="dashboard-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        <div className="dashboard-nav-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <span style={{ fontSize: '1.6rem' }}>🎫</span>
           <div>
             <h1>Sistema de Soluciones</h1>
@@ -151,7 +153,7 @@ export default function DashboardUsuario() {
             </span>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button
             id="btn-portal-publico"
             className="btn btn-outline-header btn-sm"
@@ -175,7 +177,8 @@ export default function DashboardUsuario() {
 
       <div className="dashboard-body">
         {/* Navegación por Pestañas Principales */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+        <div className="dashboard-tabs" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+          <div className="dashboard-tabs-list" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button
             className={`btn ${seccionActiva === 'INCIDENTES' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
             onClick={() => setSeccionActiva('INCIDENTES')}
@@ -194,6 +197,7 @@ export default function DashboardUsuario() {
           >
             Base de Conocimientos
           </button>
+          </div>
         </div>
 
         {seccionActiva === 'RECETAS' ? (
@@ -202,7 +206,7 @@ export default function DashboardUsuario() {
           <div>
             {exitoConsulta && <div className="alert alert-success">{exitoConsulta}</div>}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div className="dashboard-content-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.15rem', color: '#022E5B', fontWeight: 800 }}>💬 Mis Consultas</h2>
                 <p style={{ fontSize: '0.825rem', color: '#64748B', marginTop: '0.15rem' }}>
@@ -276,7 +280,7 @@ export default function DashboardUsuario() {
                       <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Mínimo 5 caracteres.</span>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                    <div className="modal-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                       <button
                         type="button"
                         className="btn btn-secondary"
@@ -331,7 +335,7 @@ export default function DashboardUsuario() {
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div className="dashboard-content-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
               {/* Pestañas de filtrado */}
               <div className="filter-tabs" style={{ marginBottom: 0 }}>
                 {['TODOS', 'ABIERTO', 'EN_CURSO', 'RESUELTO'].map(est => (
@@ -479,7 +483,7 @@ export default function DashboardUsuario() {
                       <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Mínimo 5 caracteres.</span>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                    <div className="modal-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                       <button
                         type="button"
                         className="btn btn-secondary"

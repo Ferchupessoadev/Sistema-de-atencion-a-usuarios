@@ -768,6 +768,16 @@ input:focus, select:focus, textarea:focus {
   line-height: 1.4;
 }
 
+@media (max-width: 700px) {
+  .portal-search-input-wrap {
+    flex: 1 1 100%;
+  }
+
+  .portal-search-select {
+    flex: 1 1 100%;
+  }
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .portal-header-inner {
