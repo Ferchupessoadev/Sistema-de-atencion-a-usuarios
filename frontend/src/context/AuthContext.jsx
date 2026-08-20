@@ -37,6 +37,22 @@ export function AuthProvider({ children }) {
     return userData;
   };
 
+  const register = async (userData) => {
+    const res = await api.post('/register', {
+      nombre: userData.nombre,
+      correo: userData.correo,
+      contrasena: userData.contrasena,
+      es_tecnico: Boolean(userData.es_tecnico),
+    });
+    const { token: newToken, user: registeredUser } = res.data;
+
+    localStorage.setItem('auth_token', newToken);
+    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    setToken(newToken);
+    setUser(registeredUser);
+    return registeredUser;
+  };
+
   const logout = async () => {
     try {
       await api.post('/logout');
@@ -52,7 +68,7 @@ export function AuthProvider({ children }) {
   const isAuthenticated = !!token && !!user;
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

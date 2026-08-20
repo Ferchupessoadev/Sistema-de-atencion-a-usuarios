@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
+import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
 
 export default function DashboardTecnico() {
   const { user, logout } = useAuth();
@@ -241,8 +242,9 @@ export default function DashboardTecnico() {
 
   return (
     <div className="dashboard">
+      <DashboardResponsiveStyles />
       <nav className="dashboard-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        <div className="dashboard-nav-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <span style={{ fontSize: '1.6rem' }}>🛠️</span>
           <div>
             <h1>Sistema de Soluciones</h1>
@@ -251,7 +253,7 @@ export default function DashboardTecnico() {
             </span>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <NotificationBell />
           <span className="badge badge-tecnico" style={{ background: '#DBEAFE', color: '#022E5B' }}>Técnico</span>
           <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
@@ -269,7 +271,7 @@ export default function DashboardTecnico() {
         {/* Banner de Alerta Crítica RN-004 si hay casos vencidos > 2h */}
         {alertasCriticas.length > 0 && (
           <div
-            className="alert alert-error"
+            className="dashboard-alert alert alert-error"
             style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -287,8 +289,8 @@ export default function DashboardTecnico() {
         )}
 
         {/* Pestañas de Navegación del Panel Técnico */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className="dashboard-tabs" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div className="dashboard-tabs-list" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button
               className={`btn ${seccionActiva === 'INCIDENTES' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
               onClick={() => setSeccionActiva('INCIDENTES')}
@@ -309,16 +311,18 @@ export default function DashboardTecnico() {
             </button>
           </div>
 
-          <button
-            id="btn-exportar-csv"
-            className="btn btn-secondary btn-sm"
-            onClick={handleExportarReporte}
-            disabled={exportando}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700 }}
-            title="Descargar historial de incidentes y tiempos de atención en formato CSV / Excel"
-          >
-            {exportando ? 'Generando CSV…' : '📥 Exportar Incidentes (CSV)'}
-          </button>
+          <div className="dashboard-tabs-actions">
+            <button
+              id="btn-exportar-csv"
+              className="btn btn-secondary btn-sm"
+              onClick={handleExportarReporte}
+              disabled={exportando}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700 }}
+              title="Descargar historial de incidentes y tiempos de atención en formato CSV / Excel"
+            >
+              {exportando ? 'Generando CSV…' : '📥 Exportar Incidentes (CSV)'}
+            </button>
+          </div>
         </div>
 
         {seccionActiva === 'RECETAS' ? (
@@ -370,7 +374,7 @@ export default function DashboardTecnico() {
                     <span>🛠️ Responsable: <strong>{inc.tecnico ? inc.tecnico.nombre : '⚠️ Sin asignar'}</strong></span>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                    <div className="dashboard-action-row" style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
                     <button
                       className="btn btn-success btn-sm"
                       onClick={() => {
@@ -517,7 +521,7 @@ export default function DashboardTecnico() {
 
                     {/* Acciones del técnico */}
                     {inc.estado !== 'RESUELTO' && (
-                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                      <div className="dashboard-action-row" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
                         {inc.tecnico?.id !== user.id && (
                           <button
                             className="btn btn-secondary btn-sm"
@@ -591,7 +595,7 @@ export default function DashboardTecnico() {
               <form onSubmit={handleResolverIncidente}>
                 <div className="form-group" style={{ marginBottom: '1.25rem' }}>
                   <label style={{ marginBottom: '0.5rem' }}>Tipo de Solución</label>
-                  <div style={{ display: 'flex', gap: '1.5rem' }}>
+                  <div className="dashboard-radio-options" style={{ display: 'flex', gap: '1.5rem' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, cursor: 'pointer', color: '#1e293b' }}>
                       <input
                         type="radio"
@@ -669,7 +673,7 @@ export default function DashboardTecnico() {
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         {pasos.map((paso, index) => (
-                          <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div key={index} className="dashboard-step-row" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <span
                               style={{
                                 width: '26px',
@@ -735,7 +739,7 @@ export default function DashboardTecnico() {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <div className="modal-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                   <button
                     type="button"
                     className="btn btn-secondary"
@@ -804,7 +808,7 @@ export default function DashboardTecnico() {
                   />
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <div className="modal-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                   <button
                     type="button"
                     className="btn btn-secondary"

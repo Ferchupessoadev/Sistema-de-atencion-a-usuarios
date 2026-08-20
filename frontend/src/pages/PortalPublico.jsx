@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import HeaderPublico from '../components/HeaderPublico';
+import PortalResponsiveStyles from '../components/PortalResponsiveStyles';
 
 export default function PortalPublico() {
   const { isAuthenticated } = useAuth();
@@ -66,6 +67,7 @@ export default function PortalPublico() {
 
   return (
     <div className="portal-publico">
+      <PortalResponsiveStyles />
       <HeaderPublico />
 
       {/* Hero / Banner Principal */}
