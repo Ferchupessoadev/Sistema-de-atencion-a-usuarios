@@ -427,3 +427,374 @@ input:focus, select:focus, textarea:focus {
   font-size: 1rem;
   color: var(--c-text-muted);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Portal Público — Página Principal (sin autenticación)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Header */
+.portal-header {
+  background-color: var(--c-navy);
+  border-bottom: 3px solid var(--c-red);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(2, 46, 91, 0.15);
+}
+
+.portal-header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.65rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.portal-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.portal-header-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-header-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.portal-header-subtitle {
+  font-size: 0.65rem;
+  color: #93C5FD;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.portal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.portal-header-user {
+  font-size: 0.875rem;
+  color: #FFFFFF;
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+/* Hero Section */
+.portal-hero {
+  background: linear-gradient(135deg, var(--c-navy) 0%, var(--c-navy-light) 50%, var(--c-blue) 100%);
+  padding: 2.5rem 1.5rem 2rem;
+  text-align: center;
+}
+
+.portal-hero-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.portal-hero-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.portal-hero-subtitle {
+  font-size: 0.95rem;
+  color: #BAD6F7;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+/* Barra de Búsqueda del Portal */
+.portal-search-bar {
+  display: flex;
+  gap: 0.65rem;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.portal-search-input-wrap {
+  flex: 2 1 280px;
+  position: relative;
+}
+
+.portal-search-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.portal-search-input {
+  width: 100%;
+  padding: 0.75rem 0.9rem 0.75rem 2.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0F172A;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.portal-search-input:focus {
+  outline: none;
+  border-color: var(--c-celeste-light);
+  box-shadow: 0 0 0 3px rgba(123, 179, 232, 0.3);
+}
+
+.portal-search-select {
+  flex: 1 1 160px;
+  padding: 0.75rem 0.9rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0F172A;
+  cursor: pointer;
+}
+
+.portal-search-select:focus {
+  outline: none;
+  border-color: var(--c-celeste-light);
+  box-shadow: 0 0 0 3px rgba(123, 179, 232, 0.3);
+}
+
+/* Body del Portal */
+.portal-body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+}
+
+/* Header de Resultados */
+.portal-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.portal-results-count {
+  font-size: 0.875rem;
+  color: var(--c-text-muted);
+  font-weight: 600;
+}
+
+/* Grid de Recetas */
+.portal-recetas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 1.1rem;
+}
+
+/* Card de Receta */
+.portal-receta-card {
+  background: var(--c-card);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-top: 3px solid var(--c-navy);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.portal-receta-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -4px rgba(2, 46, 91, 0.1);
+}
+
+.portal-receta-usos {
+  font-size: 0.75rem;
+  color: #047857;
+  background: #ECFDF5;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 700;
+  border: 1px solid #A7F3D0;
+}
+
+.portal-receta-titulo {
+  font-size: 1.05rem;
+  color: var(--c-navy);
+  margin: 0.65rem 0;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.portal-receta-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.portal-keyword-chip {
+  font-size: 0.7rem;
+  background: #EFF6FF;
+  color: #1D4ED8;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid #DBEAFE;
+  font-weight: 600;
+}
+
+.portal-receta-solucion {
+  background: #F8FAFC;
+  padding: 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  font-size: 0.85rem;
+  color: #334155;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+/* Footer de Receta (Votos) */
+.portal-receta-footer {
+  margin-top: 0.85rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed #E2E8F0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.portal-receta-votos {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.portal-voto-btn {
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: opacity 0.15s;
+}
+
+.portal-voto-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.portal-voto-util {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  color: #166534;
+}
+
+.portal-voto-no-util {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #991B1B;
+}
+
+/* Estado vacío */
+.portal-empty {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  background: var(--c-card);
+  border-radius: 12px;
+  border: 1px solid var(--c-border);
+}
+
+.portal-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+
+.portal-empty-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--c-text-main);
+  margin-bottom: 0.35rem;
+}
+
+.portal-empty-text {
+  font-size: 0.9rem;
+  color: var(--c-text-muted);
+}
+
+/* CTA Banner */
+.portal-cta {
+  margin-top: 2.5rem;
+  background: linear-gradient(135deg, var(--c-navy) 0%, var(--c-blue) 100%);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.portal-cta-inner {
+  padding: 2rem 2.5rem;
+  text-align: center;
+}
+
+.portal-cta-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+}
+
+.portal-cta-text {
+  font-size: 0.9rem;
+  color: #BAD6F7;
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .portal-header-inner {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .portal-header-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .portal-hero-title {
+    font-size: 1.35rem;
+  }
+
+  .portal-search-bar {
+    flex-direction: column;
+  }
+
+  .portal-recetas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-cta-inner {
+    padding: 1.5rem 1.25rem;
+  }
+}
+

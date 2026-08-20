@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import PortalPublico from './pages/PortalPublico';
 import DashboardTecnico from './pages/DashboardTecnico';
 import DashboardUsuario from './pages/DashboardUsuario';
 
@@ -28,15 +30,8 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Ruta raíz: redirigir según estado */}
-      <Route
-        path="/"
-        element={
-          isAuthenticated
-            ? <Navigate to={user?.es_tecnico ? '/tecnico' : '/usuario'} replace />
-            : <Navigate to="/login" replace />
-        }
-      />
+      {/* Portal Público — página principal, visible para todos */}
+      <Route path="/" element={<PortalPublico />} />
 
       {/* Login público */}
       <Route
@@ -45,6 +40,16 @@ function AppRoutes() {
           isAuthenticated
             ? <Navigate to={user?.es_tecnico ? '/tecnico' : '/usuario'} replace />
             : <LoginPage />
+        }
+      />
+
+      {/* Registro público */}
+      <Route
+        path="/registro"
+        element={
+          isAuthenticated
+            ? <Navigate to={user?.es_tecnico ? '/tecnico' : '/usuario'} replace />
+            : <RegisterPage />
         }
       />
 
@@ -68,7 +73,7 @@ function AppRoutes() {
         }
       />
 
-      {/* Catch-all */}
+      {/* Catch-all → portal público */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

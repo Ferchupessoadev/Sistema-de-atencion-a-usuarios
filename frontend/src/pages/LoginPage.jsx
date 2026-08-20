@@ -89,6 +89,15 @@ export default function LoginPage() {
             {loading ? 'Validando credenciales…' : 'Iniciar Sesión'}
           </button>
         </form>
+
+        <div style={{ textAlign: 'center', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #E2E8F0' }}>
+          <a
+            href="/"
+            style={{ fontSize: '0.85rem', color: '#022E5B', fontWeight: 600, textDecoration: 'none' }}
+          >
+            ← Volver al Portal Público
+          </a>
+        </div>
       </div>
     </div>
   );

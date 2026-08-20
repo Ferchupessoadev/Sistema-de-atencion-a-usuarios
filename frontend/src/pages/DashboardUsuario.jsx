@@ -9,11 +9,20 @@ export default function DashboardUsuario() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [seccionActiva, setSeccionActiva] = useState('INCIDENTES'); // 'INCIDENTES' | 'RECETAS'
+  const [seccionActiva, setSeccionActiva] = useState('INCIDENTES'); // 'INCIDENTES' | 'RECETAS' | 'CONSULTAS'
   const [incidentes, setIncidentes] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState('TODOS');
+
+  // Consultas
+  const [consultas, setConsultas] = useState([]);
+  const [loadingConsultas, setLoadingConsultas] = useState(false);
+  const [modalConsulta, setModalConsulta] = useState(false);
+  const [descConsulta, setDescConsulta] = useState('');
+  const [guardandoConsulta, setGuardandoConsulta] = useState(false);
+  const [errorConsulta, setErrorConsulta] = useState('');
+  const [exitoConsulta, setExitoConsulta] = useState('');
 
   // Modal de creación
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -43,8 +52,42 @@ export default function DashboardUsuario() {
     }
   };
 
+  const cargarConsultas = async () => {
+    try {
+      setLoadingConsultas(true);
+      const res = await api.get('/consultas');
+      setConsultas(res.data);
+    } catch (err) {
+      console.error('Error al cargar consultas:', err);
+    } finally {
+      setLoadingConsultas(false);
+    }
+  };
+
+  const handleCrearConsulta = async (e) => {
+    e.preventDefault();
+    setErrorConsulta('');
+    setGuardandoConsulta(true);
+    try {
+      await api.post('/consultas', { descripcion: descConsulta });
+      setExitoConsulta('¡Consulta enviada con éxito! El equipo técnico la revisará.');
+      setModalConsulta(false);
+      setDescConsulta('');
+      cargarConsultas();
+      setTimeout(() => setExitoConsulta(''), 4000);
+    } catch (err) {
+      const msg = err.response?.data?.errors?.descripcion?.[0]
+        || err.response?.data?.message
+        || 'Error al crear la consulta.';
+      setErrorConsulta(msg);
+    } finally {
+      setGuardandoConsulta(false);
+    }
+  };
+
   useEffect(() => {
     cargarDatos();
+    cargarConsultas();
   }, []);
 
   useEffect(() => {
@@ -55,7 +98,7 @@ export default function DashboardUsuario() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   };
 
   const handleCrearIncidente = async (e) => {
@@ -109,6 +152,14 @@ export default function DashboardUsuario() {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button
+            id="btn-portal-publico"
+            className="btn btn-outline-header btn-sm"
+            onClick={() => navigate('/')}
+            title="Volver al Portal Público"
+          >
+            🏠 Portal
+          </button>
           <NotificationBell />
           <span className="badge badge-usuario" style={{ background: '#CCFBF1', color: '#0F766E' }}>Usuario</span>
           <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
@@ -132,6 +183,12 @@ export default function DashboardUsuario() {
             Mis Incidentes ({incidentes.length})
           </button>
           <button
+            className={`btn ${seccionActiva === 'CONSULTAS' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+            onClick={() => setSeccionActiva('CONSULTAS')}
+          >
+            Mis Consultas ({consultas.length})
+          </button>
+          <button
             className={`btn ${seccionActiva === 'RECETAS' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
             onClick={() => setSeccionActiva('RECETAS')}
           >
@@ -141,6 +198,108 @@ export default function DashboardUsuario() {
 
         {seccionActiva === 'RECETAS' ? (
           <RecetasManager />
+        ) : seccionActiva === 'CONSULTAS' ? (
+          <div>
+            {exitoConsulta && <div className="alert alert-success">{exitoConsulta}</div>}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.15rem', color: '#022E5B', fontWeight: 800 }}>💬 Mis Consultas</h2>
+                <p style={{ fontSize: '0.825rem', color: '#64748B', marginTop: '0.15rem' }}>
+                  Enviá una consulta al equipo técnico y recibí asistencia.
+                </p>
+              </div>
+              <button
+                id="btn-nueva-consulta"
+                className="btn btn-primary"
+                onClick={() => { setErrorConsulta(''); setModalConsulta(true); }}
+              >
+                ➕ Nueva Consulta
+              </button>
+            </div>
+
+            {loadingConsultas ? (
+              <div className="spinner">Cargando consultas…</div>
+            ) : consultas.length === 0 ? (
+              <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748b' }}>
+                <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>No tenés consultas registradas</p>
+                <p style={{ fontSize: '0.85rem' }}>
+                  Presioná "Nueva Consulta" para enviar tu pregunta al equipo de soporte.
+                </p>
+              </div>
+            ) : (
+              <div>
+                {consultas.map(c => (
+                  <div key={c.id} className="incident-card" style={{ borderLeftColor: '#4A90E2' }}>
+                    <div className="incident-header">
+                      <span className="badge" style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' }}>💬 Consulta</span>
+                      <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                        #{c.id} · {new Date(c.created_at).toLocaleDateString()} {new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <p style={{ color: '#1e293b', fontSize: '0.95rem', whiteSpace: 'pre-line', marginTop: '0.5rem' }}>
+                      {c.descripcion}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Modal Nueva Consulta */}
+            {modalConsulta && (
+              <div className="modal-overlay">
+                <div className="modal-content">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                    <h2 style={{ fontSize: '1.25rem', color: '#022E5B', fontWeight: 800 }}>Nueva Consulta</h2>
+                    <button
+                      onClick={() => setModalConsulta(false)}
+                      style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94a3b8' }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {errorConsulta && <div className="alert alert-error">{errorConsulta}</div>}
+
+                  <form onSubmit={handleCrearConsulta}>
+                    <div className="form-group">
+                      <label htmlFor="consulta-desc">Descripción de tu consulta</label>
+                      <textarea
+                        id="consulta-desc"
+                        rows="5"
+                        value={descConsulta}
+                        onChange={(e) => setDescConsulta(e.target.value)}
+                        placeholder="Describí tu consulta de forma clara. Ej: ¿Cómo configuro el VPN corporativo en mi equipo?"
+                        required
+                        minLength={5}
+                      />
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Mínimo 5 caracteres.</span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        style={{ flex: 1 }}
+                        onClick={() => setModalConsulta(false)}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        id="btn-submit-consulta"
+                        type="submit"
+                        className="btn btn-primary"
+                        style={{ flex: 1 }}
+                        disabled={guardandoConsulta}
+                      >
+                        {guardandoConsulta ? 'Enviando…' : 'Enviar Consulta'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
         ) : (
           <div>
             {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
