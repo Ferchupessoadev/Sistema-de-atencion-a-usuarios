@@ -26,17 +26,12 @@ export default function RegisterPage() {
     setErrors({});
 
     try {
-<<<<<<< HEAD
       const user = await register(form);
       if (user.es_tecnico) {
         navigate('/tecnico');
       } else {
         navigate('/usuario');
       }
-=======
-      await register(form);
-      navigate('/usuario');
->>>>>>> main
     } catch (err) {
       // Mostrar errores de validación de Laravel (422)
       const apiErrors = err.response?.data?.errors || {};
