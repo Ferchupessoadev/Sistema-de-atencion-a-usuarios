@@ -10,14 +10,13 @@ export default function RegisterPage() {
     nombre: '',
     correo: '',
     contrasena: '',
-    es_tecnico: false,
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
     setErrors({ ...errors, [name]: '' });
   };
 
@@ -29,9 +28,9 @@ export default function RegisterPage() {
     try {
       const user = await register(form);
       if (user.es_tecnico) {
-        navigate('/tecnico/dashboard');
+        navigate('/tecnico');
       } else {
-        navigate('/usuario/dashboard');
+        navigate('/usuario');
       }
     } catch (err) {
       // Mostrar errores de validación de Laravel (422)
@@ -79,7 +78,7 @@ export default function RegisterPage() {
               onChange={handleChange}
               required
               style={styles.input}
-              placeholder="usuario@ctm.com"
+              placeholder="usuario@empresa.com"
             />
             {errors.correo && <span style={styles.fieldError}>{errors.correo[0]}</span>}
           </div>
@@ -98,20 +97,6 @@ export default function RegisterPage() {
               placeholder="••••••••"
             />
             {errors.contrasena && <span style={styles.fieldError}>{errors.contrasena[0]}</span>}
-          </div>
-
-          <div style={styles.checkboxField}>
-            <input
-              id="es_tecnico"
-              type="checkbox"
-              name="es_tecnico"
-              checked={form.es_tecnico}
-              onChange={handleChange}
-              style={{ width: '16px', height: '16px' }}
-            />
-            <label htmlFor="es_tecnico" style={styles.checkboxLabel}>
-              Soy técnico de soporte (Nivel 1)
-            </label>
           </div>
 
           {errors.general && <p style={styles.error}>{errors.general}</p>}
