@@ -29,15 +29,9 @@ export default function RegisterPage() {
     try {
       const user = await register(form);
       if (user.es_tecnico) {
-<<<<<<< Updated upstream
-        navigate('/tecnico/dashboard');
-      } else {
-        navigate('/usuario/dashboard');
-=======
         navigate('/tecnico');
       } else {
         navigate('/usuario');
->>>>>>> Stashed changes
       }
     } catch (err) {
       // Mostrar errores de validación de Laravel (422)
