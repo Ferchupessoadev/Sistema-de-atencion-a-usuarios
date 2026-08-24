@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import HeaderPublico from '../components/HeaderPublico';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -47,76 +48,79 @@ export default function RegisterPage() {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Sistema de Soluciones</h1>
-        <h2 style={styles.subtitle}>Crear Cuenta</h2>
+    <>
+      <HeaderPublico />
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <h1 style={styles.title}>Sistema de Soluciones</h1>
+          <h2 style={styles.subtitle}>Crear Cuenta</h2>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.field}>
-            <label htmlFor="nombre" style={styles.label}>Nombre completo</label>
-            <input
-              id="nombre"
-              type="text"
-              name="nombre"
-              value={form.nombre}
-              onChange={handleChange}
-              required
-              style={styles.input}
-              placeholder="Juan Pérez"
-            />
-            {errors.nombre && <span style={styles.fieldError}>{errors.nombre[0]}</span>}
-          </div>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={styles.field}>
+              <label htmlFor="nombre" style={styles.label}>Nombre completo</label>
+              <input
+                id="nombre"
+                type="text"
+                name="nombre"
+                value={form.nombre}
+                onChange={handleChange}
+                required
+                style={styles.input}
+                placeholder="Juan Pérez"
+              />
+              {errors.nombre && <span style={styles.fieldError}>{errors.nombre[0]}</span>}
+            </div>
 
-          <div style={styles.field}>
-            <label htmlFor="correo-reg" style={styles.label}>Correo electrónico</label>
-            <input
-              id="correo-reg"
-              type="email"
-              name="correo"
-              value={form.correo}
-              onChange={handleChange}
-              required
-              style={styles.input}
-              placeholder="usuario@empresa.com"
-            />
-            {errors.correo && <span style={styles.fieldError}>{errors.correo[0]}</span>}
-          </div>
+            <div style={styles.field}>
+              <label htmlFor="correo-reg" style={styles.label}>Correo electrónico</label>
+              <input
+                id="correo-reg"
+                type="email"
+                name="correo"
+                value={form.correo}
+                onChange={handleChange}
+                required
+                style={styles.input}
+                placeholder="usuario@empresa.com"
+              />
+              {errors.correo && <span style={styles.fieldError}>{errors.correo[0]}</span>}
+            </div>
 
-          <div style={styles.field}>
-            <label htmlFor="contrasena-reg" style={styles.label}>Contraseña (mín. 6 caracteres)</label>
-            <input
-              id="contrasena-reg"
-              type="password"
-              name="contrasena"
-              value={form.contrasena}
-              onChange={handleChange}
-              required
-              minLength={6}
-              style={styles.input}
-              placeholder="••••••••"
-            />
-            {errors.contrasena && <span style={styles.fieldError}>{errors.contrasena[0]}</span>}
-          </div>
+            <div style={styles.field}>
+              <label htmlFor="contrasena-reg" style={styles.label}>Contraseña (mín. 6 caracteres)</label>
+              <input
+                id="contrasena-reg"
+                type="password"
+                name="contrasena"
+                value={form.contrasena}
+                onChange={handleChange}
+                required
+                minLength={6}
+                style={styles.input}
+                placeholder="••••••••"
+              />
+              {errors.contrasena && <span style={styles.fieldError}>{errors.contrasena[0]}</span>}
+            </div>
 
-          {errors.general && <p style={styles.error}>{errors.general}</p>}
+            {errors.general && <p style={styles.error}>{errors.general}</p>}
 
-          <button
-            id="btn-register"
-            type="submit"
-            disabled={loading}
-            style={{ ...styles.button, opacity: loading ? 0.7 : 1 }}
-          >
-            {loading ? 'Registrando...' : 'Crear Cuenta'}
-          </button>
-        </form>
+            <button
+              id="btn-register"
+              type="submit"
+              disabled={loading}
+              style={{ ...styles.button, opacity: loading ? 0.7 : 1 }}
+            >
+              {loading ? 'Registrando...' : 'Crear Cuenta'}
+            </button>
+          </form>
 
-        <p style={styles.loginLink}>
-          ¿Ya tenés cuenta?{' '}
-          <Link to="/login" style={styles.link}>Iniciar sesión</Link>
-        </p>
+          <p style={styles.loginLink}>
+            ¿Ya tenés cuenta?{' '}
+            <Link to="/login" style={styles.link}>Iniciar sesión</Link>
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
