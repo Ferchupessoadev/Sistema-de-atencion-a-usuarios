@@ -47,6 +47,16 @@ export default function PortalResponsiveStyles() {
         z-index: 1;
       }
 
+      .portal-voto-btn.active {
+        box-shadow: 0 0 0 2px currentColor;
+      }
+
+      .portal-voto-actual {
+        font-size: 0.75rem;
+        color: #334155;
+        font-weight: 700;
+      }
+
       @media (max-width: 700px) {
         .portal-header-inner {
           align-items: stretch;

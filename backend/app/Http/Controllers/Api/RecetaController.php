@@ -32,8 +32,21 @@ class RecetaController extends Controller
         }
 
         $recetas = $query->orderBy('usos', 'desc')
-                         ->orderBy('votos_util', 'desc')
+                         ->orderByDesc(function ($query) {
+                             $query->selectRaw('count(*)')
+                                   ->from('votos_recetas')
+                                   ->whereColumn('votos_recetas.id_receta', 'recetas.id')
+                                   ->where('tipo', 'UTIL');
+                         })
                          ->get();
+
+        $usuarioId = auth('sanctum')->id();
+        $recetas->each(function (Receta $receta) use ($usuarioId) {
+            $receta->setAttribute(
+                'mi_voto',
+                $usuarioId ? $receta->votos()->where('id_usuario', $usuarioId)->value('tipo') : null
+            );
+        });
 
         return response()->json($recetas);
     }
@@ -110,13 +123,14 @@ class RecetaController extends Controller
         $usuarioId = $request->user()->id;
 
         $receta->registrarVoto($usuarioId, $request->tipo);
+        $receta->setAttribute('mi_voto', $request->tipo);
 
         return response()->json([
             'message'       => '¡Gracias por tu valoración!',
-            'votos_util'    => $receta->votos_util,
-            'votos_no_util' => $receta->votos_no_util,
+            'votos_util'    => $receta->votosUtil(),
+            'votos_no_util' => $receta->votosNoUtil(),
             'mi_voto'       => $request->tipo,
-            'receta'        => $receta->fresh()->load('categoria'),
+            'receta'        => $receta->fresh()->load('categoria')->setAttribute('mi_voto', $request->tipo),
         ]);
     }
 
