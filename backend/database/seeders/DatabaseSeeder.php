@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Boceto;
 use App\Models\Categoria;
-use App\Models\Consulta;
 use App\Models\Incidente;
 use App\Models\Receta;
 use App\Models\User;
@@ -231,17 +230,6 @@ class DatabaseSeeder extends Seeder
             $recetasCreadas[] = Receta::create($r);
         }
 
-        // ── 4. Consultas y Solicitudes ──────────────────────────────────────────
-
-        $con1 = Consulta::create([
-            'descripcion' => '¿Dónde descargo la aplicación de VPN para trabajar de forma remota?',
-            'id_usuario'  => $uMaria->id,
-        ]);
-
-        $con2 = Consulta::create([
-            'descripcion' => 'La impresora del sector compras solicita cambio de tóner urgente.',
-            'id_usuario'  => $uLucia->id,
-        ]);
 
         // ── 5. Incidentes Realistas con Internos ────────────────────────────────
 
@@ -292,7 +280,6 @@ class DatabaseSeeder extends Seeder
             'id_tecnico'   => $tecnicoSistemas->id,
             'id_categoria' => $cK2B->id,
             'id_receta'    => $recetasCreadas[1]->id,
-            'id_consulta'  => $con1->id,
         ]);
 
         // Incidente 5: EN CURSO - Telefonía

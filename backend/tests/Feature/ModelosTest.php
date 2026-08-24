@@ -48,17 +48,6 @@ class ModelosTest extends TestCase
     }
 
     /** @test */
-    public function test_se_puede_crear_consulta(): void
-    {
-        $usuario = $this->crearUsuario();
-        $consulta = Consulta::create([
-            'descripcion' => 'Mi PC no enciende.',
-            'id_usuario'  => $usuario->id,
-        ]);
-        $this->assertDatabaseHas('consultas', ['descripcion' => 'Mi PC no enciende.']);
-    }
-
-    /** @test */
     public function test_se_puede_crear_receta(): void
     {
         $cat = $this->crearCategoria();
@@ -214,24 +203,6 @@ class ModelosTest extends TestCase
         $this->assertEquals($receta->id, $inc->receta->id);
         $this->assertTrue($inc->estaResuelto());
         $this->assertNotNull($inc->resolucion);
-    }
-
-    /** @test */
-    public function test_consulta_vinculada_a_incidente(): void
-    {
-        $usuario  = $this->crearUsuario();
-        $cat      = $this->crearCategoria();
-        $consulta = Consulta::create(['descripcion' => 'Pregunta inicial', 'id_usuario' => $usuario->id]);
-
-        $inc = Incidente::create([
-            'descripcion'  => 'Derivado de consulta',
-            'id_usuario'   => $usuario->id,
-            'id_consulta'  => $consulta->id,
-            'id_categoria' => $cat->id,
-        ]);
-
-        $this->assertEquals($consulta->id, $inc->consulta->id);
-        $this->assertCount(1, $consulta->incidentes);
     }
 
     // ─── Tests: Helper RN-005 ─────────────────────────────────────────────────

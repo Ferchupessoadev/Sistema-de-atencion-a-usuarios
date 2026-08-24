@@ -23,7 +23,7 @@ class IncidenteController extends Controller
         $user = $request->user();
         Gate::authorize('viewAny', Incidente::class);
 
-        $query = Incidente::with(['usuario', 'tecnico', 'categoria', 'receta', 'consulta']);
+        $query = Incidente::with(['usuario', 'tecnico', 'categoria', 'receta']);
 
         if (!$user->HasRole(['tecnico'])) {
             $query->where('id_usuario', $user->id);
@@ -61,7 +61,7 @@ class IncidenteController extends Controller
     public function show($id, Request $request): JsonResponse
     {
         $user = $request->user();
-        $incidente = Incidente::with(['usuario', 'tecnico', 'categoria', 'receta', 'consulta'])->findOrFail($id);
+        $incidente = Incidente::with(['usuario', 'tecnico', 'categoria', 'receta'])->findOrFail($id);
         Gate::authorize('view', $incidente);
 
         return response()->json($incidente);
@@ -121,7 +121,6 @@ class IncidenteController extends Controller
             'interno'      => $validated['interno'] ?? ($targetUser->interno ?? null),
             'prioridad'    => $validated['prioridad'] ?? Incidente::PRIORIDAD_MEDIA,
             'estado'       => Incidente::ESTADO_ABIERTO,
-            'id_consulta'  => $validated['id_consulta'] ?? null,
             'id_tecnico'   => $user->HasRole(['tecnico']) ? ($validated['id_tecnico'] ?? null) : null,
         ]);
 
@@ -231,7 +230,7 @@ class IncidenteController extends Controller
 
         return response()->json([
             'message'   => 'Incidente actualizado correctamente.',
-            'incidente' => $incidente->fresh()->load(['usuario', 'tecnico', 'categoria', 'receta', 'consulta']),
+            'incidente' => $incidente->fresh()->load(['usuario', 'tecnico', 'categoria', 'receta']),
         ]);
     }
 

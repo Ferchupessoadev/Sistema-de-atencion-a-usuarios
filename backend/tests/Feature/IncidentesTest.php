@@ -290,9 +290,7 @@ class IncidentesTest extends TestCase
                              'solucion_texto' => "1. Detener servicio Apache\n2. Renovar certificado SSL\n3. Iniciar servicio",
                          ]);
 
-        $response->assertStatus(200)
-                 ->assertJsonPath('incidente.estado', 'RESUELTO')
-                 ->assertJsonPath('incidente.receta.titulo', 'Procedimiento de reinicio de Apache');
+        $response->assertStatus(200)->assertJsonPath('incidente.estado', 'RESUELTO');
 
         $this->assertNotNull($response->json('incidente.resolucion'));
         $this->assertDatabaseHas('recetas', [

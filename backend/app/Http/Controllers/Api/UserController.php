@@ -40,7 +40,7 @@ class UserController extends Controller
                 'id'         => $user->id,
                 'nombre'     => $user->nombre,
                 'correo'     => $user->correo,
-                'es_tecnico' => $user->HasRole(['tecnico']),
+                'es_tecnico' => $user->hasRole(['tecnico']),
             ],
         ], 201);
     }
@@ -74,7 +74,8 @@ class UserController extends Controller
                 'id'         => $user->id,
                 'nombre'     => $user->nombre,
                 'correo'     => $user->correo,
-                'es_tecnico' => $user->HasRole(['tecnico']),
+                'es_tecnico' => $user->hasRole(['tecnico']),
+                'es_representante_de_area' => $user->hasRole(['representante_de_area']),
             ],
         ]);
     }
@@ -106,7 +107,8 @@ class UserController extends Controller
             'nombre'     => $user->nombre,
             'correo'     => $user->correo,
             'interno'    => $user->interno,
-            'es_tecnico' => $user->HasRole(['tecnico']),
+            'es_tecnico' => $user->hasRole(['tecnico']),
+            'es_representante_de_area' => $user->hasRole(['representante_de_area']),
         ]);
     }
 }

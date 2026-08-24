@@ -38,9 +38,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Categorías
     Route::post('/categorias', [CategoriaController::class, 'store']);
 
-    // Consultas de usuarios
-    Route::get('/consultas',  [ConsultaController::class, 'index']);
-    Route::post('/consultas', [ConsultaController::class, 'store']);
 
     // Base de Conocimientos - Recetas (Fase 4 y Mejoras)
     Route::post('/recetas',            [RecetaController::class, 'store']);

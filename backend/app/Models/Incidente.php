@@ -16,7 +16,6 @@ class Incidente extends Model
         'resolucion',
         'interno',
         'id_usuario',
-        'id_consulta',
         'id_tecnico',
         'id_categoria',
         'id_receta',
@@ -59,11 +58,6 @@ class Incidente extends Model
         return $this->belongsTo(User::class, 'id_tecnico');
     }
 
-    /** Consulta que derivó en el incidente (nullable) */
-    public function consulta(): BelongsTo
-    {
-        return $this->belongsTo(Consulta::class, 'id_consulta');
-    }
 
     /** Categoría del incidente */
     public function categoria(): BelongsTo
