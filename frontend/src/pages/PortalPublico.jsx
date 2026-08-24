@@ -183,7 +183,7 @@ export default function PortalPublico() {
                       type="button"
                       disabled={votandoId === r.id || !isAuthenticated}
                       onClick={() => handleVotar(r.id, 'UTIL')}
-                      className="portal-voto-btn portal-voto-util"
+                      className={`portal-voto-btn portal-voto-util ${r.mi_voto === 'UTIL' ? 'active' : ''}`}
                       title={isAuthenticated ? 'Esta solución me fue útil' : 'Iniciá sesión para votar'}
                     >
                       👍 {r.votos_util || 0}
@@ -192,12 +192,18 @@ export default function PortalPublico() {
                       type="button"
                       disabled={votandoId === r.id || !isAuthenticated}
                       onClick={() => handleVotar(r.id, 'NO_UTIL')}
-                      className="portal-voto-btn portal-voto-no-util"
+                      className={`portal-voto-btn portal-voto-no-util ${r.mi_voto === 'NO_UTIL' ? 'active' : ''}`}
                       title={isAuthenticated ? 'No me sirvió esta solución' : 'Iniciá sesión para votar'}
                     >
                       👎 {r.votos_no_util || 0}
                     </button>
                   </div>
+
+                  {r.mi_voto && (
+                    <span className="portal-voto-actual">
+                      Tu voto: {r.mi_voto === 'UTIL' ? 'Útil 👍' : 'No útil 👎'}
+                    </span>
+                  )}
 
                   {mensajeVoto[r.id] && (
                     <span style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 600 }}>
