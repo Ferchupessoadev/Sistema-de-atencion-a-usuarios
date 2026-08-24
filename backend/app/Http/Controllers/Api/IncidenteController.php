@@ -155,6 +155,12 @@ class IncidenteController extends Controller
 
             $nuevoEstado = $request->input('estado', $incidente->estado);
 
+            if ($nuevoEstado === Incidente::ESTADO_RESUELTO && $incidente->id_tecnico !== $user->id) {
+                return response()->json([
+                    'message' => 'Debes tomar el incidente antes de poder resolverlo.',
+                ], 403);
+            }
+
             // RN-002: Si se marca como RESUELTO, verificar que haya receta o solución explicada
             if ($nuevoEstado === Incidente::ESTADO_RESUELTO) {
                 $tieneReceta   = $request->filled('id_receta') || $incidente->id_receta;

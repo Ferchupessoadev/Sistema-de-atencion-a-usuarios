@@ -70,6 +70,31 @@ export default function DashboardTecnico() {
     navigate('/login', { replace: true });
   };
 
+  const handleTomarIncidente = async (incidente) => {
+    try {
+      await api.put(`/incidentes/${incidente.id}`, {
+        id_tecnico: user.id,
+        estado: 'EN_CURSO',
+      });
+      setMensajeExito(`Te has asignado el incidente #${incidente.id}.`);
+      await cargarDatos();
+      setTimeout(() => setMensajeExito(''), 4000);
+    } catch (err) {
+      setErrorAccion(err.response?.data?.message || 'Error al tomar el incidente.');
+    }
+  };
+
+  const handleCambiarPrioridad = async (incidente, nuevaPrioridad) => {
+    try {
+      await api.put(`/incidentes/${incidente.id}`, { prioridad: nuevaPrioridad });
+      setMensajeExito(`Prioridad del incidente #${incidente.id} actualizada a ${nuevaPrioridad}.`);
+      await cargarDatos();
+      setTimeout(() => setMensajeExito(''), 4000);
+    } catch (err) {
+      setErrorAccion(err.response?.data?.message || 'Error al cambiar la prioridad.');
+    }
+  };
+
   // Exportar reporte de incidentes en CSV
   const handleExportarReporte = async () => {
     try {
@@ -341,13 +366,23 @@ export default function DashboardTecnico() {
                     <span>🛠️ Responsable: <strong>{inc.tecnico ? inc.tecnico.nombre : '⚠️ Sin asignar'}</strong></span>
                   </div>
 
-                    <div className="dashboard-action-row" style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-                    <button
-                      className="btn btn-success btn-sm"
-                      onClick={() => navigate(`/tecnico/incidentes/${inc.id}/resolver`)}
-                    >
-                      ✅ Resolver Caso Urgente
-                    </button>
+                  <div className="dashboard-action-row" style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                    {!inc.tecnico && (
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleTomarIncidente(inc)}
+                      >
+                        ✋ Tomar Caso
+                      </button>
+                    )}
+                    {inc.tecnico?.id === user.id && (
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={() => navigate(`/tecnico/incidentes/${inc.id}/resolver`)}
+                      >
+                        ✅ Resolver Caso Urgente
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -486,7 +521,7 @@ export default function DashboardTecnico() {
                     {/* Acciones del técnico */}
                     {inc.estado !== 'RESUELTO' && (
                       <div className="dashboard-action-row" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                        {inc.tecnico?.id !== user.id && (
+                        {!inc.tecnico && (
                           <button
                             className="btn btn-secondary btn-sm"
                             onClick={() => handleTomarIncidente(inc)}
@@ -495,12 +530,14 @@ export default function DashboardTecnico() {
                           </button>
                         )}
 
-                        <button
-                          className="btn btn-success btn-sm"
-                          onClick={() => navigate(`/tecnico/incidentes/${inc.id}/resolver`)}
-                        >
-                          ✅ Resolver
-                        </button>
+                        {inc.tecnico?.id === user.id && (
+                          <button
+                            className="btn btn-success btn-sm"
+                            onClick={() => navigate(`/tecnico/incidentes/${inc.id}/resolver`)}
+                          >
+                            ✅ Resolver
+                          </button>
+                        )}
 
                         <button
                           className="btn btn-warning btn-sm"
