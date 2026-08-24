@@ -126,6 +126,14 @@ export default function DashboardUsuario() {
           >
             🏠 Portal
           </button>
+          <button
+            id="btn-mi-perfil-usuario"
+            className="btn btn-outline-header btn-sm"
+            onClick={() => navigate('/perfil')}
+            title="Mi Perfil"
+          >
+            👤 Mi Perfil
+          </button>
           <NotificationBell />
           <span className="badge badge-usuario" style={{ background: '#CCFBF1', color: '#0F766E' }}>Usuario</span>
           <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
