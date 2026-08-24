@@ -7,7 +7,6 @@ use App\Models\Categoria;
 use App\Models\Incidente;
 use App\Models\Receta;
 use App\Models\User;
-use CategoriasSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
