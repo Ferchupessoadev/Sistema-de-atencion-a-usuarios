@@ -7,6 +7,7 @@ use App\Models\Categoria;
 use App\Models\Incidente;
 use App\Models\Receta;
 use App\Models\User;
+use CategoriasSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,7 +15,29 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call(RolesAndPermissionsSeeder::class);
+        $this->call([RolesAndPermissionsSeeder::class, CategoriasSeeder::class]);
+
+        $categorias = Categoria::whereIn('nombre', [
+            'AICO - Atención a Usuarios',
+            'Computadora y Hardware',
+            'Impresoras y Fotocopiadoras',
+            'Redes e Internet',
+            'WIFI y Conectividad',
+            'Telefonía e Internos',
+            'K2B y Sistemas ERP',
+            'Software y Aplicaciones',
+            'Accesos y Seguridad',
+        ])->get()->keyBy('nombre');
+
+        $cAICO = $categorias->get('AICO - Atención a Usuarios');
+        $cComputadora = $categorias->get('Computadora y Hardware');
+        $cImpresora = $categorias->get('Impresoras y Fotocopiadoras');
+        $cRedes = $categorias->get('Redes e Internet');
+        $cWIFI = $categorias->get('WIFI y Conectividad');
+        $cTelefonia = $categorias->get('Telefonía e Internos');
+        $cK2B = $categorias->get('K2B y Sistemas ERP');
+        $cSoftware = $categorias->get('Software y Aplicaciones');
+        $cAccesos = $categorias->get('Accesos y Seguridad');
 
         // ── 1. Usuarios y Especialistas de CTM ──────────────────────────────────
 
@@ -100,17 +123,6 @@ class DatabaseSeeder extends Seeder
         ]);
         $uAna->assignRole('default');
 
-        // ── 2. Categorías Oficiales ─────────────────────────────────────────────
-
-        $cAICO        = Categoria::create(['nombre' => 'AICO - Atención a Usuarios']);
-        $cComputadora = Categoria::create(['nombre' => 'Computadora y Hardware']);
-        $cImpresora   = Categoria::create(['nombre' => 'Impresoras y Fotocopiadoras']);
-        $cRedes       = Categoria::create(['nombre' => 'Redes e Internet']);
-        $cWIFI        = Categoria::create(['nombre' => 'WIFI y Conectividad']);
-        $cTelefonia   = Categoria::create(['nombre' => 'Telefonía e Internos']);
-        $cK2B         = Categoria::create(['nombre' => 'K2B y Sistemas ERP']);
-        $cSoftware    = Categoria::create(['nombre' => 'Software y Aplicaciones']);
-        $cAccesos     = Categoria::create(['nombre' => 'Accesos y Seguridad']);
 
         // ── 3. Recetas Oficiales con Keywords y Votos de Utilidad ───────────────
 
