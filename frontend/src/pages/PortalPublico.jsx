@@ -177,8 +177,9 @@ export default function PortalPublico() {
 
                 {/* Footer: Votación */}
                 <div className="portal-receta-footer">
-                  <div className="portal-receta-votos">
-                    <span style={{ fontSize: '0.75rem', color: '#64748B' }}>¿Te sirvió?</span>
+                  <div className="portal-receta-vote-area">
+                    <span className="portal-receta-vote-label">¿Te sirvió esta solución?</span>
+                    <div className="portal-receta-votos" role="group" aria-label="Valorar receta">
                     <button
                       type="button"
                       disabled={votandoId === r.id || !isAuthenticated}
@@ -186,7 +187,11 @@ export default function PortalPublico() {
                       className={`portal-voto-btn portal-voto-util ${r.mi_voto === 'UTIL' ? 'active' : ''}`}
                       title={isAuthenticated ? 'Esta solución me fue útil' : 'Iniciá sesión para votar'}
                     >
-                      👍 {r.votos_util || 0}
+                      <span className="portal-voto-icon" aria-hidden="true">👍</span>
+                      <span className="portal-voto-copy">
+                        <span>Útil</span>
+                        <strong>{r.votos_util || 0}</strong>
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -195,13 +200,18 @@ export default function PortalPublico() {
                       className={`portal-voto-btn portal-voto-no-util ${r.mi_voto === 'NO_UTIL' ? 'active' : ''}`}
                       title={isAuthenticated ? 'No me sirvió esta solución' : 'Iniciá sesión para votar'}
                     >
-                      👎 {r.votos_no_util || 0}
+                      <span className="portal-voto-icon" aria-hidden="true">👎</span>
+                      <span className="portal-voto-copy">
+                        <span>No útil</span>
+                        <strong>{r.votos_no_util || 0}</strong>
+                      </span>
                     </button>
+                    </div>
                   </div>
 
                   {r.mi_voto && (
                     <span className="portal-voto-actual">
-                      Tu voto: {r.mi_voto === 'UTIL' ? 'Útil 👍' : 'No útil 👎'}
+                      Tu voto: <strong>{r.mi_voto === 'UTIL' ? 'Útil 👍' : 'No útil 👎'}</strong>
                     </span>
                   )}
 

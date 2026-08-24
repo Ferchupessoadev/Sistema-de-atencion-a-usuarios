@@ -254,52 +254,44 @@ export default function RecetasManager() {
 
               <div>
                 {/* Sección de Votación / Utilidad */}
-                <div style={{ marginTop: '0.85rem', paddingTop: '0.65rem', borderTop: '1px dashed #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748B' }}>¿Te sirvió?</span>
+                <div className="portal-receta-footer">
+                  <div className="portal-receta-vote-area">
+                    <span className="portal-receta-vote-label">¿Te sirvió esta solución?</span>
+                    <div className="portal-receta-votos" role="group" aria-label="Valorar receta">
                     <button
                       type="button"
                       disabled={votandoId === r.id}
                       onClick={() => handleVotar(r.id, 'UTIL')}
-                      style={{
-                        background: '#F0FDF4',
-                        border: '1px solid #BBF7D0',
-                        color: '#166534',
-                        borderRadius: '6px',
-                        padding: '0.2rem 0.5rem',
-                        fontSize: '0.75rem',
-                        cursor: 'pointer',
-                        fontWeight: 700,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                      }}
+                      className={`portal-voto-btn portal-voto-util ${r.mi_voto === 'UTIL' ? 'active' : ''}`}
                       title="Esta solución me fue útil"
                     >
-                      👍 {r.votos_util || 0}
+                      <span className="portal-voto-icon" aria-hidden="true">👍</span>
+                      <span className="portal-voto-copy">
+                        <span>Útil</span>
+                        <strong>{r.votos_util || 0}</strong>
+                      </span>
                     </button>
                     <button
                       type="button"
                       disabled={votandoId === r.id}
                       onClick={() => handleVotar(r.id, 'NO_UTIL')}
-                      style={{
-                        background: '#FEF2F2',
-                        border: '1px solid #FECACA',
-                        color: '#991B1B',
-                        borderRadius: '6px',
-                        padding: '0.2rem 0.5rem',
-                        fontSize: '0.75rem',
-                        cursor: 'pointer',
-                        fontWeight: 700,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                      }}
+                      className={`portal-voto-btn portal-voto-no-util ${r.mi_voto === 'NO_UTIL' ? 'active' : ''}`}
                       title="No me sirvió esta solución"
                     >
-                      👎 {r.votos_no_util || 0}
+                      <span className="portal-voto-icon" aria-hidden="true">👎</span>
+                      <span className="portal-voto-copy">
+                        <span>No útil</span>
+                        <strong>{r.votos_no_util || 0}</strong>
+                      </span>
                     </button>
+                    </div>
                   </div>
+
+                  {r.mi_voto && (
+                    <span className="portal-voto-actual">
+                      Tu voto: <strong>{r.mi_voto === 'UTIL' ? 'Útil 👍' : 'No útil 👎'}</strong>
+                    </span>
+                  )}
 
                   {mensajeVoto[r.id] && (
                     <span style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 600 }}>
