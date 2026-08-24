@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreIncidenteRequest;
 use App\Models\Incidente;
 use App\Models\Receta;
 use App\Models\User;
@@ -73,45 +74,13 @@ class IncidenteController extends Controller
      * RN-001: Si es_tecnico, debe incluir id_categoria y prioridad obligatoriamente.
      * RN-005: Bloquea si el usuario tiene >= 3 incidentes en estado ABIERTO.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreIncidenteRequest $request): JsonResponse
     {
         $user = $request->user();
         Gate::authorize('create', Incidente::class);
+        $validated = $request->validated();
 
-        // Determinar el usuario titular del incidente
         $targetUserId = $user->id;
-        if ($user->hasRole(['tecnico']) && $request->filled('id_usuario')) {
-            $targetUserId = $request->id_usuario;
-        }
-
-        // RN-005: Validar que el usuario no supere el límite de 3 incidentes ABIERTOS
-        $targetUser = User::findOrFail($targetUserId);
-        if ($targetUser->contarIncidentesAbiertos() >= 3) {
-            return response()->json([
-                'message' => 'El usuario ya tiene 3 o más incidentes abiertos. Debe esperar a que sean resueltos antes de abrir uno nuevo.',
-                'errors'  => [
-                    'id_usuario' => ['Límite alcanzado: no se permiten más de 3 incidentes en estado ABIERTO simultáneamente.'],
-                ],
-            ], 422);
-        }
-
-        // RN-001: Reglas de validación condicionales según el rol
-        $rules = [
-            'descripcion'  => 'required|string|min:5|max:2000',
-            'id_categoria' => 'required|exists:categorias,id',
-            'interno'      => 'nullable|string|max:20',
-        ];
-
-        if ($user->hasRole(['tecnico'])) {
-            // Técnicos deben especificar obligatoriamente prioridad y categoría (RN-001)
-            $rules['prioridad']  = 'required|in:BAJA,MEDIA,ALTA';
-            $rules['id_usuario'] = 'sometimes|exists:users,id';
-            $rules['id_tecnico'] = 'nullable|exists:users,id';
-        } else {
-            $rules['prioridad']  = 'sometimes|in:BAJA,MEDIA,ALTA';
-        }
-
-        $validated = $request->validate($rules);
 
         $incidente = Incidente::create([
             'descripcion'  => $validated['descripcion'],
