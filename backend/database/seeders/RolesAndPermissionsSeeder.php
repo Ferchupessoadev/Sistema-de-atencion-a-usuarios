@@ -13,6 +13,7 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
+        $admin = Role::findOrCreate('admin', 'web');
         $tecnico = Role::findOrCreate('tecnico', 'web');
         $representante_de_area = Role::findOrCreate('representante_de_area', 'web');
         $usuario_normal = Role::findOrCreate('default', 'web');
@@ -61,6 +62,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'recetas.ver',
             'categorias.ver',
         ]);
+
+        // Admin
+        $admin->syncPermissions($permissionModels);
+
         $this->command->info('Roles y permisos iniciales creados correctamente.');
     }
 

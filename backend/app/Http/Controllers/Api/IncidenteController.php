@@ -99,7 +99,6 @@ class IncidenteController extends Controller
         $rules = [
             'descripcion'  => 'required|string|min:5|max:2000',
             'id_categoria' => 'required|exists:categorias,id',
-            'id_consulta'  => 'nullable|exists:consultas,id',
             'interno'      => 'nullable|string|max:20',
         ];
 
