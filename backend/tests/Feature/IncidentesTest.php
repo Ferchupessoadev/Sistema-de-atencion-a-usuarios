@@ -225,6 +225,7 @@ class IncidentesTest extends TestCase
             'descripcion'  => 'Problema pendiente',
             'estado'       => 'EN_CURSO',
             'id_usuario'   => $usuario->id,
+            'id_tecnico'   => $tecnico->id,
             'id_categoria' => $cat->id,
         ]);
 
@@ -236,6 +237,28 @@ class IncidentesTest extends TestCase
 
         $response->assertStatus(422)
                  ->assertJsonValidationErrors(['resolucion']);
+    }
+
+    /** @test */
+    public function test_tecnico_debe_tomar_incidente_antes_de_resolverlo(): void
+    {
+        $tecnico = $this->crearUsuario(true);
+        $usuario = $this->crearUsuario(false);
+        $cat = $this->crearCategoria();
+        $inc = Incidente::create([
+            'descripcion' => 'Problema sin asignar.',
+            'estado' => 'EN_CURSO',
+            'id_usuario' => $usuario->id,
+            'id_categoria' => $cat->id,
+        ]);
+
+        $this->actingAs($tecnico, 'sanctum')
+            ->putJson("/api/incidentes/{$inc->id}", [
+                'estado' => 'RESUELTO',
+                'solucion_texto' => 'Se aplicó una solución técnica.',
+            ])
+            ->assertForbidden()
+            ->assertJsonPath('message', 'Debes tomar el incidente antes de poder resolverlo.');
     }
 
     /** @test */
@@ -252,6 +275,7 @@ class IncidentesTest extends TestCase
             'descripcion'  => 'Problema con solución conocida',
             'estado'       => 'EN_CURSO',
             'id_usuario'   => $usuario->id,
+            'id_tecnico'   => $tecnico->id,
             'id_categoria' => $cat->id,
         ]);
 
@@ -280,6 +304,7 @@ class IncidentesTest extends TestCase
             'descripcion'  => 'Problema resuelto manualmente',
             'estado'       => 'EN_CURSO',
             'id_usuario'   => $usuario->id,
+            'id_tecnico'   => $tecnico->id,
             'id_categoria' => $cat->id,
         ]);
 
