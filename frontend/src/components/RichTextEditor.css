@@ -1,0 +1,190 @@
+/* ═══════════════════════════════════════════════════════════════
+   TipTap Rich Text Editor & Viewer Styles
+   ═══════════════════════════════════════════════════════════════ */
+
+.rich-editor-container {
+  border: 1.5px solid #CBD5E1;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.rich-editor-container:focus-within {
+  border-color: var(--c-celeste);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+/* Toolbar */
+.rich-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.5rem;
+  background-color: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.rich-editor-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 0.4rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.rich-editor-btn:hover:not(:disabled) {
+  background-color: #E2E8F0;
+  color: #0F172A;
+}
+
+.rich-editor-btn.is-active {
+  background-color: var(--c-navy);
+  color: #FFFFFF;
+  border-color: var(--c-navy);
+}
+
+.rich-editor-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.rich-editor-divider {
+  width: 1px;
+  height: 20px;
+  background-color: #CBD5E1;
+  margin: 0 0.2rem;
+}
+
+/* Editor Content Area */
+.rich-editor-content {
+  padding: 0.85rem 1rem;
+  outline: none;
+  font-size: 0.925rem;
+  color: #0F172A;
+  line-height: 1.6;
+  min-height: 150px;
+  cursor: text;
+}
+
+.rich-editor-content .ProseMirror {
+  outline: none;
+  min-height: 140px;
+}
+
+.rich-editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #94A3B8;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Typography Inside Editor & Viewer */
+.rich-editor-content p,
+.rich-text-view p {
+  margin-bottom: 0.6rem;
+}
+
+.rich-editor-content p:last-child,
+.rich-text-view p:last-child {
+  margin-bottom: 0;
+}
+
+.rich-editor-content h2,
+.rich-text-view h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--c-navy);
+  margin-top: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.rich-editor-content h3,
+.rich-text-view h3 {
+  font-size: 1.025rem;
+  font-weight: 700;
+  color: var(--c-navy-light);
+  margin-top: 0.6rem;
+  margin-bottom: 0.35rem;
+}
+
+.rich-editor-content ul,
+.rich-text-view ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.rich-editor-content ol,
+.rich-text-view ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.rich-editor-content li,
+.rich-text-view li {
+  margin-bottom: 0.25rem;
+}
+
+.rich-editor-content blockquote,
+.rich-text-view blockquote {
+  border-left: 3px solid var(--c-celeste);
+  padding-left: 0.75rem;
+  margin: 0.6rem 0;
+  color: #475569;
+  font-style: italic;
+  background-color: #F8FAFC;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0 6px 6px 0;
+}
+
+.rich-editor-content pre,
+.rich-text-view pre {
+  background: #0F172A;
+  color: #F8FAFC;
+  font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.825rem;
+  overflow-x: auto;
+  margin: 0.6rem 0;
+}
+
+.rich-editor-content code,
+.rich-text-view code {
+  background-color: #F1F5F9;
+  color: #BE185D;
+  font-family: Consolas, Monaco, monospace;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.rich-editor-content pre code,
+.rich-text-view pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Rich Text Viewer Container */
+.rich-text-view {
+  font-size: 0.875rem;
+  color: #334155;
+  line-height: 1.55;
+}
