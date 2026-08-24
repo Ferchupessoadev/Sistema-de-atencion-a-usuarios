@@ -42,7 +42,7 @@ class RecetaController extends Controller
      * GET /api/recetas/{id}
      * Ver detalle de una receta.
      */
-    public function show($id): JsonResponse
+    public function show(int $id): JsonResponse
     {
         $receta = Receta::with(['categoria', 'incidentes'])->findOrFail($id);
 
@@ -76,7 +76,7 @@ class RecetaController extends Controller
      * PUT /api/recetas/{id}
      * Actualizar una receta (solo técnicos).
      */
-    public function update($id, Request $request): JsonResponse
+    public function update(int $id, Request $request): JsonResponse
     {
         $receta = Receta::findOrFail($id);
         Gate::authorize('update', $receta);
@@ -100,7 +100,7 @@ class RecetaController extends Controller
      * POST /api/recetas/{id}/votar
      * Permite a usuarios o técnicos calificar si la solución fue útil o no (registra voto por usuario).
      */
-    public function votar($id, Request $request): JsonResponse
+    public function votar(int $id, Request $request): JsonResponse
     {
         $request->validate([
             'tipo' => 'required|in:UTIL,NO_UTIL',
@@ -124,7 +124,7 @@ class RecetaController extends Controller
      * DELETE /api/recetas/{id}
      * Eliminar una receta (solo técnicos).
      */
-    public function destroy($id, Request $request): JsonResponse
+    public function destroy(int $id, Request $request): JsonResponse
     {
         $receta = Receta::findOrFail($id);
         Gate::authorize('delete', $receta);

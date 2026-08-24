@@ -58,7 +58,7 @@ class IncidenteController extends Controller
      * GET /api/incidentes/{id}
      * Ver el detalle de un incidente específico.
      */
-    public function show($id, Request $request): JsonResponse
+    public function show(int $id, Request $request): JsonResponse
     {
         $user = $request->user();
         $incidente = Incidente::with(['usuario', 'tecnico', 'categoria', 'receta'])->findOrFail($id);
@@ -136,7 +136,7 @@ class IncidenteController extends Controller
      * Actualizar datos, estado o técnico asignado.
      * RN-002: Requiere solución (texto o id_receta) para pasar a estado RESUELTO.
      */
-    public function update($id, Request $request): JsonResponse
+    public function update(int $id, Request $request): JsonResponse
     {
         $user = $request->user();
         $incidente = Incidente::findOrFail($id);
@@ -238,7 +238,7 @@ class IncidenteController extends Controller
      * PUT /api/incidentes/{id}/derivar
      * RN-003: Derivar incidente a otro técnico o unidad especializada y notificar al usuario.
      */
-    public function derivar($id, Request $request): JsonResponse
+    public function derivar(int $id, Request $request): JsonResponse
     {
         $incidente = Incidente::with('usuario')->findOrFail($id);
         Gate::authorize('derive', $incidente);
