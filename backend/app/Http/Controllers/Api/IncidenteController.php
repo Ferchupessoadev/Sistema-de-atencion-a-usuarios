@@ -88,7 +88,7 @@ class IncidenteController extends Controller
         $targetUser = User::findOrFail($targetUserId);
         if ($targetUser->contarIncidentesAbiertos() >= 3) {
             return response()->json([
-                'message' => 'El usuario ya tiene 3 o más incidentes abiertos. Debe resolverlos antes de abrir uno nuevo (RN-005).',
+                'message' => 'El usuario ya tiene 3 o más incidentes abiertos. Debe esperar a que sean resueltos antes de abrir uno nuevo.',
                 'errors'  => [
                     'id_usuario' => ['Límite alcanzado: no se permiten más de 3 incidentes en estado ABIERTO simultáneamente.'],
                 ],
@@ -162,7 +162,7 @@ class IncidenteController extends Controller
 
                 if (! $tieneReceta && ! $tieneSolucion) {
                     return response()->json([
-                        'message' => 'Para cerrar/resolver el incidente se requiere indicar una receta o detallar una solución (RN-002).',
+                        'message' => 'Para cerrar/resolver el incidente se requiere indicar una receta o detallar una solución.',
                         'errors'  => [
                             'resolucion' => ['Debe asociar una receta existente o ingresar una solución detallada para marcar el incidente como RESUELTO.'],
                         ],
@@ -272,7 +272,7 @@ class IncidenteController extends Controller
 
 
         return response()->json([
-            'message'      => 'Incidente derivado correctamente. Notificación enviada al usuario (RN-003).',
+            'message'      => 'Incidente derivado correctamente. Notificación enviada al usuario.',
             'incidente'    => $incidente->fresh()->load(['usuario', 'tecnico', 'categoria', 'receta']),
             'notificacion' => $notificacion,
         ]);

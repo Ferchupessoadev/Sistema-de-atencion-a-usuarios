@@ -31,7 +31,7 @@ class RevisarAlertasIncidentes extends Command
             return Command::SUCCESS;
         }
 
-        $this->warn("⚠️ Se detectaron {$totalCriticos} incidente(s) crítico(s) sin resolver (RN-004).");
+        $this->warn("⚠️ Se detectaron {$totalCriticos} incidente(s) crítico(s) sin resolver.");
 
         $tecnicos = User::role('tecnico')->get();
 

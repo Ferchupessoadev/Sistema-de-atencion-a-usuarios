@@ -5,6 +5,7 @@ import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
 import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
+import RichTextViewer from '../components/RichTextViewer';
 
 export default function DashboardTecnico() {
   const { user, logout } = useAuth();
@@ -25,15 +26,6 @@ export default function DashboardTecnico() {
   const [filtroEstado, setFiltroEstado] = useState('TODOS');
   const [filtroPrioridad, setFiltroPrioridad] = useState('TODAS');
   const [filtroCategoria, setFiltroCategoria] = useState('TODAS');
-
-  // Modal Resolver (RN-002)
-  const [modalResolver, setModalResolver] = useState(null); // incidente seleccionado
-  const [tipoSolucion, setTipoSolucion] = useState('RECETA'); // 'RECETA' o 'TEXTO'
-  const [recetaSeleccionada, setRecetaSeleccionada] = useState('');
-  
-  // Solución Personalizada (Lista Ordenada & Título)
-  const [tituloReceta, setTituloReceta] = useState('');
-  const [pasos, setPasos] = useState(['', '', '']);
 
   // Modal Derivar (RN-003)
   const [modalDerivar, setModalDerivar] = useState(null);
@@ -111,24 +103,6 @@ export default function DashboardTecnico() {
     setPasos([...pasos, '']);
   };
 
-  const handleEliminarPaso = (index) => {
-    if (pasos.length <= 1) return;
-    const nuevosPasos = pasos.filter((_, i) => i !== index);
-    setPasos(nuevosPasos);
-  };
-
-  // Abrir modal resolver
-  const abrirModalResolver = (inc) => {
-    setErrorAccion('');
-    setModalResolver(inc);
-    setTipoSolucion('RECETA');
-    setTituloReceta(`Solución: ${inc.descripcion.substring(0, 45)}${inc.descripcion.length > 45 ? '...' : ''}`);
-    setPasos(['', '', '']);
-    if (recetas.length > 0) {
-      setRecetaSeleccionada(recetas[0].id);
-    }
-  };
-
   // Tomar incidente (asignarse a sí mismo)
   const handleTomarIncidente = async (incidente) => {
     try {
@@ -158,53 +132,6 @@ export default function DashboardTecnico() {
     }
   };
 
-  // Resolver incidente (RN-002 y guardado de receta)
-  const handleResolverIncidente = async (e) => {
-    e.preventDefault();
-    setErrorAccion('');
-    setGuardando(true);
-
-    try {
-      const payload = {
-        estado: 'RESUELTO',
-      };
-
-      if (tipoSolucion === 'RECETA') {
-        payload.id_receta = recetaSeleccionada;
-      } else {
-        const pasosValidos = pasos.map(p => p.trim()).filter(p => p.length > 0);
-        if (pasosValidos.length === 0) {
-          setErrorAccion('Debes ingresar al menos un paso para la solución.');
-          setGuardando(false);
-          return;
-        }
-
-        payload.titulo_receta = tituloReceta || `Solución para Incidente #${modalResolver.id}`;
-        payload.solucion_texto = pasosValidos.map((p, i) => `${i + 1}. ${p}`).join('\n');
-      }
-
-      await api.put(`/incidentes/${modalResolver.id}`, payload);
-
-      setMensajeExito(
-        tipoSolucion === 'TEXTO'
-          ? `¡Incidente #${modalResolver.id} resuelto y solución guardada como nueva Receta en la Base de Conocimientos!`
-          : `¡Incidente #${modalResolver.id} marcado como RESUELTO!`
-      );
-
-      setModalResolver(null);
-      setPasos(['', '', '']);
-      cargarDatos();
-      setTimeout(() => setMensajeExito(''), 5000);
-    } catch (err) {
-      const msg = err.response?.data?.errors?.resolucion?.[0]
-               || err.response?.data?.message
-               || 'Error al resolver el incidente.';
-      setErrorAccion(msg);
-    } finally {
-      setGuardando(false);
-    }
-  };
-
   // Derivar incidente (RN-003)
   const handleDerivarIncidente = async (e) => {
     e.preventDefault();
@@ -217,7 +144,7 @@ export default function DashboardTecnico() {
         motivo: motivoDerivacion,
       });
 
-      setMensajeExito(`Incidente #${modalDerivar.id} derivado correctamente. Notificación enviada a ${res.data.notificacion.destinatario} (RN-003).`);
+      setMensajeExito(`Incidente #${modalDerivar.id} derivado correctamente. Notificación enviada a ${res.data.notificacion.destinatario}.`);
       setModalDerivar(null);
       setMotivoDerivacion('');
       setUnidadEspecializada('');
@@ -294,7 +221,7 @@ export default function DashboardTecnico() {
             onClick={() => setSeccionActiva('ALERTAS')}
           >
             <div>
-              🚨 <strong>Alerta RN-004:</strong> Hay {alertasCriticas.length} incidente(s) de ALTA prioridad con más de 2 horas sin resolver.
+              🚨 <strong>Atención:</strong> Hay {alertasCriticas.length} incidente(s) de ALTA prioridad con más de 2 horas sin resolver.
             </div>
             <span style={{ textDecoration: 'underline', fontSize: '0.8rem' }}>Ver Alertas &gt;</span>
           </div>
@@ -319,7 +246,7 @@ export default function DashboardTecnico() {
               className={`btn ${seccionActiva === 'ALERTAS' ? 'btn-danger' : 'btn-secondary'} btn-sm`}
               onClick={() => setSeccionActiva('ALERTAS')}
             >
-              ⚠️ Alertas Críticas RN-004 {alertasCriticas.length > 0 && `(${alertasCriticas.length})`}
+              ⚠️ Incidentes Críticos {alertasCriticas.length > 0 && `(${alertasCriticas.length})`}
             </button>
             <button
               className={`btn ${seccionActiva === 'USUARIOS' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
@@ -411,10 +338,10 @@ export default function DashboardTecnico() {
           <div>
             <div className="card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid #ef4444' }}>
               <h2 style={{ fontSize: '1.25rem', color: '#991b1b', marginBottom: '0.25rem' }}>
-                🚨 Monitor de Alertas Críticas (Regla de Negocio RN-004)
+                🚨 Monitor de Incidentes Críticos
               </h2>
               <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                Incidentes de <strong>Prioridad ALTA</strong> que han superado el umbral de <strong>2 horas</strong> sin haber sido marcados como RESUELTOS.
+                Incidentes de <strong>Prioridad ALTA</strong> pendientes de resolución hace más de 2 horas.
               </p>
             </div>
 
@@ -457,10 +384,7 @@ export default function DashboardTecnico() {
                     <div className="dashboard-action-row" style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
                     <button
                       className="btn btn-success btn-sm"
-                      onClick={() => {
-                        setSeccionActiva('INCIDENTES');
-                        abrirModalResolver(inc);
-                      }}
+                      onClick={() => navigate(`/tecnico/incidentes/${inc.id}/resolver`)}
                     >
                       ✅ Resolver Caso Urgente
                     </button>
@@ -472,7 +396,7 @@ export default function DashboardTecnico() {
         ) : (
           <div>
             {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
-            {errorAccion && !modalResolver && !modalDerivar && <div className="alert alert-error">{errorAccion}</div>}
+            {errorAccion && !modalDerivar && <div className="alert alert-error">{errorAccion}</div>}
 
             {/* Métricas rápidas */}
             <div className="stats-grid">
@@ -516,7 +440,7 @@ export default function DashboardTecnico() {
                 </div>
 
                 <div style={{ flex: '1 1 160px' }}>
-                  <label style={{ fontSize: '0.75rem', marginBottom: '0.2rem' }}>Prioridad (RN-001)</label>
+                  <label style={{ fontSize: '0.75rem', marginBottom: '0.2rem' }}>Prioridad</label>
                   <select
                     value={filtroPrioridad}
                     onChange={(e) => setFiltroPrioridad(e.target.value)}
@@ -579,8 +503,8 @@ export default function DashboardTecnico() {
                     {inc.receta && (
                       <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem', padding: '0.75rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '0.85rem' }}>
                         <strong style={{ color: '#166534' }}>💡 Solución aplicada (Receta #{inc.receta.id}):</strong> {inc.receta.titulo}
-                        <div style={{ marginTop: '0.35rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5, background: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                          {inc.receta.solucion}
+                        <div style={{ marginTop: '0.35rem', background: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          <RichTextViewer content={inc.receta.solucion} />
                         </div>
                       </div>
                     )}
@@ -613,9 +537,9 @@ export default function DashboardTecnico() {
 
                         <button
                           className="btn btn-success btn-sm"
-                          onClick={() => abrirModalResolver(inc)}
+                          onClick={() => navigate(`/tecnico/incidentes/${inc.id}/resolver`)}
                         >
-                          ✅ Resolver (RN-002)
+                          ✅ Resolver
                         </button>
 
                         <button
@@ -625,10 +549,10 @@ export default function DashboardTecnico() {
                             setModalDerivar(inc);
                           }}
                         >
-                          ↗️ Derivar (RN-003)
+                          ↗️ Derivar
                         </button>
 
-                        {/* Selector rápido de prioridad (RN-001) */}
+                        {/* Selector rápido de prioridad */}
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginLeft: 'auto' }}>
                           <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Prioridad:</span>
                           {['BAJA', 'MEDIA', 'ALTA'].map(p => (
@@ -652,196 +576,6 @@ export default function DashboardTecnico() {
           </div>
         )}
 
-        {/* Modal Resolver Incidente (RN-002) */}
-        {modalResolver && (
-          <div className="modal-overlay">
-            <div className="modal-content" style={{ maxWidth: '580px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                <h2 style={{ fontSize: '1.25rem', color: '#022E5B', fontWeight: 800 }}>Resolver Incidente #{modalResolver.id}</h2>
-                <button
-                  onClick={() => setModalResolver(null)}
-                  style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94a3b8' }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="alert alert-info" style={{ fontSize: '0.825rem', marginBottom: '1.25rem' }}>
-                ℹ️ <strong>Regla de Negocio RN-002:</strong> Puedes seleccionar una receta existente de la base de conocimientos o redactar una solución personalizada que se <strong>guardará automáticamente como nueva receta</strong> para futuros casos.
-              </div>
-
-              {errorAccion && <div className="alert alert-error">{errorAccion}</div>}
-
-              <form onSubmit={handleResolverIncidente}>
-                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                  <label style={{ marginBottom: '0.5rem' }}>Tipo de Solución</label>
-                  <div className="dashboard-radio-options" style={{ display: 'flex', gap: '1.5rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, cursor: 'pointer', color: '#1e293b' }}>
-                      <input
-                        type="radio"
-                        name="tipoSolucion"
-                        value="RECETA"
-                        checked={tipoSolucion === 'RECETA'}
-                        onChange={() => setTipoSolucion('RECETA')}
-                        style={{ width: 'auto' }}
-                      />
-                      📚 Usar Receta Existente
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, cursor: 'pointer', color: '#1e293b' }}>
-                      <input
-                        type="radio"
-                        name="tipoSolucion"
-                        value="TEXTO"
-                        checked={tipoSolucion === 'TEXTO'}
-                        onChange={() => setTipoSolucion('TEXTO')}
-                        style={{ width: 'auto' }}
-                      />
-                      ✨ Solución Personalizada (Nueva Receta)
-                    </label>
-                  </div>
-                </div>
-
-                {tipoSolucion === 'RECETA' ? (
-                  <div className="form-group">
-                    <label htmlFor="modal-receta">Seleccionar Guía / Receta</label>
-                    <select
-                      id="modal-receta"
-                      value={recetaSeleccionada}
-                      onChange={(e) => setRecetaSeleccionada(e.target.value)}
-                      required
-                    >
-                      {recetas.map(r => (
-                        <option key={r.id} value={r.id}>
-                          {r.titulo} (Usos: {r.usos} · {r.categoria?.nombre})
-                        </option>
-                      ))}
-                    </select>
-                    {recetas.find(r => String(r.id) === String(recetaSeleccionada)) && (
-                      <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', fontSize: '0.825rem', color: '#334155', border: '1px solid #e2e8f0', whiteSpace: 'pre-line', lineHeight: 1.5 }}>
-                        <strong style={{ color: '#047857' }}>Procedimiento a aplicar:</strong>
-                        <div style={{ marginTop: '0.25rem' }}>
-                          {recetas.find(r => String(r.id) === String(recetaSeleccionada)).solucion}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                    {/* Título de la Solución */}
-                    <div className="form-group" style={{ marginBottom: '1rem' }}>
-                      <label htmlFor="modal-titulo-receta" style={{ color: '#1e293b' }}>
-                        Título de la Nueva Receta / Solución
-                      </label>
-                      <input
-                        id="modal-titulo-receta"
-                        type="text"
-                        value={tituloReceta}
-                        onChange={(e) => setTituloReceta(e.target.value)}
-                        placeholder="Ej. Configuración de puertos y VLAN para switch HP"
-                        required
-                      />
-                    </div>
-
-                    {/* Lista Ordenada de Pasos */}
-                    <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#1e293b' }}>
-                        <span>Pasos de la Solución (Lista Ordenada)</span>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal' }}>
-                          {pasos.filter(p => p.trim()).length} paso(s) definidos
-                        </span>
-                      </label>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {pasos.map((paso, index) => (
-                          <div key={index} className="dashboard-step-row" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span
-                              style={{
-                                width: '26px',
-                                height: '26px',
-                                borderRadius: '50%',
-                                background: '#022E5B',
-                                color: '#fff',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '0.75rem',
-                                fontWeight: 700,
-                                flexShrink: 0,
-                              }}
-                            >
-                              {index + 1}
-                            </span>
-                            <input
-                              type="text"
-                              value={paso}
-                              onChange={(e) => handleCambiarPaso(index, e.target.value)}
-                              placeholder={`Paso ${index + 1}: Detalle de la acción realizada...`}
-                              required={index === 0}
-                              style={{ flex: 1 }}
-                            />
-                            {pasos.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => handleEliminarPaso(index)}
-                                title="Eliminar este paso"
-                                style={{
-                                  background: '#fee2e2',
-                                  border: 'none',
-                                  color: '#dc2626',
-                                  borderRadius: '6px',
-                                  width: '28px',
-                                  height: '28px',
-                                  cursor: 'pointer',
-                                  fontWeight: 700,
-                                  flexShrink: 0,
-                                }}
-                              >
-                                ✕
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleAgregarPaso}
-                        className="btn btn-secondary btn-sm"
-                        style={{ marginTop: '0.75rem', width: '100%' }}
-                      >
-                        ➕ Agregar Siguiente Paso
-                      </button>
-                    </div>
-
-                    <div style={{ fontSize: '0.775rem', color: '#047857', background: '#ecfdf5', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #a7f3d0' }}>
-                      💾 <strong>Auto-guardado:</strong> Esta solución quedará registrada en la Base de Conocimientos con 1 uso y podrá ser seleccionada en futuros incidentes de la categoría <strong>{modalResolver.categoria?.nombre || 'General'}</strong>.
-                    </div>
-                  </div>
-                )}
-
-                <div className="modal-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    style={{ flex: 1 }}
-                    onClick={() => setModalResolver(null)}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-success"
-                    style={{ flex: 1 }}
-                    disabled={guardando}
-                  >
-                    {guardando ? 'Guardando…' : 'Confirmar Resolución'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
         {/* Modal Derivar Incidente (RN-003) */}
         {modalDerivar && (
           <div className="modal-overlay">
@@ -854,10 +588,6 @@ export default function DashboardTecnico() {
                 >
                   ✕
                 </button>
-              </div>
-
-              <div className="alert alert-info" style={{ fontSize: '0.825rem' }}>
-                ℹ️ <strong>Regla de Negocio RN-003:</strong> Al derivar el incidente se registrará el motivo y se enviará una notificación automática al usuario ({modalDerivar.usuario?.correo}).
               </div>
 
               {errorAccion && <div className="alert alert-error">{errorAccion}</div>}

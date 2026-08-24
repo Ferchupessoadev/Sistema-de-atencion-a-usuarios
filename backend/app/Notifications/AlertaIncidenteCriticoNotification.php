@@ -28,7 +28,7 @@ class AlertaIncidenteCriticoNotification extends Notification
     {
         return [
             'tipo'               => 'ALERTA_CRITICA',
-            'titulo'             => "⚠️ Alerta RN-004: Incidente crítico #{$this->incidente->id} sin resolver",
+            'titulo'             => "⚠️ Incidente crítico #{$this->incidente->id} sin resolver",
             'mensaje'            => "El incidente de ALTA prioridad lleva más de {$this->horasTranscurridas} horas sin resolución.",
             'incidente_id'       => $this->incidente->id,
             'categoria'          => $this->incidente->categoria?->nombre ?? 'General',
