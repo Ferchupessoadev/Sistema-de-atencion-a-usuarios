@@ -103,7 +103,7 @@ class IncidenteController extends Controller
             'interno'      => 'nullable|string|max:20',
         ];
 
-        if ($user->HasRole(['tecnico'])) {
+        if ($user->hasRole(['tecnico'])) {
             // Técnicos deben especificar obligatoriamente prioridad y categoría (RN-001)
             $rules['prioridad']  = 'required|in:BAJA,MEDIA,ALTA';
             $rules['id_usuario'] = 'sometimes|exists:users,id';
@@ -121,7 +121,7 @@ class IncidenteController extends Controller
             'interno'      => $validated['interno'] ?? ($targetUser->interno ?? null),
             'prioridad'    => $validated['prioridad'] ?? Incidente::PRIORIDAD_MEDIA,
             'estado'       => Incidente::ESTADO_ABIERTO,
-            'id_tecnico'   => $user->HasRole(['tecnico']) ? ($validated['id_tecnico'] ?? null) : null,
+            'id_tecnico'   => $user->hasRole(['tecnico']) ? ($validated['id_tecnico'] ?? null) : null,
         ]);
 
 
@@ -142,7 +142,7 @@ class IncidenteController extends Controller
         $incidente = Incidente::findOrFail($id);
         Gate::authorize('update', $incidente);
 
-        if ($user->HasRole(['tecnico'])) {
+        if ($user->hasRole(['tecnico'])) {
             $request->validate([
                 'estado'         => 'sometimes|in:ABIERTO,EN_CURSO,RESUELTO',
                 'prioridad'      => 'sometimes|in:BAJA,MEDIA,ALTA',
