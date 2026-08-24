@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import RichTextEditor from './RichTextEditor';
+import RichTextViewer from './RichTextViewer';
 
 export default function RecetasManager() {
   const { user } = useAuth();
@@ -79,6 +81,13 @@ export default function RecetasManager() {
     e.preventDefault();
     setGuardando(true);
     setErrorMsg('');
+
+    const solucionLimpia = solucion.replace(/<[^>]*>/g, '').trim();
+    if (!solucion || solucionLimpia.length < 5) {
+      setErrorMsg('Debes ingresar un procedimiento de solución de al menos 5 caracteres.');
+      setGuardando(false);
+      return;
+    }
 
     try {
       if (modoEdicion) {
@@ -238,8 +247,8 @@ export default function RecetasManager() {
                   </div>
                 )}
 
-                <div style={{ background: '#F8FAFC', padding: '0.85rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.85rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5 }}>
-                  {r.solucion}
+                <div style={{ background: '#F8FAFC', padding: '0.85rem', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                  <RichTextViewer content={r.solucion} />
                 </div>
               </div>
 
@@ -383,15 +392,14 @@ export default function RecetasManager() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="receta-solucion">Procedimiento / Pasos de Solución (Lista Ordenada)</label>
-                <textarea
-                  id="receta-solucion"
-                  rows="6"
+                <label style={{ display: 'block', marginBottom: '0.4rem', color: '#1e293b' }}>
+                  Procedimiento / Pasos de Solución (Editor Enriquecido)
+                </label>
+                <RichTextEditor
                   value={solucion}
-                  onChange={(e) => setSolucion(e.target.value)}
-                  placeholder="1. Paso 1...&#10;2. Paso 2...&#10;3. Comprobación final..."
-                  required
-                  minLength={10}
+                  onChange={setSolucion}
+                  placeholder="Detalla aquí los pasos de la solución técnica, comandos, notas o instrucciones..."
+                  minHeight="180px"
                 />
               </div>
 

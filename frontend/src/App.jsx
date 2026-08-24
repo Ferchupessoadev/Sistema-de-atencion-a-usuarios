@@ -7,6 +7,7 @@ import PortalPublico from './pages/PortalPublico';
 import DashboardTecnico from './pages/DashboardTecnico';
 import DashboardUsuario from './pages/DashboardUsuario';
 import ProfilePage from './pages/ProfilePage';
+import ResolverIncidentePage from './pages/ResolverIncidentePage';
 
 // Guard: requiere autenticación
 function ProtectedRoute({ children }) {
@@ -60,6 +61,16 @@ function AppRoutes() {
         element={
           <TecnicoRoute>
             <DashboardTecnico />
+          </TecnicoRoute>
+        }
+      />
+
+      {/* Resolver incidente — solo técnicos */}
+      <Route
+        path="/tecnico/incidentes/:id/resolver"
+        element={
+          <TecnicoRoute>
+            <ResolverIncidentePage />
           </TecnicoRoute>
         }
       />

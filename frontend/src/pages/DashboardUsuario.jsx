@@ -5,6 +5,7 @@ import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
 import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
+import RichTextViewer from '../components/RichTextViewer';
 
 export default function DashboardUsuario() {
   const { user, logout } = useAuth();
@@ -180,7 +181,7 @@ export default function DashboardUsuario() {
               </div>
               <div className="stat-box">
                 <div className="stat-number" style={{ color: '#b45309' }}>{totalAbiertos} / 3</div>
-                <div className="stat-label">Abiertos (RN-005)</div>
+                <div className="stat-label">Abiertos</div>
               </div>
               <div className="stat-box">
                 <div className="stat-number" style={{ color: '#1d4ed8' }}>{totalEnCurso}</div>
@@ -192,10 +193,10 @@ export default function DashboardUsuario() {
               </div>
             </div>
 
-            {/* Alerta de bloqueo RN-005 si tiene >= 3 abiertos */}
+            {/* Alerta de límite de incidentes abiertos */}
             {totalAbiertos >= 3 && (
               <div className="alert alert-warning">
-                ⚠️ <strong>Límite de incidentes alcanzado (RN-005):</strong> Tienes 3 incidentes en estado ABIERTO. Debes esperar a que sean resueltos antes de abrir uno nuevo.
+                ⚠️ <strong>Límite de incidentes alcanzado:</strong> Tienes 3 incidentes en estado ABIERTO. Debes esperar a que sean resueltos antes de abrir uno nuevo.
               </div>
             )}
 
@@ -213,7 +214,7 @@ export default function DashboardUsuario() {
                 ))}
               </div>
 
-              {/* Botón para crear incidente (RN-005 bloquea si tiene >= 3 abiertos) */}
+              {/* Botón para crear incidente */}
               <button
                 id="btn-crear-incidente"
                 className="btn btn-primary"
@@ -222,7 +223,7 @@ export default function DashboardUsuario() {
                   setErrorCreacion('');
                   setModalAbierto(true);
                 }}
-                title={totalAbiertos >= 3 ? 'Bloqueado por RN-005 (máximo 3 abiertos)' : 'Reportar nuevo incidente'}
+                title={totalAbiertos >= 3 ? 'Límite alcanzado (máximo 3 abiertos)' : 'Reportar nuevo incidente'}
               >
                 ➕ Nuevo Incidente
               </button>
@@ -265,8 +266,8 @@ export default function DashboardUsuario() {
                     {inc.receta && (
                       <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem', padding: '0.75rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '0.85rem' }}>
                         <strong style={{ color: '#166534' }}>💡 Solución aplicada (Receta #{inc.receta.id}):</strong> {inc.receta.titulo}
-                        <div style={{ marginTop: '0.35rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5, background: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                          {inc.receta.solucion}
+                        <div style={{ marginTop: '0.35rem', background: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          <RichTextViewer content={inc.receta.solucion} />
                         </div>
                       </div>
                     )}
@@ -320,7 +321,7 @@ export default function DashboardUsuario() {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="modal-interno">Teléfono / Interno de contacto (Opcional)</label>
+                      <label htmlFor="modal-interno">Interno de contacto (Opcional)</label>
                       <input
                         id="modal-interno"
                         type="text"

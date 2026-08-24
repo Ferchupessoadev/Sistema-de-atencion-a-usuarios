@@ -3,6 +3,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import HeaderPublico from '../components/HeaderPublico';
 import PortalResponsiveStyles from '../components/PortalResponsiveStyles';
+import RichTextViewer from '../components/RichTextViewer';
 
 export default function PortalPublico() {
   const { isAuthenticated } = useAuth();
@@ -170,7 +171,7 @@ export default function PortalPublico() {
 
                   {/* Solución */}
                   <div className="portal-receta-solucion">
-                    {r.solucion}
+                    <RichTextViewer content={r.solucion} />
                   </div>
                 </div>
 
