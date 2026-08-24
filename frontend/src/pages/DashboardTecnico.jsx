@@ -27,7 +27,7 @@ export default function DashboardTecnico() {
   const [filtroPrioridad, setFiltroPrioridad] = useState('TODAS');
   const [filtroCategoria, setFiltroCategoria] = useState('TODAS');
 
-  // Modal Derivar (RN-003)
+  // Modal Derivar
   const [modalDerivar, setModalDerivar] = useState(null);
   const [unidadEspecializada, setUnidadEspecializada] = useState('');
   const [motivoDerivacion, setMotivoDerivacion] = useState('');
@@ -92,47 +92,7 @@ export default function DashboardTecnico() {
     }
   };
 
-  // Manejo de pasos en solución personalizada
-  const handleCambiarPaso = (index, valor) => {
-    const nuevosPasos = [...pasos];
-    nuevosPasos[index] = valor;
-    setPasos(nuevosPasos);
-  };
-
-  const handleAgregarPaso = () => {
-    setPasos([...pasos, '']);
-  };
-
-  // Tomar incidente (asignarse a sí mismo)
-  const handleTomarIncidente = async (incidente) => {
-    try {
-      await api.put(`/incidentes/${incidente.id}`, {
-        id_tecnico: user.id,
-        estado: 'EN_CURSO',
-      });
-      setMensajeExito(`Te has asignado el incidente #${incidente.id}.`);
-      cargarDatos();
-      setTimeout(() => setMensajeExito(''), 4000);
-    } catch (err) {
-      setErrorAccion(err.response?.data?.message || 'Error al tomar el incidente.');
-    }
-  };
-
-  // Cambiar prioridad (RN-001)
-  const handleCambiarPrioridad = async (incidente, nuevaPrioridad) => {
-    try {
-      await api.put(`/incidentes/${incidente.id}`, {
-        prioridad: nuevaPrioridad,
-      });
-      setMensajeExito(`Prioridad del incidente #${incidente.id} actualizada a ${nuevaPrioridad}.`);
-      cargarDatos();
-      setTimeout(() => setMensajeExito(''), 4000);
-    } catch (err) {
-      setErrorAccion(err.response?.data?.message || 'Error al cambiar la prioridad.');
-    }
-  };
-
-  // Derivar incidente (RN-003)
+  // Derivar incidente
   const handleDerivarIncidente = async (e) => {
     e.preventDefault();
     setErrorAccion('');
@@ -576,7 +536,7 @@ export default function DashboardTecnico() {
           </div>
         )}
 
-        {/* Modal Derivar Incidente (RN-003) */}
+        {/* Modal Derivar Incidente */}
         {modalDerivar && (
           <div className="modal-overlay">
             <div className="modal-content">

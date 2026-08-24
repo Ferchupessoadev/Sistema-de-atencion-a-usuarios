@@ -53,7 +53,6 @@ export default function ResolverIncidentePage() {
         setIdCategoriaReceta(resInc.data.id_categoria || (resCat.data[0]?.id ?? ''));
 
         if (resRec.data.length > 0) {
-          // Filtrar por categoría del incidente si existe
           const coincidentes = resRec.data.filter(r => r.id_categoria === resInc.data.id_categoria);
           setRecetaSeleccionadaId(coincidentes.length > 0 ? coincidentes[0].id : resRec.data[0].id);
         }
@@ -231,7 +230,7 @@ export default function ResolverIncidentePage() {
                 onClick={() => setModoResolucion('CUSTOM')}
                 style={{ flex: '1 1 220px' }}
               >
-                ✍️ Redactar Solución (Editor TipTap)
+                ✍️ Redactar Solución
               </button>
               <button
                 type="button"

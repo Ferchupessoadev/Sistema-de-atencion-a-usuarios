@@ -32,6 +32,7 @@ export default function RichTextEditor({
   });
 
   // Sync external value changes if needed
+  // Sync external value changes
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
       if (!value && editor.isEmpty) return;
