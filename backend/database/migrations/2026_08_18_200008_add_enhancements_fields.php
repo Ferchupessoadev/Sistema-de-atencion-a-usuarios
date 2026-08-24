@@ -21,8 +21,6 @@ return new class extends Migration
         // 3. Agregar keywords y votos a recetas
         Schema::table('recetas', function (Blueprint $table) {
             $table->text('keywords')->nullable()->after('solucion');
-            $table->unsignedBigInteger('votos_util')->default(0)->after('usos');
-            $table->unsignedBigInteger('votos_no_util')->default(0)->after('votos_util');
         });
     }
 
