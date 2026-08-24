@@ -288,14 +288,20 @@ class RecetasYAlertasTest extends TestCase
              ->assertJsonPath('votos_no_util', 1)
              ->assertJsonPath('mi_voto', 'NO_UTIL');
 
-        // 3. Usuario 1 cambia su voto de UTIL a NO_UTIL (no duplica registro, actualiza)
+        // 3. Usuario 1 cambia su voto en la misma fila
         $res3 = $this->actingAs($usuario1, 'sanctum')
                      ->postJson("/api/recetas/{$receta->id}/votar", ['tipo' => 'NO_UTIL']);
         $res3->assertStatus(200)
              ->assertJsonPath('votos_util', 0)
-             ->assertJsonPath('votos_no_util', 2);
+             ->assertJsonPath('votos_no_util', 2)
+             ->assertJsonPath('mi_voto', 'NO_UTIL');
 
         $this->assertDatabaseCount('votos_recetas', 2);
+        $this->assertDatabaseHas('votos_recetas', [
+              'id_usuario' => $usuario1->id,
+              'id_receta'  => $receta->id,
+            'tipo'       => 'NO_UTIL',
+           ]);
     }
 
     /** @test */

@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
@@ -86,10 +87,7 @@ class ProfileController extends Controller
      */
     public function listUsers(Request $request): JsonResponse
     {
-        // Verificar rol técnico
-        if (! $request->user()->hasRole('tecnico')) {
-            return response()->json(['message' => 'No autorizado.'], 403);
-        }
+        Gate::authorize('viewAny', User::class);
 
         $users = User::select('id', 'nombre', 'correo', 'interno', 'created_at')
             ->orderBy('created_at', 'desc')

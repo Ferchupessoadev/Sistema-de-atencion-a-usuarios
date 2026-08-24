@@ -16,14 +16,10 @@ class Receta extends Model
         'keywords',
         'id_categoria',
         'usos',
-        'votos_util',
-        'votos_no_util',
     ];
 
     protected $casts = [
         'usos'          => 'integer',
-        'votos_util'    => 'integer',
-        'votos_no_util' => 'integer',
     ];
 
     // ─── Relaciones ──────────────────────────────────────────
@@ -56,7 +52,7 @@ class Receta extends Model
     }
 
     /**
-     * Registra o actualiza el voto de un usuario específico y sincroniza contadores.
+     * Registra o actualiza el voto del usuario en la misma fila.
      */
     public function registrarVoto(int $usuarioId, string $tipo): void
     {
@@ -64,26 +60,26 @@ class Receta extends Model
             ['id_usuario' => $usuarioId, 'id_receta' => $this->id],
             ['tipo' => $tipo]
         );
-
-        $this->votos_util = $this->votos()->where('tipo', 'UTIL')->count();
-        $this->votos_no_util = $this->votos()->where('tipo', 'NO_UTIL')->count();
-        $this->save();
     }
 
-    /**
-     * Registra un voto positivo.
-     */
-    public function votarUtil(): void
+    public function votosUtil(): int
     {
-        $this->increment('votos_util');
+        return $this->votos()->where('tipo', 'UTIL')->count();
     }
 
-    /**
-     * Registra un voto negativo.
-     */
-    public function votarNoUtil(): void
+    public function votosNoUtil(): int
     {
-        $this->increment('votos_no_util');
+        return $this->votos()->where('tipo', 'NO_UTIL')->count();
+    }
+
+    public function getVotosUtilAttribute(): int
+    {
+        return $this->votosUtil();
+    }
+
+    public function getVotosNoUtilAttribute(): int
+    {
+        return $this->votosNoUtil();
     }
 }
 

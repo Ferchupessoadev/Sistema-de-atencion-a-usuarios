@@ -25,7 +25,7 @@ class IncidenteController extends Controller
 
         $query = Incidente::with(['usuario', 'tecnico', 'categoria', 'receta']);
 
-        if (!$user->HasRole(['tecnico'])) {
+        if (!$user->hasRole(['tecnico'])) {
             $query->where('id_usuario', $user->id);
         } else {
             // Filtros para técnicos
@@ -80,7 +80,7 @@ class IncidenteController extends Controller
 
         // Determinar el usuario titular del incidente
         $targetUserId = $user->id;
-        if ($user->HasRole(['tecnico']) && $request->filled('id_usuario')) {
+        if ($user->hasRole(['tecnico']) && $request->filled('id_usuario')) {
             $targetUserId = $request->id_usuario;
         }
 
