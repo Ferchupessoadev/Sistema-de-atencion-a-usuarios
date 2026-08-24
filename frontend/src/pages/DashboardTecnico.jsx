@@ -10,7 +10,11 @@ export default function DashboardTecnico() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [seccionActiva, setSeccionActiva] = useState('INCIDENTES'); // 'INCIDENTES' | 'RECETAS' | 'ALERTAS'
+  const [seccionActiva, setSeccionActiva] = useState('INCIDENTES'); // 'INCIDENTES' | 'RECETAS' | 'ALERTAS' | 'USUARIOS'
+
+  // Panel de usuarios
+  const [usuarios, setUsuarios] = useState([]);
+  const [busquedaUsuario, setBusquedaUsuario] = useState('');
   const [incidentes, setIncidentes] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [recetas, setRecetas] = useState([]);
@@ -254,6 +258,14 @@ export default function DashboardTecnico() {
           </div>
         </div>
         <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button
+            id="btn-mi-perfil-tecnico"
+            className="btn btn-outline-header btn-sm"
+            onClick={() => navigate('/perfil')}
+            title="Mi Perfil"
+          >
+            👤 Mi Perfil
+          </button>
           <NotificationBell />
           <span className="badge badge-tecnico" style={{ background: '#DBEAFE', color: '#022E5B' }}>Técnico</span>
           <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
@@ -309,6 +321,17 @@ export default function DashboardTecnico() {
             >
               ⚠️ Alertas Críticas RN-004 {alertasCriticas.length > 0 && `(${alertasCriticas.length})`}
             </button>
+            <button
+              className={`btn ${seccionActiva === 'USUARIOS' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+              onClick={() => {
+                setSeccionActiva('USUARIOS');
+                if (usuarios.length === 0) {
+                  api.get('/users').then(res => setUsuarios(res.data)).catch(() => {});
+                }
+              }}
+            >
+              👥 Usuarios
+            </button>
           </div>
 
           <div className="dashboard-tabs-actions">
@@ -327,6 +350,63 @@ export default function DashboardTecnico() {
 
         {seccionActiva === 'RECETAS' ? (
           <RecetasManager />
+        ) : seccionActiva === 'USUARIOS' ? (
+          <div>
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.25rem', color: 'var(--c-navy)', marginBottom: '0.25rem' }}>
+                👥 Usuarios Registrados ({usuarios.length})
+              </h2>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1rem' }}>
+                Listado de todos los usuarios del sistema.
+              </p>
+              <input
+                type="text"
+                placeholder="Buscar por nombre o correo…"
+                value={busquedaUsuario}
+                onChange={e => setBusquedaUsuario(e.target.value)}
+                style={{ maxWidth: '400px' }}
+              />
+            </div>
+
+            <div className="user-cards-grid">
+              {usuarios
+                .filter(u => {
+                  if (!busquedaUsuario.trim()) return true;
+                  const q = busquedaUsuario.toLowerCase();
+                  return u.nombre.toLowerCase().includes(q) || u.correo.toLowerCase().includes(q);
+                })
+                .map(u => (
+                  <div key={u.id} className="user-card card">
+                    <div className="user-card-avatar">
+                      {u.nombre ? u.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'}
+                    </div>
+                    <div className="user-card-info">
+                      <h3 className="user-card-name">{u.nombre}</h3>
+                      <p className="user-card-email">📧 {u.correo}</p>
+                      {u.interno && <p className="user-card-interno">📞 Int. {u.interno}</p>}
+                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                        {u.roles?.map(r => (
+                          <span key={r} className={`badge ${r === 'tecnico' ? 'badge-tecnico' : r === 'representante_de_area' ? 'badge-tecnico' : 'badge-usuario'}`}>
+                            {r}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="user-card-date">
+                        Registrado: {new Date(u.created_at).toLocaleDateString('es-AR')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            {usuarios.length === 0 && (
+              <div className="portal-empty">
+                <div className="portal-empty-icon">👥</div>
+                <h3 className="portal-empty-title">Sin usuarios</h3>
+                <p className="portal-empty-text">No se encontraron usuarios registrados.</p>
+              </div>
+            )}
+          </div>
         ) : seccionActiva === 'ALERTAS' ? (
           <div>
             <div className="card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid #ef4444' }}>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\IncidenteController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RecetaController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -34,6 +35,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Autenticación & Perfil
     Route::post('/logout', [UserController::class, 'logout']);
     Route::get('/user',    [UserController::class, 'me']);
+
+    // Perfil de usuario
+    Route::get('/profile',          [ProfileController::class, 'show']);
+    Route::put('/profile',          [ProfileController::class, 'update']);
+    Route::put('/profile/password', [ProfileController::class, 'changePassword']);
+
+    // Listado de usuarios (solo técnicos)
+    Route::get('/users', [ProfileController::class, 'listUsers']);
 
     // Categorías
     Route::post('/categorias', [CategoriaController::class, 'store']);

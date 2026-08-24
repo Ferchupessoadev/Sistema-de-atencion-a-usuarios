@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import PortalPublico from './pages/PortalPublico';
 import DashboardTecnico from './pages/DashboardTecnico';
 import DashboardUsuario from './pages/DashboardUsuario';
+import ProfilePage from './pages/ProfilePage';
 
 // Guard: requiere autenticación
 function ProtectedRoute({ children }) {
@@ -69,6 +70,16 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <DashboardUsuario />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Perfil de usuario — cualquier autenticado */}
+      <Route
+        path="/perfil"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />
