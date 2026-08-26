@@ -27,7 +27,7 @@ class StoreIncidenteRequest extends FormRequest
         $es_tecnico = $this->user()->hasRole('tecnico');
 
         return [
-            'descripcion'  => 'required|string|min:5|max:2000',
+            'descripcion'  => 'required|string|min:5|max:50000',
             'id_categoria' => 'required|exists:categorias,id',
             'interno'      => 'nullable|string|max:20',
             'prioridad' => [$es_tecnico ? 'required' : 'sometimes', 'in:BAJA,MEDIA,ALTA',

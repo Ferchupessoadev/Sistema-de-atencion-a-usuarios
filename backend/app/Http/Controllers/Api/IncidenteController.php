@@ -192,7 +192,7 @@ class IncidenteController extends Controller
             }
 
             $request->validate([
-                'descripcion' => 'required|string|min:5|max:2000',
+                'descripcion' => 'required|string|min:5|max:50000',
             ]);
 
             $incidente->descripcion = $request->descripcion;
@@ -217,7 +217,7 @@ class IncidenteController extends Controller
         $validated = $request->validate([
             'id_tecnico'            => 'nullable|exists:users,id',
             'unidad_especializada'  => 'nullable|string|max:255',
-            'motivo'                => 'required|string|min:5|max:1000',
+            'motivo'                => 'required|string|min:5|max:50000',
         ]);
 
         if (array_key_exists('id_tecnico', $validated)) {

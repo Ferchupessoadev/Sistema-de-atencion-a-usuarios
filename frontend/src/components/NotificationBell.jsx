@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
+import RichTextViewer from './RichTextViewer';
 
 export default function NotificationBell() {
   const [notificaciones, setNotificaciones] = useState([]);
@@ -178,9 +179,9 @@ export default function NotificationBell() {
                       <p style={{ fontSize: '0.825rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.2rem' }}>
                         {data.titulo || 'Notificación del sistema'}
                       </p>
-                      <p style={{ fontSize: '0.775rem', color: '#475569', lineHeight: 1.3 }}>
-                        {data.mensaje || JSON.stringify(data)}
-                      </p>
+                      <div style={{ fontSize: '0.775rem', color: '#475569', lineHeight: 1.3 }}>
+                        <RichTextViewer content={data.mensaje || JSON.stringify(data)} />
+                      </div>
                       <span style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.25rem', display: 'block' }}>
                         {data.fecha || new Date(n.created_at).toLocaleString()}
                       </span>

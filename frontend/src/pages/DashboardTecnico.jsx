@@ -5,11 +5,29 @@ import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
 import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
+import RichTextEditor from '../components/RichTextEditor';
 import RichTextViewer from '../components/RichTextViewer';
+import SearchableSelect from '../components/SearchableSelect';
 
 export default function DashboardTecnico() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  // Áreas predefinidas para derivación
+  const AREAS_DERIVACION = [
+    { value: 'AICO - Atención a Usuarios', label: 'AICO - Atención a Usuarios', sublabel: 'Mesa de ayuda y soporte de primer nivel' },
+    { value: 'Redes e Internet', label: 'Redes e Internet', sublabel: 'Conectividad, switches, cableado estructurado, VPN' },
+    { value: 'WIFI y Conectividad', label: 'WIFI y Conectividad', sublabel: 'Access points, cobertura inalámbrica, autenticación' },
+    { value: 'Telefonía e Internos', label: 'Telefonía e Internos', sublabel: 'Centrales telefónicas, internos, VoIP' },
+    { value: 'K2B y Sistemas ERP', label: 'K2B y Sistemas ERP', sublabel: 'Módulos K2B, GeneXus, sistemas de gestión' },
+    { value: 'Software y Aplicaciones', label: 'Software y Aplicaciones', sublabel: 'Instalación, licencias, actualizaciones de software' },
+    { value: 'Computadora y Hardware', label: 'Computadora y Hardware', sublabel: 'PCs, notebooks, monitores, periféricos' },
+    { value: 'Impresoras y Fotocopiadoras', label: 'Impresoras y Fotocopiadoras', sublabel: 'Impresoras de red, tóner, escaneo, fotocopiadoras' },
+    { value: 'Accesos y Seguridad', label: 'Accesos y Seguridad', sublabel: 'Cuentas de usuario, permisos, Active Directory, firewall' },
+    { value: 'Infraestructura y Servidores', label: 'Infraestructura y Servidores', sublabel: 'Servidores físicos y virtuales, datacenter, backups' },
+    { value: 'Desarrollo y Sistemas', label: 'Desarrollo y Sistemas', sublabel: 'Desarrollo de software interno, APIs, bases de datos' },
+    { value: 'Soporte Externo / Proveedores', label: 'Soporte Externo / Proveedores', sublabel: 'Escalado a proveedores externos y garantías' },
+  ];
 
   const [seccionActiva, setSeccionActiva] = useState('INCIDENTES'); // 'INCIDENTES' | 'RECETAS' | 'ALERTAS' | 'USUARIOS'
 
@@ -31,6 +49,15 @@ export default function DashboardTecnico() {
   const [modalDerivar, setModalDerivar] = useState(null);
   const [unidadEspecializada, setUnidadEspecializada] = useState('');
   const [motivoDerivacion, setMotivoDerivacion] = useState('');
+
+  // Modal Nuevo Incidente (Técnico)
+  const [modalNuevoIncidente, setModalNuevoIncidente] = useState(false);
+  const [nuevoIncCategoria, setNuevoIncCategoria] = useState('');
+  const [nuevoIncPrioridad, setNuevoIncPrioridad] = useState('MEDIA');
+  const [nuevoIncInterno, setNuevoIncInterno] = useState('');
+  const [nuevoIncDescripcion, setNuevoIncDescripcion] = useState('');
+  const [nuevoIncUsuarioId, setNuevoIncUsuarioId] = useState('');
+  const [errorNuevoInc, setErrorNuevoInc] = useState('');
 
   // Mensajes y estados
   const [guardando, setGuardando] = useState(false);
@@ -121,6 +148,13 @@ export default function DashboardTecnico() {
   const handleDerivarIncidente = async (e) => {
     e.preventDefault();
     setErrorAccion('');
+
+    const motivoLimpio = motivoDerivacion.replace(/<[^>]*>/g, '').trim();
+    if (!motivoDerivacion || motivoLimpio.length < 5) {
+      setErrorAccion('Por favor ingresa un motivo de derivación detallado (mínimo 5 caracteres).');
+      return;
+    }
+
     setGuardando(true);
 
     try {
@@ -129,7 +163,7 @@ export default function DashboardTecnico() {
         motivo: motivoDerivacion,
       });
 
-      setMensajeExito(`Incidente #${modalDerivar.id} derivado correctamente. Notificación enviada a ${res.data.notificacion.destinatario}.`);
+      setMensajeExito(`Incidente #${modalDerivar.id} derivado correctamente. Notificación enviada a ${res.data.notificacion?.destinatario || 'usuario'}.`);
       setModalDerivar(null);
       setMotivoDerivacion('');
       setUnidadEspecializada('');
@@ -137,6 +171,49 @@ export default function DashboardTecnico() {
       setTimeout(() => setMensajeExito(''), 5000);
     } catch (err) {
       setErrorAccion(err.response?.data?.message || 'Error al derivar el incidente.');
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  // Crear incidente desde consola técnica
+  const handleCrearIncidenteTecnico = async (e) => {
+    e.preventDefault();
+    setErrorNuevoInc('');
+
+    const textoLimpio = nuevoIncDescripcion.replace(/<[^>]*>/g, '').trim();
+    if (!nuevoIncDescripcion || textoLimpio.length < 5) {
+      setErrorNuevoInc('Por favor escribe una descripción del problema (mínimo 5 caracteres).');
+      return;
+    }
+
+    setGuardando(true);
+    try {
+      const payload = {
+        id_categoria: nuevoIncCategoria || (categorias[0]?.id ?? ''),
+        descripcion: nuevoIncDescripcion,
+        prioridad: nuevoIncPrioridad,
+        interno: nuevoIncInterno || null,
+      };
+      if (nuevoIncUsuarioId) {
+        payload.id_usuario = nuevoIncUsuarioId;
+      }
+
+      await api.post('/incidentes', payload);
+
+      setMensajeExito('¡Incidente registrado exitosamente en el sistema!');
+      setModalNuevoIncidente(false);
+      setNuevoIncDescripcion('');
+      setNuevoIncInterno('');
+      setNuevoIncUsuarioId('');
+      cargarDatos();
+      setTimeout(() => setMensajeExito(''), 4000);
+    } catch (err) {
+      const msg = err.response?.data?.errors?.id_usuario?.[0]
+        || err.response?.data?.errors?.descripcion?.[0]
+        || err.response?.data?.message
+        || 'Error al registrar el incidente.';
+      setErrorNuevoInc(msg);
     } finally {
       setGuardando(false);
     }
@@ -246,7 +323,25 @@ export default function DashboardTecnico() {
             </button>
           </div>
 
-          <div className="dashboard-tabs-actions">
+          <div className="dashboard-tabs-actions" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button
+              id="btn-tecnico-nuevo-incidente"
+              className="btn btn-primary btn-sm"
+              onClick={() => {
+                setErrorNuevoInc('');
+                if (categorias.length > 0 && !nuevoIncCategoria) {
+                  setNuevoIncCategoria(categorias[0].id);
+                }
+                if (usuarios.length === 0) {
+                  api.get('/users').then(res => setUsuarios(res.data)).catch(() => {});
+                }
+                setModalNuevoIncidente(true);
+              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700 }}
+              title="Registrar un nuevo incidente en la Mesa de Ayuda"
+            >
+              ➕ Registrar Incidente
+            </button>
             <button
               id="btn-exportar-csv"
               className="btn btn-secondary btn-sm"
@@ -356,9 +451,9 @@ export default function DashboardTecnico() {
                     </span>
                   </div>
 
-                  <p style={{ color: '#1e293b', fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                    {inc.descripcion}
-                  </p>
+                  <div style={{ color: '#1e293b', fontSize: '0.95rem', marginBottom: '0.75rem' }}>
+                    <RichTextViewer content={inc.descripcion} />
+                  </div>
 
                   <div className="incident-meta">
                     <span>👤 Afectado: <strong>{inc.usuario?.nombre}</strong> ({inc.usuario?.correo})</span>
@@ -491,9 +586,9 @@ export default function DashboardTecnico() {
                       </span>
                     </div>
 
-                    <p style={{ color: '#1e293b', fontSize: '0.95rem', marginBottom: '0.75rem', whiteSpace: 'pre-line' }}>
-                      {inc.descripcion}
-                    </p>
+                    <div style={{ color: '#1e293b', fontSize: '0.95rem', marginBottom: '0.75rem' }}>
+                      <RichTextViewer content={inc.descripcion} />
+                    </div>
 
                     {inc.receta && (
                       <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem', padding: '0.75rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '0.85rem' }}>
@@ -573,15 +668,27 @@ export default function DashboardTecnico() {
           </div>
         )}
 
-        {/* Modal Derivar Incidente */}
+        {/* Modal Derivar Incidente con TipTap */}
         {modalDerivar && (
           <div className="modal-overlay">
-            <div className="modal-content">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                <h2 style={{ fontSize: '1.25rem', color: '#022E5B', fontWeight: 800 }}>Derivar Incidente #{modalDerivar.id}</h2>
+            <div className="modal-content modal-lg">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '1.8rem' }}>↗️</span>
+                  <div>
+                    <h2 style={{ fontSize: '1.3rem', color: 'var(--c-navy)', fontWeight: 800, margin: 0 }}>
+                      Derivar Incidente #{modalDerivar.id}
+                    </h2>
+                    <span style={{ fontSize: '0.785rem', color: '#64748B' }}>
+                      Transferencia técnica a unidad especializada con notificación automática al usuario
+                    </span>
+                  </div>
+                </div>
                 <button
+                  type="button"
                   onClick={() => setModalDerivar(null)}
-                  style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94a3b8' }}
+                  style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94A3B8' }}
+                  title="Cerrar modal"
                 >
                   ✕
                 </button>
@@ -589,29 +696,50 @@ export default function DashboardTecnico() {
 
               {errorAccion && <div className="alert alert-error">{errorAccion}</div>}
 
+              {/* Resumen del Incidente */}
+              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '0.85rem 1rem', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.4rem', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.825rem', color: '#475569' }}>
+                    👤 Solicitante: <strong>{modalDerivar.usuario?.nombre}</strong> ({modalDerivar.usuario?.correo})
+                  </span>
+                  <span className={`badge badge-prioridad-${modalDerivar.prioridad}`}>
+                    Prioridad {modalDerivar.prioridad}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.875rem', color: '#1E293B', marginTop: '0.35rem' }}>
+                  <RichTextViewer content={modalDerivar.descripcion} />
+                </div>
+              </div>
+
               <form onSubmit={handleDerivarIncidente}>
-                <div className="form-group">
-                  <label htmlFor="modal-unidad">Unidad o Área Especializada de Destino</label>
-                  <input
-                    id="modal-unidad"
-                    type="text"
+                <div className="form-group" style={{ marginBottom: '1.2rem' }}>
+                  <label htmlFor="modal-unidad" style={{ fontWeight: 600, color: '#1E293B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <span>Unidad o Área Especializada de Destino <span style={{ color: '#EF4444' }}>*</span></span>
+                    <span style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 400 }}>Escribe para buscar o selecciona</span>
+                  </label>
+                  <SearchableSelect
+                    inputId="modal-unidad"
+                    options={AREAS_DERIVACION}
                     value={unidadEspecializada}
-                    onChange={(e) => setUnidadEspecializada(e.target.value)}
-                    placeholder="Ej. Redes y Comunicaciones, Sistemas ERP K2B, Infraestructura"
+                    onChange={setUnidadEspecializada}
+                    allowFreeText={true}
+                    onTextChange={setUnidadEspecializada}
+                    placeholder="Escribe el nombre del área (ej. Redes, K2B, Telefonía...)"
+                    emptyMessage="No hay áreas coincidentes. Puedes escribir el nombre manualmente."
                     required
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="modal-motivo">Motivo de la Derivación</label>
-                  <textarea
-                    id="modal-motivo"
-                    rows="3"
+                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                  <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', fontWeight: 600, color: '#1E293B' }}>
+                    <span>Motivo y Justificación Técnica de la Derivación <span style={{ color: '#EF4444' }}>*</span></span>
+                    <span style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 400 }}>Editor con formato enriquecido</span>
+                  </label>
+                  <RichTextEditor
                     value={motivoDerivacion}
-                    onChange={(e) => setMotivoDerivacion(e.target.value)}
-                    placeholder="Justificación técnica por la cual se transfiere el caso a otra área..."
-                    required
-                    minLength={5}
+                    onChange={setMotivoDerivacion}
+                    placeholder="Detalla las razones técnicas del traspaso, diagnóstico preliminar y notas para el área receptora..."
+                    minHeight="160px"
                   />
                 </div>
 
@@ -621,16 +749,152 @@ export default function DashboardTecnico() {
                     className="btn btn-secondary"
                     style={{ flex: 1 }}
                     onClick={() => setModalDerivar(null)}
+                    disabled={guardando}
                   >
-                    Cancelar
+                    ← Cancelar
                   </button>
                   <button
                     type="submit"
                     className="btn btn-warning"
-                    style={{ flex: 1 }}
+                    style={{ flex: 1.5, padding: '0.75rem 1.25rem', fontSize: '0.95rem' }}
                     disabled={guardando}
                   >
-                    {guardando ? 'Derivando…' : 'Confirmar Derivación'}
+                    {guardando ? 'Derivando…' : '↗️ Confirmar Derivación'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Registrar Nuevo Incidente desde Consola Técnica */}
+        {modalNuevoIncidente && (
+          <div className="modal-overlay">
+            <div className="modal-content modal-lg">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '1.8rem' }}>🎫</span>
+                  <div>
+                    <h2 style={{ fontSize: '1.3rem', color: 'var(--c-navy)', fontWeight: 800, margin: 0 }}>
+                      Registrar Incidente en Mesa de Ayuda
+                    </h2>
+                    <span style={{ fontSize: '0.785rem', color: '#64748B' }}>
+                      Carga de incidente técnico con asignación directa de categoría y nivel de prioridad
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setModalNuevoIncidente(false)}
+                  style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94A3B8' }}
+                  title="Cerrar modal"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {errorNuevoInc && <div className="alert alert-error">{errorNuevoInc}</div>}
+
+              <form onSubmit={handleCrearIncidenteTecnico}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label htmlFor="tec-modal-cat" style={{ fontWeight: 600, color: '#1E293B' }}>
+                      Categoría <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
+                    <select
+                      id="tec-modal-cat"
+                      value={nuevoIncCategoria}
+                      onChange={(e) => setNuevoIncCategoria(e.target.value)}
+                      required
+                    >
+                      {categorias.map(cat => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label htmlFor="tec-modal-prioridad" style={{ fontWeight: 600, color: '#1E293B' }}>
+                      Prioridad Inicial <span style={{ color: '#EF4444' }}>*</span>
+                    </label>
+                    <select
+                      id="tec-modal-prioridad"
+                      value={nuevoIncPrioridad}
+                      onChange={(e) => setNuevoIncPrioridad(e.target.value)}
+                      required
+                    >
+                      <option value="BAJA">BAJA</option>
+                      <option value="MEDIA">MEDIA</option>
+                      <option value="ALTA">ALTA (Crítica)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem', marginBottom: '1.2rem' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label htmlFor="tec-modal-usuario" style={{ fontWeight: 600, color: '#1E293B' }}>
+                      Usuario Solicitante / Afectado (Opcional)
+                    </label>
+                    <select
+                      id="tec-modal-usuario"
+                      value={nuevoIncUsuarioId}
+                      onChange={(e) => setNuevoIncUsuarioId(e.target.value)}
+                    >
+                      <option value="">A mi nombre ({user?.nombre})</option>
+                      {usuarios.map(u => (
+                        <option key={u.id} value={u.id}>
+                          {u.nombre} ({u.correo}) {u.interno ? `· Int. ${u.interno}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label htmlFor="tec-modal-interno" style={{ fontWeight: 600, color: '#1E293B' }}>
+                      Interno de Contacto
+                    </label>
+                    <input
+                      id="tec-modal-interno"
+                      type="text"
+                      value={nuevoIncInterno}
+                      onChange={(e) => setNuevoIncInterno(e.target.value)}
+                      placeholder="Ej. 3105, 3777..."
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                  <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', fontWeight: 600, color: '#1E293B' }}>
+                    <span>Descripción Detallada del Incidente <span style={{ color: '#EF4444' }}>*</span></span>
+                    <span style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 400 }}>Editor con formato enriquecido</span>
+                  </label>
+                  <RichTextEditor
+                    value={nuevoIncDescripcion}
+                    onChange={setNuevoIncDescripcion}
+                    placeholder="Describe detalladamente el incidente técnico (síntomas, equipos involucrados, mensajes de error en pantalla, etc.)..."
+                    minHeight="200px"
+                  />
+                </div>
+
+                <div className="modal-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{ flex: 1 }}
+                    onClick={() => setModalNuevoIncidente(false)}
+                    disabled={guardando}
+                  >
+                    ← Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{ flex: 1.5, padding: '0.75rem 1.25rem', fontSize: '0.95rem' }}
+                    disabled={guardando}
+                  >
+                    {guardando ? 'Guardando Incidente…' : '✅ Registrar Incidente'}
                   </button>
                 </div>
               </form>

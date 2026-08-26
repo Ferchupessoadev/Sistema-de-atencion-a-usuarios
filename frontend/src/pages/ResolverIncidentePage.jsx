@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextViewer from '../components/RichTextViewer';
+import SearchableSelect from '../components/SearchableSelect';
 import NotificationBell from '../components/NotificationBell';
 import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
 
@@ -204,9 +205,9 @@ export default function ResolverIncidentePage() {
             <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '0.35rem' }}>
               Descripción del Problema reportado por el Usuario
             </span>
-            <p style={{ color: '#0F172A', fontSize: '1rem', lineHeight: 1.5, whiteSpace: 'pre-line', margin: 0 }}>
-              {incidente.descripcion}
-            </p>
+            <div style={{ color: '#0F172A', fontSize: '0.95rem', lineHeight: 1.5, margin: 0 }}>
+              <RichTextViewer content={incidente.descripcion} />
+            </div>
           </div>
 
           <div className="incident-meta" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
@@ -290,29 +291,25 @@ export default function ResolverIncidentePage() {
             {/* MODO 2: Seleccionar Receta Existente */}
             {modoResolucion === 'RECETA' && (
               <div>
-                <div style={{ marginBottom: '1rem' }}>
-                  <input
-                    type="text"
-                    placeholder="🔍 Filtrar recetas por título o palabra clave..."
-                    value={busquedaReceta}
-                    onChange={(e) => setBusquedaReceta(e.target.value)}
-                  />
-                </div>
-
                 <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                  <label htmlFor="res-receta-select">Seleccionar Guía / Receta</label>
-                  <select
-                    id="res-receta-select"
+                  <label htmlFor="res-receta-search" style={{ fontWeight: 600, color: '#1E293B', display: 'block', marginBottom: '0.4rem' }}>
+                    Buscar Guía / Receta de Solución <span style={{ color: '#EF4444' }}>*</span>
+                  </label>
+                  <SearchableSelect
+                    inputId="res-receta-search"
+                    options={recetas.map(r => ({
+                      value: r.id,
+                      label: r.titulo,
+                      sublabel: `Categoría: ${r.categoria?.nombre || 'General'} · Usos: ${r.usos}`,
+                      keywords: r.keywords || '',
+                      badge: r.categoria?.nombre || 'General',
+                    }))}
                     value={recetaSeleccionadaId}
-                    onChange={(e) => setRecetaSeleccionadaId(e.target.value)}
+                    onChange={(val) => setRecetaSeleccionadaId(val)}
+                    placeholder="Escribe para buscar recetas por título o palabra clave..."
+                    emptyMessage="No se encontraron recetas con ese término."
                     required
-                  >
-                    {recetasFiltradas.map(r => (
-                      <option key={r.id} value={r.id}>
-                        {r.titulo} (Categoría: {r.categoria?.nombre || 'General'} · Usos: {r.usos})
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 {recetaActual ? (
@@ -331,7 +328,7 @@ export default function ResolverIncidentePage() {
                     </div>
                   </div>
                 ) : (
-                  <p style={{ color: '#64748B', fontSize: '0.9rem' }}>No se encontraron recetas con ese término de búsqueda.</p>
+                  <p style={{ color: '#64748B', fontSize: '0.9rem' }}>Escribe en el buscador para encontrar una receta existente.</p>
                 )}
               </div>
             )}

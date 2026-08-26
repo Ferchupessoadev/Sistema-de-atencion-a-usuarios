@@ -238,6 +238,7 @@ class DatabaseSeeder extends Seeder
 
         $recetasCreadas = [];
         foreach ($recetasData as $r) {
+            unset($r['votos_util'], $r['votos_no_util']);
             $recetasCreadas[] = Receta::create($r);
         }
 

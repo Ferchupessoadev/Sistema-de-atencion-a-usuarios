@@ -5,6 +5,7 @@ import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
 import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
+import RichTextEditor from '../components/RichTextEditor';
 import RichTextViewer from '../components/RichTextViewer';
 
 export default function DashboardUsuario() {
@@ -65,6 +66,13 @@ export default function DashboardUsuario() {
   const handleCrearIncidente = async (e) => {
     e.preventDefault();
     setErrorCreacion('');
+
+    const textoLimpio = descripcion.replace(/<[^>]*>/g, '').trim();
+    if (!descripcion || textoLimpio.length < 5) {
+      setErrorCreacion('Por favor escribe una descripción del problema (mínimo 5 caracteres).');
+      return;
+    }
+
     setGuardando(true);
 
     try {
@@ -254,9 +262,9 @@ export default function DashboardUsuario() {
                       </span>
                     </div>
 
-                    <p style={{ color: '#1e293b', fontSize: '0.95rem', marginBottom: '0.75rem', whiteSpace: 'pre-line' }}>
-                      {inc.descripcion}
-                    </p>
+                    <div style={{ color: '#1e293b', fontSize: '0.95rem', marginBottom: '0.75rem' }}>
+                      <RichTextViewer content={inc.descripcion} />
+                    </div>
 
                     {inc.receta && (
                       <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem', padding: '0.75rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '0.85rem' }}>
@@ -282,15 +290,27 @@ export default function DashboardUsuario() {
               </div>
             )}
 
-            {/* Modal de Creación de Incidente */}
+            {/* Modal de Creación de Incidente con TipTap */}
             {modalAbierto && (
               <div className="modal-overlay">
-                <div className="modal-content">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                    <h2 style={{ fontSize: '1.25rem', color: '#022E5B', fontWeight: 800 }}>Reportar Nuevo Incidente</h2>
+                <div className="modal-content modal-lg">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span style={{ fontSize: '1.8rem' }}>🎫</span>
+                      <div>
+                        <h2 style={{ fontSize: '1.3rem', color: 'var(--c-navy)', fontWeight: 800, margin: 0 }}>
+                          Reportar Nuevo Incidente
+                        </h2>
+                        <span style={{ fontSize: '0.785rem', color: '#64748B' }}>
+                          Describe el problema para que el equipo de soporte técnico pueda asistirte
+                        </span>
+                      </div>
+                    </div>
                     <button
+                      type="button"
                       onClick={() => setModalAbierto(false)}
-                      style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94a3b8' }}
+                      style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94A3B8' }}
+                      title="Cerrar modal"
                     >
                       ✕
                     </button>
@@ -299,48 +319,50 @@ export default function DashboardUsuario() {
                   {errorCreacion && <div className="alert alert-error">{errorCreacion}</div>}
 
                   <form onSubmit={handleCrearIncidente}>
-                    <div className="form-group">
-                      <label htmlFor="modal-categoria">Categoría del Problema</label>
-                      <select
-                        id="modal-categoria"
-                        value={idCategoria}
-                        onChange={(e) => setIdCategoria(e.target.value)}
-                        required
-                      >
-                        {categorias.map(cat => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.nombre}
-                          </option>
-                        ))}
-                      </select>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '1rem', marginBottom: '1.2rem' }}>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label htmlFor="modal-categoria" style={{ fontWeight: 600, color: '#1E293B' }}>
+                          Categoría del Problema <span style={{ color: '#EF4444' }}>*</span>
+                        </label>
+                        <select
+                          id="modal-categoria"
+                          value={idCategoria}
+                          onChange={(e) => setIdCategoria(e.target.value)}
+                          required
+                        >
+                          {categorias.map(cat => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.nombre}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label htmlFor="modal-interno" style={{ fontWeight: 600, color: '#1E293B' }}>
+                          Interno de Contacto
+                        </label>
+                        <input
+                          id="modal-interno"
+                          type="text"
+                          value={interno}
+                          onChange={(e) => setInterno(e.target.value)}
+                          placeholder="Ej. 3105, 3777, 3422..."
+                        />
+                      </div>
                     </div>
 
-                    <div className="form-group">
-                      <label htmlFor="modal-interno">Interno de contacto (Opcional)</label>
-                      <input
-                        id="modal-interno"
-                        type="text"
-                        value={interno}
-                        onChange={(e) => setInterno(e.target.value)}
-                        placeholder="Ej. 3105, 3777, 3422..."
-                      />
-                      <span style={{ fontSize: '0.725rem', color: '#64748B' }}>
-                        Permite que el técnico de soporte se comunique directamente a tu puesto.
-                      </span>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="modal-descripcion">Descripción detallada del incidente</label>
-                      <textarea
-                        id="modal-descripcion"
-                        rows="4"
+                    <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', fontWeight: 600, color: '#1E293B' }}>
+                        <span>Descripción Detallada del Incidente <span style={{ color: '#EF4444' }}>*</span></span>
+                        <span style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 400 }}>Editor con formato enriquecido</span>
+                      </label>
+                      <RichTextEditor
                         value={descripcion}
-                        onChange={(e) => setDescripcion(e.target.value)}
-                        placeholder="Describe el inconveniente de manera clara (ej. Mi equipo no enciende, la impresora emite error de papel, etc.)"
-                        required
-                        minLength={5}
+                        onChange={setDescripcion}
+                        placeholder="Describe el inconveniente de manera clara (puedes incluir pasos que realizaste, mensajes de error en pantalla, listas con viñetas, etc.)..."
+                        minHeight="200px"
                       />
-                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Mínimo 5 caracteres.</span>
                     </div>
 
                     <div className="modal-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
@@ -349,17 +371,18 @@ export default function DashboardUsuario() {
                         className="btn btn-secondary"
                         style={{ flex: 1 }}
                         onClick={() => setModalAbierto(false)}
+                        disabled={guardando}
                       >
-                        Cancelar
+                        ← Cancelar
                       </button>
                       <button
                         id="btn-submit-incidente"
                         type="submit"
                         className="btn btn-primary"
-                        style={{ flex: 1 }}
+                        style={{ flex: 1.5, padding: '0.75rem 1.25rem', fontSize: '0.95rem' }}
                         disabled={guardando}
                       >
-                        {guardando ? 'Guardando…' : 'Registrar Incidente'}
+                        {guardando ? 'Guardando Incidente…' : '✅ Registrar Incidente'}
                       </button>
                     </div>
                   </form>
