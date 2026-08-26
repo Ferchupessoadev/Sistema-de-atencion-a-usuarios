@@ -17,7 +17,7 @@ class SecurityTest extends TestCase
     {
         $user = User::create(array_merge([
             'nombre'     => 'Usuario Test',
-            'correo'     => 'usuario@ctm.com',
+            'correo'     => 'usuario_' . uniqid() . '@ctm.com',
             'contrasena' => Hash::make('Password123'),
             'es_tecnico' => $esTecnico,
         ], $overrides));
@@ -153,5 +153,39 @@ class SecurityTest extends TestCase
         ]);
 
         $bloqueado->assertStatus(429);
+    }
+
+    /** @test */
+    public function test_tecnico_puede_gestionar_crud_de_categorias(): void
+    {
+        $tecnico = $this->crearUsuario(true);
+        $usuario = $this->crearUsuario(false);
+
+        // 1. Técnico crea categoría
+        $resCrear = $this->actingAs($tecnico, 'sanctum')->postJson('/api/categorias', [
+            'nombre' => 'Nueva Categoria Test',
+        ]);
+        $resCrear->assertStatus(201);
+        $catId = $resCrear->json('categoria.id');
+
+        // 2. Usuario común no puede editar ni borrar
+        $this->actingAs($usuario, 'sanctum')
+            ->putJson("/api/categorias/{$catId}", ['nombre' => 'Hacked'])
+            ->assertStatus(403);
+
+        $this->actingAs($usuario, 'sanctum')
+            ->deleteJson("/api/categorias/{$catId}")
+            ->assertStatus(403);
+
+        // 3. Técnico edita categoría
+        $resEdit = $this->actingAs($tecnico, 'sanctum')
+            ->putJson("/api/categorias/{$catId}", ['nombre' => 'Categoria Actualizada']);
+        $resEdit->assertStatus(200);
+
+        // 4. Técnico elimina categoría sin dependencias
+        $resDel = $this->actingAs($tecnico, 'sanctum')
+            ->deleteJson("/api/categorias/{$catId}");
+        $resDel->assertStatus(200);
+        $this->assertDatabaseMissing('categorias', ['id' => $catId]);
     }
 }

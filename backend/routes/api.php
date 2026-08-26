@@ -45,8 +45,10 @@ Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function () {
     // Listado de usuarios (solo técnicos)
     Route::get('/users', [ProfileController::class, 'listUsers']);
 
-    // Categorías
-    Route::post('/categorias', [CategoriaController::class, 'store']);
+    // Categorías (CRUD para técnicos / AICO)
+    Route::post('/categorias',        [CategoriaController::class, 'store']);
+    Route::put('/categorias/{id}',    [CategoriaController::class, 'update']);
+    Route::delete('/categorias/{id}', [CategoriaController::class, 'destroy']);
 
 
     // Base de Conocimientos - Recetas (Fase 4 y Mejoras)

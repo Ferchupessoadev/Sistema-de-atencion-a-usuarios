@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import NotificationBell from '../components/NotificationBell';
 import RecetasManager from '../components/RecetasManager';
+import CategoriasManager from '../components/CategoriasManager';
 import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextViewer from '../components/RichTextViewer';
@@ -13,9 +14,8 @@ export default function DashboardTecnico() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Áreas predefinidas para derivación
+  // Áreas predefinidas para derivación especializada
   const AREAS_DERIVACION = [
-    { value: 'AICO - Atención a Usuarios', label: 'AICO - Atención a Usuarios', sublabel: 'Mesa de ayuda y soporte de primer nivel' },
     { value: 'Redes e Internet', label: 'Redes e Internet', sublabel: 'Conectividad, switches, cableado estructurado, VPN' },
     { value: 'WIFI y Conectividad', label: 'WIFI y Conectividad', sublabel: 'Access points, cobertura inalámbrica, autenticación' },
     { value: 'Telefonía e Internos', label: 'Telefonía e Internos', sublabel: 'Centrales telefónicas, internos, VoIP' },
@@ -296,13 +296,19 @@ export default function DashboardTecnico() {
               className={`btn ${seccionActiva === 'INCIDENTES' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
               onClick={() => setSeccionActiva('INCIDENTES')}
             >
-              🛠️ Incidentes del Sistema ({incidentes.length})
+              🛠️ Incidentes ({incidentes.length})
             </button>
             <button
               className={`btn ${seccionActiva === 'RECETAS' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
               onClick={() => setSeccionActiva('RECETAS')}
             >
               📚 Base de Conocimientos ({recetas.length})
+            </button>
+            <button
+              className={`btn ${seccionActiva === 'CATEGORIAS' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+              onClick={() => setSeccionActiva('CATEGORIAS')}
+            >
+              🏷️ Categorías
             </button>
             <button
               className={`btn ${seccionActiva === 'ALERTAS' ? 'btn-danger' : 'btn-secondary'} btn-sm`}
@@ -357,6 +363,8 @@ export default function DashboardTecnico() {
 
         {seccionActiva === 'RECETAS' ? (
           <RecetasManager />
+        ) : seccionActiva === 'CATEGORIAS' ? (
+          <CategoriasManager />
         ) : seccionActiva === 'USUARIOS' ? (
           <div>
             <div className="card" style={{ marginBottom: '1.5rem' }}>

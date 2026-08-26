@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
         $this->call([RolesAndPermissionsSeeder::class, CategoriasSeeder::class]);
 
         $categorias = Categoria::whereIn('nombre', [
-            'AICO - Atención a Usuarios',
             'Computadora y Hardware',
             'Impresoras y Fotocopiadoras',
             'Redes e Internet',
@@ -29,7 +28,6 @@ class DatabaseSeeder extends Seeder
             'Accesos y Seguridad',
         ])->get()->keyBy('nombre');
 
-        $cAICO = $categorias->get('AICO - Atención a Usuarios');
         $cComputadora = $categorias->get('Computadora y Hardware');
         $cImpresora = $categorias->get('Impresoras y Fotocopiadoras');
         $cRedes = $categorias->get('Redes e Internet');
@@ -184,7 +182,7 @@ class DatabaseSeeder extends Seeder
 
             [
                 'titulo'        => 'DESBLOQUEO DE CUENTA DE ACTIVE DIRECTORY POR INTENTOS FALLIDOS',
-                'id_categoria'  => $cAICO->id,
+                'id_categoria'  => $cAccesos->id,
                 'usos'          => 45,
                 'keywords'      => 'bloqueada, bloqueo, active directory, usuario, clave temporal, ad, 3777',
                 'solucion'      => "1. Verificar en el controlador de dominio Active Directory si la cuenta del usuario está bloqueada.\n2. Comprobar que el usuario no tenga dispositivos móviles con credenciales antiguas intentando autenticarse.\n3. En Active Directory Users & Computers > Propiedades de Cuenta > tildar 'Desbloquear cuenta'.\n4. Si el usuario olvidó la clave, generar una contraseña provisoria marcando 'Cambiar contraseña en el próximo inicio'.\n5. Comunicar al usuario el restablecimiento por interno 3777 o correo alternativo.",

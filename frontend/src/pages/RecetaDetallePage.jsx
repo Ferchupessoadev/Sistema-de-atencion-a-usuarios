@@ -32,8 +32,9 @@ export default function RecetaDetallePage() {
   const [guardando, setGuardando] = useState(false);
   const [mensajeExito, setMensajeExito] = useState('');
 
-  const getCategoryIcon = (nombre = '') => {
-    const n = (nombre || '').toLowerCase();
+  const getCategoryIcon = (catOrName) => {
+    if (typeof catOrName === 'object' && catOrName?.icono) return catOrName.icono;
+    const n = (typeof catOrName === 'string' ? catOrName : catOrName?.nombre || '').toLowerCase();
     if (n.includes('computadora') || n.includes('hardware') || n.includes('pc') || n.includes('pantalla')) return '💻';
     if (n.includes('impresora') || n.includes('fotocopiadora') || n.includes('toner') || n.includes('hoja')) return '🖨️';
     if (n.includes('red') || n.includes('internet') || n.includes('cableado') || n.includes('vpn')) return '🌐';
@@ -42,7 +43,6 @@ export default function RecetaDetallePage() {
     if (n.includes('k2b') || n.includes('erp') || n.includes('sistema') || n.includes('genexus')) return '🏢';
     if (n.includes('acceso') || n.includes('seguridad') || n.includes('password') || n.includes('clave')) return '🔒';
     if (n.includes('software') || n.includes('aplicacion') || n.includes('office') || n.includes('outlook')) return '📦';
-    if (n.includes('aico') || n.includes('atencion') || n.includes('soporte')) return '🎧';
     return '💡';
   };
 

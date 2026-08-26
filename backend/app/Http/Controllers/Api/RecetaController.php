@@ -212,8 +212,11 @@ class RecetaController extends Controller
         $receta->votos_no_util = (int) $receta->votos_no_util;
 
         return response()->json([
-            'message' => 'Voto registrado correctamente.',
-            'receta' => $receta,
+            'message'       => '¡Gracias por tu valoración!',
+            'votos_util'    => (int) $receta->votos_util,
+            'votos_no_util' => (int) $receta->votos_no_util,
+            'mi_voto'       => $request->tipo,
+            'receta'        => $receta,
         ]);
     }
 
