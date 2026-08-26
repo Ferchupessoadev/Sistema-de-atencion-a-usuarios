@@ -188,4 +188,36 @@ class SecurityTest extends TestCase
         $resDel->assertStatus(200);
         $this->assertDatabaseMissing('categorias', ['id' => $catId]);
     }
+
+    /** @test */
+    public function test_usuario_puede_subir_y_eliminar_foto_de_perfil(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $usuario = $this->crearUsuario(false);
+
+        // Crear archivo de imagen simulado
+        $file = \Illuminate\Http\UploadedFile::fake()->create('avatar.jpg', 50, 'image/jpeg');
+
+        // 1. Subir foto
+        $res = $this->actingAs($usuario, 'sanctum')
+            ->postJson('/api/profile/foto', [
+                'foto' => $file,
+            ]);
+
+        $res->assertStatus(200)
+            ->assertJsonPath('message', 'Foto de perfil optimizada y actualizada correctamente.');
+
+        $this->assertNotNull($res->json('foto_url'));
+        $usuarioFresh = $usuario->fresh();
+        $this->assertNotNull($usuarioFresh->foto);
+        $this->assertEquals(1, $usuarioFresh->getMedia('avatars')->count());
+
+        // 2. Eliminar foto
+        $resDel = $this->actingAs($usuario, 'sanctum')
+            ->deleteJson('/api/profile/foto');
+
+        $resDel->assertStatus(200);
+        $this->assertNull($usuario->fresh()->foto);
+        $this->assertEquals(0, $usuario->fresh()->getMedia('avatars')->count());
+    }
 }
