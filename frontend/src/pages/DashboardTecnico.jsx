@@ -256,6 +256,13 @@ export default function DashboardTecnico() {
             👤 Mi Perfil
           </button>
           <NotificationBell />
+          {user?.foto_url ? (
+            <img src={user.foto_url} alt={user.nombre} className="navbar-avatar-img" />
+          ) : (
+            <span className="navbar-avatar-initials">
+              {user?.nombre ? user.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'}
+            </span>
+          )}
           <span className="badge badge-tecnico" style={{ background: '#DBEAFE', color: '#022E5B' }}>Técnico</span>
           <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
           <button
@@ -392,8 +399,12 @@ export default function DashboardTecnico() {
                 })
                 .map(u => (
                   <div key={u.id} className="user-card card">
-                    <div className="user-card-avatar">
-                      {u.nombre ? u.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'}
+                    <div className="user-card-avatar" style={{ padding: 0, overflow: 'hidden' }}>
+                      {u.foto_url ? (
+                        <img src={u.foto_url} alt={u.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        u.nombre ? u.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'
+                      )}
                     </div>
                     <div className="user-card-info">
                       <h3 className="user-card-name">{u.nombre}</h3>
@@ -496,25 +507,104 @@ export default function DashboardTecnico() {
             {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
             {errorAccion && !modalDerivar && <div className="alert alert-error">{errorAccion}</div>}
 
-            {/* Métricas rápidas */}
+            {/* Métricas rápidas e interactivas */}
             <div className="stats-grid">
-              <div className="stat-box">
+              <div
+                className={`stat-box clickable ${filtroEstado === 'TODOS' && filtroPrioridad === 'TODAS' ? 'active' : ''}`}
+                onClick={() => {
+                  setFiltroEstado('TODOS');
+                  setFiltroPrioridad('TODAS');
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    setFiltroEstado('TODOS');
+                    setFiltroPrioridad('TODAS');
+                  }
+                }}
+                title="Toca para ver todos los incidentes del sistema"
+              >
                 <div className="stat-number">{incidentes.length}</div>
                 <div className="stat-label">Total Sistema</div>
               </div>
-              <div className="stat-box">
+
+              <div
+                className={`stat-box clickable ${filtroEstado === 'ABIERTO' && filtroPrioridad === 'TODAS' ? 'active' : ''}`}
+                onClick={() => {
+                  setFiltroEstado(prev => (prev === 'ABIERTO' ? 'TODOS' : 'ABIERTO'));
+                  setFiltroPrioridad('TODAS');
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    setFiltroEstado(prev => (prev === 'ABIERTO' ? 'TODOS' : 'ABIERTO'));
+                    setFiltroPrioridad('TODAS');
+                  }
+                }}
+                title="Toca para mostrar solo los incidentes Sin Asignar / Abiertos"
+              >
                 <div className="stat-number" style={{ color: '#b45309' }}>{totalAbiertos}</div>
                 <div className="stat-label">Sin Asignar / Abiertos</div>
               </div>
-              <div className="stat-box">
+
+              <div
+                className={`stat-box clickable ${filtroEstado === 'EN_CURSO' && filtroPrioridad === 'TODAS' ? 'active' : ''}`}
+                onClick={() => {
+                  setFiltroEstado(prev => (prev === 'EN_CURSO' ? 'TODOS' : 'EN_CURSO'));
+                  setFiltroPrioridad('TODAS');
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    setFiltroEstado(prev => (prev === 'EN_CURSO' ? 'TODOS' : 'EN_CURSO'));
+                    setFiltroPrioridad('TODAS');
+                  }
+                }}
+                title="Toca para mostrar solo los incidentes En Atención / En Curso"
+              >
                 <div className="stat-number" style={{ color: '#1d4ed8' }}>{totalEnCurso}</div>
                 <div className="stat-label">En Atención</div>
               </div>
-              <div className="stat-box">
+
+              <div
+                className={`stat-box clickable ${filtroPrioridad === 'ALTA' ? 'active' : ''}`}
+                onClick={() => {
+                  setFiltroPrioridad(prev => (prev === 'ALTA' ? 'TODAS' : 'ALTA'));
+                  if (filtroEstado === 'RESUELTO') setFiltroEstado('TODOS');
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    setFiltroPrioridad(prev => (prev === 'ALTA' ? 'TODAS' : 'ALTA'));
+                    if (filtroEstado === 'RESUELTO') setFiltroEstado('TODOS');
+                  }
+                }}
+                title="Toca para mostrar solo los incidentes de Prioridad ALTA Activos"
+              >
                 <div className="stat-number" style={{ color: '#b91c1c' }}>{totalAlta}</div>
                 <div className="stat-label">Prioridad Alta Activos</div>
               </div>
-              <div className="stat-box">
+
+              <div
+                className={`stat-box clickable ${filtroEstado === 'RESUELTO' && filtroPrioridad === 'TODAS' ? 'active' : ''}`}
+                onClick={() => {
+                  setFiltroEstado(prev => (prev === 'RESUELTO' ? 'TODOS' : 'RESUELTO'));
+                  setFiltroPrioridad('TODAS');
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    setFiltroEstado(prev => (prev === 'RESUELTO' ? 'TODOS' : 'RESUELTO'));
+                    setFiltroPrioridad('TODAS');
+                  }
+                }}
+                title="Toca para mostrar solo los incidentes Resueltos"
+              >
                 <div className="stat-number" style={{ color: '#047857' }}>{totalResueltos}</div>
                 <div className="stat-label">Resueltos</div>
               </div>

@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -22,11 +23,13 @@ class ProfileController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'id'       => $user->id,
-            'nombre'   => $user->nombre,
-            'correo'   => $user->correo,
-            'interno'  => $user->interno,
-            'roles'    => $user->getRoleNames(),
+            'id'         => $user->id,
+            'nombre'     => $user->nombre,
+            'correo'     => $user->correo,
+            'interno'    => $user->interno,
+            'foto'       => $user->foto,
+            'foto_url'   => $user->foto_url,
+            'roles'      => $user->getRoleNames(),
             'es_tecnico' => $user->hasRole('tecnico'),
             'created_at' => $user->created_at,
         ]);
@@ -46,10 +49,88 @@ class ProfileController extends Controller
         return response()->json([
             'message' => 'Perfil actualizado correctamente.',
             'user'    => [
-                'id'       => $user->id,
-                'nombre'   => $user->nombre,
-                'correo'   => $user->correo,
-                'interno'  => $user->interno,
+                'id'         => $user->id,
+                'nombre'     => $user->nombre,
+                'correo'     => $user->correo,
+                'interno'    => $user->interno,
+                'foto'       => $user->foto,
+                'foto_url'   => $user->foto_url,
+                'es_tecnico' => $user->hasRole('tecnico'),
+            ],
+        ]);
+    }
+
+    /**
+     * POST /api/profile/foto
+     * Sube y actualiza la foto de perfil del usuario optimizándola con Spatie MediaLibrary.
+     */
+    public function uploadFoto(Request $request): JsonResponse
+    {
+        $request->validate([
+            'foto' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', // Max 2MB
+        ], [
+            'foto.required' => 'Debes seleccionar una imagen para tu foto de perfil.',
+            'foto.image'    => 'El archivo seleccionado debe ser una imagen.',
+            'foto.mimes'    => 'Formatos permitidos: JPG, PNG, WEBP o JPEG.',
+            'foto.max'      => 'La foto no debe superar los 2 MB de tamaño.',
+        ]);
+
+        $user = $request->user();
+
+        // Limpiar colección previa y almacenar la nueva imagen en Spatie MediaLibrary
+        $user->clearMediaCollection('avatars');
+        $media = $user->addMediaFromRequest('foto')
+            ->toMediaCollection('avatars');
+
+        $user->update([
+            'foto' => $media->getUrl(),
+        ]);
+
+        return response()->json([
+            'message'  => 'Foto de perfil optimizada y actualizada correctamente.',
+            'foto'     => $media->getUrl(),
+            'foto_url' => $user->foto_url,
+            'user'     => [
+                'id'         => $user->id,
+                'nombre'     => $user->nombre,
+                'correo'     => $user->correo,
+                'interno'    => $user->interno,
+                'foto'       => $user->foto,
+                'foto_url'   => $user->foto_url,
+                'es_tecnico' => $user->hasRole('tecnico'),
+            ],
+        ]);
+    }
+
+    /**
+     * DELETE /api/profile/foto
+     * Elimina la foto de perfil del usuario.
+     */
+    public function removeFoto(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $user->clearMediaCollection('avatars');
+
+        if ($user->foto && !str_starts_with($user->foto, 'http') && Storage::disk('public')->exists($user->foto)) {
+            Storage::disk('public')->delete($user->foto);
+        }
+
+        $user->update([
+            'foto' => null,
+        ]);
+
+        return response()->json([
+            'message'  => 'Foto de perfil eliminada correctamente.',
+            'foto'     => null,
+            'foto_url' => null,
+            'user'     => [
+                'id'         => $user->id,
+                'nombre'     => $user->nombre,
+                'correo'     => $user->correo,
+                'interno'    => $user->interno,
+                'foto'       => null,
+                'foto_url'   => null,
                 'es_tecnico' => $user->hasRole('tecnico'),
             ],
         ]);
@@ -89,7 +170,7 @@ class ProfileController extends Controller
     {
         Gate::authorize('viewAny', User::class);
 
-        $users = User::select('id', 'nombre', 'correo', 'interno', 'created_at')
+        $users = User::select('id', 'nombre', 'correo', 'interno', 'foto', 'created_at')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function (User $user) {
@@ -98,6 +179,8 @@ class ProfileController extends Controller
                     'nombre'     => $user->nombre,
                     'correo'     => $user->correo,
                     'interno'    => $user->interno,
+                    'foto'       => $user->foto,
+                    'foto_url'   => $user->foto_url,
                     'roles'      => $user->getRoleNames(),
                     'created_at' => $user->created_at,
                 ];
