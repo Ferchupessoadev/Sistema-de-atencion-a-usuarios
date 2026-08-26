@@ -1,0 +1,155 @@
+/* Contenedor principal de la barra de navegación */
+.dashboard-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    /* Ajusta el fondo de tu nav general si es necesario */
+}
+
+.dashboard-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.dashboard-nav-icon {
+    font-size: 1.6rem;
+}
+
+.dashboard-nav-subtitle {
+    font-size: 0.725rem;
+    color: #93C5FD;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+.dashboard-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Contenedor del Dropdown */
+.user-dropdown-container {
+    position: relative;
+}
+
+/* Botón disparador del usuario (Avatar + Nombre) */
+.user-menu-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.user-menu-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Avatar circular */
+.user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #1d4ed8;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.user-name {
+    font-size: 0.9rem;
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+.dropdown-arrow {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Menú flotante (Estilo Facebook) */
+.user-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+    width: 220px;
+    padding: 0.5rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    animation: fadeInDropdown 0.15s ease-out;
+}
+
+.user-dropdown-header {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 0.25rem;
+}
+
+.user-dropdown-title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #111827;
+}
+
+.user-dropdown-subtitle {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+/* Opciones dentro del menú */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    fontSize: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f3f4f6;
+}
+
+.dropdown-item.logout {
+    color: #dc2626;
+}
+
+.dropdown-item.logout:hover {
+    background-color: #fee2e2;
+}
+
+/* Animación sutil de aparición */
+@keyframes fadeInDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
