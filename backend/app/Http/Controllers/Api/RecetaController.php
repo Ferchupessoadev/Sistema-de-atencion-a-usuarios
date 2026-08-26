@@ -12,40 +12,62 @@ class RecetaController extends Controller
 {
     /**
      * GET /api/recetas
-     * Listar y buscar recetas en la base de conocimientos (incluyendo keywords).
+     * Listar y buscar recetas en la base de conocimientos.
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Receta::with('categoria');
+        $query = Receta::with('categoria')
+            ->withCount([
+                'votos as votos_util' => function ($q) {
+                    $q->where('tipo', 'UTIL');
+                },
+                'votos as votos_no_util' => function ($q) {
+                    $q->where('tipo', 'NO_UTIL');
+                },
+            ]);
 
+        // Filtro por categoría
         if ($request->filled('id_categoria')) {
-            $query->where('id_categoria', $request->id_categoria);
+            $query->where(
+                'id_categoria',
+                $request->id_categoria
+            );
         }
 
+        // Búsqueda
         if ($request->filled('q')) {
-            $search = '%' . $request->q . '%';
+            $search = '%' . trim($request->q) . '%';
+
             $query->where(function ($q) use ($search) {
                 $q->where('titulo', 'like', $search)
-                  ->orWhere('solucion', 'like', $search)
-                  ->orWhere('keywords', 'like', $search);
+                    ->orWhere('solucion', 'like', $search)
+                    ->orWhere('keywords', 'like', $search);
             });
         }
 
-        $recetas = $query->orderBy('usos', 'desc')
-                         ->orderByDesc(function ($query) {
-                             $query->selectRaw('count(*)')
-                                   ->from('votos_recetas')
-                                   ->whereColumn('votos_recetas.id_receta', 'recetas.id')
-                                   ->where('tipo', 'UTIL');
-                         })
-                         ->get();
+        // Ordenar por usos y luego por votos útiles
+        $recetas = $query
+            ->orderByDesc('usos')
+            ->orderByDesc('votos_util')
+            ->get();
 
+        // Usuario actual
         $usuarioId = auth('sanctum')->id();
+
+        // Agregar el voto del usuario
         $recetas->each(function (Receta $receta) use ($usuarioId) {
-            $receta->setAttribute(
-                'mi_voto',
-                $usuarioId ? $receta->votos()->where('id_usuario', $usuarioId)->value('tipo') : null
-            );
+
+            $receta->mi_voto = null;
+
+            if ($usuarioId) {
+                $receta->mi_voto = $receta->votos()
+                    ->where('id_usuario', $usuarioId)
+                    ->value('tipo');
+            }
+
+            // Aseguramos que sean números
+            $receta->votos_util = (int) $receta->votos_util;
+            $receta->votos_no_util = (int) $receta->votos_no_util;
         });
 
         return response()->json($recetas);
@@ -111,28 +133,59 @@ class RecetaController extends Controller
 
     /**
      * POST /api/recetas/{id}/votar
-     * Permite a usuarios o técnicos calificar si la solución fue útil o no (registra voto por usuario).
      */
-    public function votar(int $id, Request $request): JsonResponse
+    public function votar(Request $request, int $id): JsonResponse 
     {
         $request->validate([
-            'tipo' => 'required|in:UTIL,NO_UTIL',
+            'tipo' => [
+                'required',
+                'in:UTIL,NO_UTIL',
+            ],
         ]);
+
+        $usuarioId = auth('sanctum')->id();
+
+        if (!$usuarioId) {
+            return response()->json([
+                'message' => 'Debes estar autenticado para votar.',
+            ], 401);
+        }
 
         $receta = Receta::findOrFail($id);
-        $usuarioId = $request->user()->id;
 
-        $receta->registrarVoto($usuarioId, $request->tipo);
-        $receta->setAttribute('mi_voto', $request->tipo);
+        // Registrar o actualizar voto
+        $receta->registrarVoto(
+            $usuarioId,
+            $request->tipo
+        );
+
+        // Recargar relaciones
+        $receta->load('categoria');
+
+        // Recalcular contadores
+        $receta->loadCount([
+            'votos as votos_util' => function ($q) {
+                $q->where('tipo', 'UTIL');
+            },
+            'votos as votos_no_util' => function ($q) {
+                $q->where('tipo', 'NO_UTIL');
+            },
+        ]);
+
+        // Voto del usuario
+        $receta->mi_voto = $receta->votos()
+            ->where('id_usuario', $usuarioId)
+            ->value('tipo');
+
+        $receta->votos_util = (int) $receta->votos_util;
+        $receta->votos_no_util = (int) $receta->votos_no_util;
 
         return response()->json([
-            'message'       => '¡Gracias por tu valoración!',
-            'votos_util'    => $receta->votosUtil(),
-            'votos_no_util' => $receta->votosNoUtil(),
-            'mi_voto'       => $request->tipo,
-            'receta'        => $receta->fresh()->load('categoria')->setAttribute('mi_voto', $request->tipo),
+            'message' => 'Voto registrado correctamente.',
+            'receta' => $receta,
         ]);
     }
+
 
     /**
      * DELETE /api/recetas/{id}

@@ -12,6 +12,7 @@ class Incidente extends Model
     protected $fillable = [
         'descripcion',
         'estado',
+        'solucion',
         'prioridad',
         'resolucion',
         'interno',

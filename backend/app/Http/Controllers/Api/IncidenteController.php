@@ -145,6 +145,7 @@ class IncidenteController extends Controller
                 }
 
                 $incidente->resolucion = now();
+                $incidente->solucion = $request->solucion_texto;
 
                 // Si ingresó una solución personalizada, guardarla automáticamente como nueva Receta en la Base de Conocimientos
                 if ($tieneSolucion && ! $request->filled('id_receta')) {

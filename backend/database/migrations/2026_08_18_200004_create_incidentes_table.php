@@ -20,6 +20,8 @@ return new class extends Migration
             $table->enum('prioridad', ['BAJA', 'MEDIA', 'ALTA'])
                   ->default('MEDIA');
 
+            $table->longText('solucion')->nullable(); // nullable hasta que se resuelva
+
             // Fecha/hora de resolución (nullable hasta que se cierre)
             $table->dateTime('resolucion')->nullable();
 

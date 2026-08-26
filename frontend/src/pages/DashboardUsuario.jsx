@@ -274,6 +274,14 @@ export default function DashboardUsuario() {
                         </div>
                       </div>
                     )}
+                    {inc.solucion && (
+                      <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem', padding: '0.75rem', background: '#fefce8', borderRadius: '8px', border: '1px solid #fde68a', fontSize: '0.85rem' }}>
+                        <strong style={{ color: '#78350f' }}>💡 Solución aplicada (Explicada por el técnico):</strong>
+                        <div style={{ marginTop: '0.35rem', background: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          <RichTextViewer content={inc.solucion} />
+                        </div>
+                      </div>
+                    )}
 
                     <div className="incident-meta">
                       <span>

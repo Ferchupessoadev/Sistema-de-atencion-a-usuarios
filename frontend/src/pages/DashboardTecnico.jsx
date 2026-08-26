@@ -220,10 +220,10 @@ export default function DashboardTecnico() {
   };
 
   // Estadísticas
-  const totalAbiertos  = incidentes.filter(i => i.estado === 'ABIERTO').length;
-  const totalEnCurso   = incidentes.filter(i => i.estado === 'EN_CURSO').length;
+  const totalAbiertos = incidentes.filter(i => i.estado === 'ABIERTO').length;
+  const totalEnCurso = incidentes.filter(i => i.estado === 'EN_CURSO').length;
   const totalResueltos = incidentes.filter(i => i.estado === 'RESUELTO').length;
-  const totalAlta      = incidentes.filter(i => i.prioridad === 'ALTA' && i.estado !== 'RESUELTO').length;
+  const totalAlta = incidentes.filter(i => i.prioridad === 'ALTA' && i.estado !== 'RESUELTO').length;
 
   // Filtrado
   const incidentesFiltrados = incidentes.filter(i => {
@@ -315,7 +315,7 @@ export default function DashboardTecnico() {
               onClick={() => {
                 setSeccionActiva('USUARIOS');
                 if (usuarios.length === 0) {
-                  api.get('/users').then(res => setUsuarios(res.data)).catch(() => {});
+                  api.get('/users').then(res => setUsuarios(res.data)).catch(() => { });
                 }
               }}
             >
@@ -595,6 +595,14 @@ export default function DashboardTecnico() {
                         <strong style={{ color: '#166534' }}>💡 Solución aplicada (Receta #{inc.receta.id}):</strong> {inc.receta.titulo}
                         <div style={{ marginTop: '0.35rem', background: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                           <RichTextViewer content={inc.receta.solucion} />
+                        </div>
+                      </div>
+                    )}
+                    {inc.solucion && (
+                      <div style={{ marginTop: '0.5rem', marginBottom: '0.75rem', padding: '0.75rem', background: '#fefce8', borderRadius: '8px', border: '1px solid #fde68a', fontSize: '0.85rem' }}>
+                        <strong style={{ color: '#78350f' }}>💡 Solución aplicada (Explicada por el técnico):</strong>
+                        <div style={{ marginTop: '0.35rem', background: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          <RichTextViewer content={inc.solucion} />
                         </div>
                       </div>
                     )}
