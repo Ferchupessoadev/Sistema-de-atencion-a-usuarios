@@ -112,52 +112,7 @@ export default function DashboardUsuario() {
   return (
     <div className="dashboard">
       <DashboardResponsiveStyles />
-      <nav className="dashboard-nav">
-        <div className="dashboard-nav-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <span style={{ fontSize: '1.6rem' }}>🎫</span>
-          <div>
-            <h1>Sistema de Soluciones</h1>
-            <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
-              Portal de Usuario {user?.interno && `· Int. ${user.interno}`}
-            </span>
-          </div>
-        </div>
-        <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button
-            id="btn-portal-publico"
-            className="btn btn-outline-header btn-sm"
-            onClick={() => navigate('/')}
-            title="Volver al Portal Público"
-          >
-            🏠 Portal
-          </button>
-          <button
-            id="btn-mi-perfil-usuario"
-            className="btn btn-outline-header btn-sm"
-            onClick={() => navigate('/perfil')}
-            title="Mi Perfil"
-          >
-            👤 Mi Perfil
-          </button>
-          <NotificationBell />
-          {user?.foto_url ? (
-            <img src={user.foto_url} alt={user.nombre} className="navbar-avatar-img" />
-          ) : (
-            <span className="navbar-avatar-initials">
-              {user?.nombre ? user.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'}
-            </span>
-          )}
-          <span className="badge badge-usuario" style={{ background: '#CCFBF1', color: '#0F766E' }}>Usuario</span>
-          <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
-          <button
-            id="btn-logout-usuario"
-            className="btn btn-outline-header btn-sm"
-            onClick={handleLogout}
-          >
-            Cerrar sesión
-          </button>
-        </div>
-      </nav>
+      <DashboardNavbar role="usuario" user={user} onLogout={handleLogout} />
 
       <div className="dashboard-body">
         {/* Navegación por Pestañas Principales */}

@@ -77,7 +77,13 @@ export const DashboardNavbar = ({
                         className="user-menu-trigger"
                     >
                         <div className="user-avatar">
-                            {user?.nombre ? user.nombre.charAt(0).toUpperCase() : '👤'}
+                            {user?.foto_url ? (
+                                <img src={user.foto_url} alt={user.nombre} className="navbar-avatar-img" />
+                            ) : (
+                                <span className="navbar-avatar-initials">
+                                {user?.nombre ? user.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'}
+                                </span>
+                            )}
                         </div>
                         <span className="user-name">
                             {user?.nombre} <span className="dropdown-arrow">▾</span>

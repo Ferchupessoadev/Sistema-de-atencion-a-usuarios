@@ -79,9 +79,6 @@ export default function DashboardTecnico() {
       setCategorias(resCat.data);
       setRecetas(resRec.data);
       setAlertasCriticas(resCriticas.data.incidentes || []);
-      if (resRec.data.length > 0 && !recetaSeleccionada) {
-        setRecetaSeleccionada(resRec.data[0].id);
-      }
     } catch (err) {
       console.error('Error al cargar datos:', err);
     } finally {
@@ -237,44 +234,7 @@ export default function DashboardTecnico() {
   return (
     <div className="dashboard">
       <DashboardResponsiveStyles />
-      <nav className="dashboard-nav">
-        <div className="dashboard-nav-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <span style={{ fontSize: '1.6rem' }}>🛠️</span>
-          <div>
-            <h1>Sistema de Soluciones</h1>
-            <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
-              Consola Técnica de Gestión {user?.interno && `· Int. ${user.interno}`}
-            </span>
-          </div>
-        </div>
-        <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button
-            id="btn-mi-perfil-tecnico"
-            className="btn btn-outline-header btn-sm"
-            onClick={() => navigate('/perfil')}
-            title="Mi Perfil"
-          >
-            👤 Mi Perfil
-          </button>
-          <NotificationBell />
-          {user?.foto_url ? (
-            <img src={user.foto_url} alt={user.nombre} className="navbar-avatar-img" />
-          ) : (
-            <span className="navbar-avatar-initials">
-              {user?.nombre ? user.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'}
-            </span>
-          )}
-          <span className="badge badge-tecnico" style={{ background: '#DBEAFE', color: '#022E5B' }}>Técnico</span>
-          <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
-          <button
-            id="btn-logout-tecnico"
-            className="btn btn-outline-header btn-sm"
-            onClick={handleLogout}
-          >
-            Cerrar sesión
-          </button>
-        </div>
-      </nav>
+      <DashboardNavbar role="tecnico" user={user} onLogout={handleLogout} />
 
       <div className="dashboard-body">
         {/* Banner de Alerta Crítica RN-004 si hay casos vencidos > 2h */}
