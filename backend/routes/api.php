@@ -13,25 +13,26 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | API Routes — Mesa de Ayuda CTM
 |--------------------------------------------------------------------------
-| Rutas públicas (sin autenticación requerida)
+| Rutas públicas (con protección de Rate Limiting anti-DDoS / Brute Force)
 */
 
-Route::post('/register',    [UserController::class, 'register']);
-Route::post('/login',       [UserController::class, 'login']);
+Route::middleware('throttle:10,1')->post('/register', [UserController::class, 'register']);
+Route::middleware('throttle:15,1')->post('/login',    [UserController::class, 'login']);
 
-
-// Base de conocimiento pública (Fase 4)
-Route::get('/recetas',      [RecetaController::class, 'index']);
-Route::get('/recetas/{id}', [RecetaController::class, 'show']);
-Route::get('/categorias',   [CategoriaController::class, 'index']);
+// Base de conocimiento pública (Fase 4 - Rate limit 60 req/min)
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/recetas',      [RecetaController::class, 'index']);
+    Route::get('/recetas/{id}', [RecetaController::class, 'show']);
+    Route::get('/categorias',   [CategoriaController::class, 'index']);
+});
 
 /*
 |--------------------------------------------------------------------------
-| Rutas protegidas (requieren token Sanctum)
+| Rutas protegidas (requieren token Sanctum + Rate Limit)
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function () {
     // Autenticación & Perfil
     Route::post('/logout', [UserController::class, 'logout']);
     Route::get('/user',    [UserController::class, 'me']);

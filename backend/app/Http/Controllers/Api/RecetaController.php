@@ -85,6 +85,25 @@ class RecetaController extends Controller
     }
 
     /**
+     * Sanitiza texto enriquecido HTML permitiendo solo etiquetas seguras (previene Stored XSS).
+     */
+    private static function sanitizeRichText(?string $html): ?string
+    {
+        if ($html === null) {
+            return null;
+        }
+
+        $allowedTags = '<p><br><b><strong><i><em><u><s><strike><h1><h2><h3><h4><h5><h6><ul><ol><li><blockquote><pre><code><hr><a><span><div>';
+        $stripped = strip_tags($html, $allowedTags);
+
+        // Remover manejadores de eventos (onclick, onerror, onload, etc.) y protocolos javascript:
+        $sanitized = preg_replace('/\s*on\w+\s*=\s*(["\']).*?\1/i', '', $stripped);
+        $sanitized = preg_replace('/href\s*=\s*(["\'])\s*javascript:[^"\']*\1/i', 'href="#"', $sanitized);
+
+        return trim($sanitized);
+    }
+
+    /**
      * POST /api/recetas
      * Crear una receta en la base de conocimientos (solo técnicos).
      */
@@ -98,6 +117,8 @@ class RecetaController extends Controller
             'keywords'     => 'nullable|string|max:1000',
             'id_categoria' => 'required|exists:categorias,id',
         ]);
+
+        $validated['solucion'] = self::sanitizeRichText($validated['solucion']);
 
         $receta = Receta::create($validated);
 
@@ -122,6 +143,10 @@ class RecetaController extends Controller
             'keywords'     => 'nullable|string|max:1000',
             'id_categoria' => 'sometimes|exists:categorias,id',
         ]);
+
+        if (isset($validated['solucion'])) {
+            $validated['solucion'] = self::sanitizeRichText($validated['solucion']);
+        }
 
         $receta->update($validated);
 

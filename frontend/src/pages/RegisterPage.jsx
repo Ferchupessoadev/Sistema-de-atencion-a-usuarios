@@ -87,7 +87,7 @@ export default function RegisterPage() {
             </div>
 
             <div style={styles.field}>
-              <label htmlFor="contrasena-reg" style={styles.label}>Contraseña (mín. 6 caracteres)</label>
+              <label htmlFor="contrasena-reg" style={styles.label}>Contraseña (mín. 8 caracteres, letras y números)</label>
               <input
                 id="contrasena-reg"
                 type="password"
@@ -95,7 +95,7 @@ export default function RegisterPage() {
                 value={form.contrasena}
                 onChange={handleChange}
                 required
-                minLength={6}
+                minLength={8}
                 style={styles.input}
                 placeholder="••••••••"
               />
