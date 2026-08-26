@@ -21,9 +21,10 @@ Route::middleware('throttle:15,1')->post('/login',    [UserController::class, 'l
 
 // Base de conocimiento pública (Fase 4 - Rate limit 60 req/min)
 Route::middleware('throttle:60,1')->group(function () {
-    Route::get('/recetas',      [RecetaController::class, 'index']);
-    Route::get('/recetas/{id}', [RecetaController::class, 'show']);
-    Route::get('/categorias',   [CategoriaController::class, 'index']);
+    Route::get('/recetas',        [RecetaController::class, 'index']);
+    Route::get('/recetas/{id}',   [RecetaController::class, 'show']);
+    Route::get('/categorias',     [CategoriaController::class, 'index']);
+    Route::get('/categorias/{id}', [CategoriaController::class, 'show']);
 });
 
 /*

@@ -352,11 +352,12 @@ export default function CategoriasManager() {
                     className="btn btn-secondary btn-sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      abrirModalEditar(cat);
+                      navigate(`/categoria/${cat.id}`);
                     }}
-                    style={{ fontSize: '0.8rem', padding: '0.3rem 0.65rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                    style={{ fontSize: '0.8rem', padding: '0.3rem 0.65rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600 }}
+                    title="Abrir panel completo de modificación de esta categoría"
                   >
-                    ✏️ Editar
+                    ✏️ Modificar
                   </button>
                   <button
                     className="btn btn-danger btn-sm"

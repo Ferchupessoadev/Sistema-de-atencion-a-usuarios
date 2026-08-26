@@ -27,6 +27,21 @@ class CategoriaController extends Controller
     }
 
     /**
+     * GET /api/categorias/{id}
+     * Obtener el detalle de una categoría específica con sus recetas y conteos.
+     */
+    public function show(int $id): JsonResponse
+    {
+        $categoria = Categoria::with(['recetas' => function ($q) {
+            $q->select('id', 'titulo', 'id_categoria', 'usos', 'keywords', 'created_at')->orderBy('titulo');
+        }])
+        ->withCount(['incidentes', 'recetas'])
+        ->findOrFail($id);
+
+        return response()->json($categoria);
+    }
+
+    /**
      * POST /api/categorias
      * Crear una nueva categoría con emoji (solo técnicos / AICO).
      */
