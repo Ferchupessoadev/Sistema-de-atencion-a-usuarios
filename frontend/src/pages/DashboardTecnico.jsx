@@ -9,6 +9,7 @@ import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextViewer from '../components/RichTextViewer';
 import SearchableSelect from '../components/SearchableSelect';
+import { DashboardNavbar } from '../components/Dashboard/DashboardHeader';
 
 export default function DashboardTecnico() {
   const { user, logout } = useAuth();

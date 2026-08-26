@@ -7,6 +7,7 @@ import RecetasManager from '../components/RecetasManager';
 import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextViewer from '../components/RichTextViewer';
+import { DashboardNavbar } from '../components/Dashboard/DashboardHeader';
 
 export default function DashboardUsuario() {
   const { user, logout } = useAuth();
