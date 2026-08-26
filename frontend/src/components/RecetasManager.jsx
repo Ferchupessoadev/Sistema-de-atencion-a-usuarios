@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import RichTextEditor from './RichTextEditor';
 import RichTextViewer from './RichTextViewer';
 
 export default function RecetasManager() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [recetas, setRecetas] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -233,11 +235,11 @@ export default function RecetasManager() {
             <div
               key={r.id}
               className="solution-square-card"
-              onClick={() => setRecetaSeleccionada(r)}
+              onClick={() => navigate(`/receta/${r.id}`)}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setRecetaSeleccionada(r); }}
-              title="Haz clic para ver la solución completa"
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/receta/${r.id}`); }}
+              title="Haz clic para abrir el panel de solución completo"
             >
               {/* Header de la tarjeta */}
               <div className="solution-card-header">

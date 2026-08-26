@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import HeaderPublico from '../components/HeaderPublico';
@@ -6,6 +7,7 @@ import PortalResponsiveStyles from '../components/PortalResponsiveStyles';
 import RichTextViewer from '../components/RichTextViewer';
 
 export default function PortalPublico() {
+  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
   const [recetas, setRecetas] = useState([]);
@@ -13,13 +15,6 @@ export default function PortalPublico() {
   const [busqueda, setBusqueda] = useState('');
   const [catFiltro, setCatFiltro] = useState('');
   const [loading, setLoading] = useState(true);
-
-  // Modal para ver solución completa
-  const [recetaSeleccionada, setRecetaSeleccionada] = useState(null);
-
-  // Votación (solo para usuarios autenticados)
-  const [votandoId, setVotandoId] = useState(null);
-  const [mensajeVoto, setMensajeVoto] = useState({});
 
   const getCategoryIcon = (nombre = '') => {
     const n = (nombre || '').toLowerCase();
@@ -34,7 +29,7 @@ export default function PortalPublico() {
     if (n.includes('aico') || n.includes('atencion') || n.includes('soporte')) return '🎧';
     return '💡';
   };
-
+  
   const cargarRecetas = async () => {
     try {
       setLoading(true);
@@ -170,11 +165,11 @@ export default function PortalPublico() {
               <div
                 key={r.id}
                 className="solution-square-card"
-                onClick={() => setRecetaSeleccionada(r)}
+                onClick={() => navigate(`/receta/${r.id}`)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setRecetaSeleccionada(r); }}
-                title="Haz clic para ver la solución completa paso a paso"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/receta/${r.id}`); }}
+                title="Haz clic para abrir el panel de solución completo"
               >
                 {/* Header de la tarjeta */}
                 <div className="solution-card-header">
