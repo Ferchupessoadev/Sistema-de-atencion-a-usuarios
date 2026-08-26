@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreIncidenteRequest;
+use App\Models\Boceto;
 use App\Models\Incidente;
 use App\Models\Receta;
 use App\Models\User;
@@ -150,14 +151,10 @@ class IncidenteController extends Controller
                     $tituloReceta = $request->input('titulo_receta') 
                         ?: ('Solución para: ' . \Illuminate\Support\Str::limit($incidente->descripcion, 50));
 
-                    $nuevaReceta = Receta::create([
-                        'titulo'       => $tituloReceta,
-                        'solucion'     => $request->solucion_texto,
-                        'id_categoria' => $request->input('id_categoria', $incidente->id_categoria),
-                        'usos'         => 1,
+                    Boceto::create([
+                        'titulo' => $tituloReceta,
+                        'solucion_previa' => $request->solucion_texto,
                     ]);
-
-                    $incidente->id_receta = $nuevaReceta->id;
                 } elseif ($request->filled('id_receta') && $request->id_receta != $incidente->id_receta) {
                     // Si se asoció una receta existente, incrementar contador de uso
                     $receta = Receta::find($request->id_receta);

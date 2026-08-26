@@ -284,13 +284,6 @@ export default function ResolverIncidentePage() {
                     minHeight="260px"
                   />
                 </div>
-
-                <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '8px', padding: '0.85rem 1rem', fontSize: '0.825rem', color: '#047857', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span>💾</span>
-                  <span>
-                    <strong>Auto-guardado:</strong> Esta solución quedará registrada en la Base de Conocimientos para que otros técnicos y usuarios puedan consultarla.
-                  </span>
-                </div>
               </div>
             )}
 
