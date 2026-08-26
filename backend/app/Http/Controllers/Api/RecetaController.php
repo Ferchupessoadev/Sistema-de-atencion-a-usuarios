@@ -148,14 +148,16 @@ class RecetaController extends Controller
         $usuarioId = $request->user()->id;
 
         $receta->registrarVoto($usuarioId, $request->tipo);
-        $receta->setAttribute('mi_voto', $request->tipo);
+
+        $recetaActualizada = $receta->fresh()->load('categoria');
+        $recetaActualizada->setAttribute('mi_voto', $request->tipo);
 
         return response()->json([
             'message'       => '¡Gracias por tu valoración!',
-            'votos_util'    => $receta->votosUtil(),
-            'votos_no_util' => $receta->votosNoUtil(),
+            'votos_util'    => $recetaActualizada->votos_util,
+            'votos_no_util' => $recetaActualizada->votos_no_util,
             'mi_voto'       => $request->tipo,
-            'receta'        => $receta->fresh()->load('categoria')->setAttribute('mi_voto', $request->tipo),
+            'receta'        => $recetaActualizada,
         ]);
     }
 

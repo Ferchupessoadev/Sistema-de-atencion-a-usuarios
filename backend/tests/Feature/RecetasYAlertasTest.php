@@ -109,6 +109,34 @@ class RecetasYAlertasTest extends TestCase
              ->assertStatus(403);
     }
 
+    /** @test */
+    public function test_usuario_puede_votar_receta_y_actualiza_contadores(): void
+    {
+        $usuario = $this->crearUsuario(false);
+        $cat     = $this->crearCategoria();
+        $receta  = Receta::create(['titulo' => 'Receta Votable', 'solucion' => 'Solucion paso a paso', 'id_categoria' => $cat->id]);
+
+        // Voto UTIL
+        $res1 = $this->actingAs($usuario, 'sanctum')
+                     ->postJson("/api/recetas/{$receta->id}/votar", ['tipo' => 'UTIL']);
+
+        $res1->assertStatus(200)
+             ->assertJsonPath('votos_util', 1)
+             ->assertJsonPath('votos_no_util', 0)
+             ->assertJsonPath('mi_voto', 'UTIL')
+             ->assertJsonPath('receta.votos_util', 1);
+
+        // Cambiar a NO_UTIL
+        $res2 = $this->actingAs($usuario, 'sanctum')
+                     ->postJson("/api/recetas/{$receta->id}/votar", ['tipo' => 'NO_UTIL']);
+
+        $res2->assertStatus(200)
+             ->assertJsonPath('votos_util', 0)
+             ->assertJsonPath('votos_no_util', 1)
+             ->assertJsonPath('mi_voto', 'NO_UTIL')
+             ->assertJsonPath('receta.votos_no_util', 1);
+    }
+
     // ─── FASE 5: Alertas y Notificaciones (RN-003 & RN-004) ───────────────────
 
     /** @test */

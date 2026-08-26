@@ -22,6 +22,11 @@ class Receta extends Model
         'usos'          => 'integer',
     ];
 
+    protected $appends = [
+        'votos_util',
+        'votos_no_util',
+    ];
+
     // ─── Relaciones ──────────────────────────────────────────
 
     /** La receta pertenece a una categoría */
