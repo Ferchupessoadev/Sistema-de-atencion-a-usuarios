@@ -9,6 +9,7 @@ import DashboardUsuario from './pages/DashboardUsuario';
 import ProfilePage from './pages/ProfilePage';
 import ResolverIncidentePage from './pages/ResolverIncidentePage';
 import RecetaDetallePage from './pages/RecetaDetallePage';
+import CategoriaDetallePage from './pages/CategoriaDetallePage';
 
 // Guard: requiere autenticación
 function ProtectedRoute({ children }) {
@@ -39,6 +40,10 @@ function AppRoutes() {
       {/* Vista y panel de Solución / Receta individual (pública y accesible por URL) */}
       <Route path="/recetas/:id" element={<RecetaDetallePage />} />
       <Route path="/receta/:id" element={<RecetaDetallePage />} />
+
+      {/* Panel y vista de Gestión de Categoría individual */}
+      <Route path="/categorias/:id" element={<TecnicoRoute><CategoriaDetallePage /></TecnicoRoute>} />
+      <Route path="/categoria/:id" element={<TecnicoRoute><CategoriaDetallePage /></TecnicoRoute>} />
 
       {/* Login público */}
       <Route
