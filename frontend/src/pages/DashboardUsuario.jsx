@@ -17,11 +17,6 @@ export default function DashboardUsuario() {
   const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState('TODOS');
 
-  const [modalConsulta, setModalConsulta] = useState(false);
-  const [descConsulta, setDescConsulta] = useState('');
-  const [guardandoConsulta, setGuardandoConsulta] = useState(false);
-  const [errorConsulta, setErrorConsulta] = useState('');
-  const [exitoConsulta, setExitoConsulta] = useState('');
 
   // Modal de creación
   const [modalAbierto, setModalAbierto] = useState(false);
