@@ -24,9 +24,26 @@ export default function RecetasManager() {
   const [mensajeExito, setMensajeExito] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Modal para ver solución completa
+  const [recetaSeleccionada, setRecetaSeleccionada] = useState(null);
+
   // Votación feedback
   const [votandoId, setVotandoId] = useState(null);
   const [mensajeVoto, setMensajeVoto] = useState({});
+
+  const getCategoryIcon = (nombre = '') => {
+    const n = (nombre || '').toLowerCase();
+    if (n.includes('computadora') || n.includes('hardware') || n.includes('pc') || n.includes('pantalla')) return '💻';
+    if (n.includes('impresora') || n.includes('fotocopiadora') || n.includes('toner') || n.includes('hoja')) return '🖨️';
+    if (n.includes('red') || n.includes('internet') || n.includes('cableado') || n.includes('vpn')) return '🌐';
+    if (n.includes('wifi') || n.includes('inalámbrica') || n.includes('conectividad')) return '📶';
+    if (n.includes('telef') || n.includes('interno') || n.includes('voip') || n.includes('llamada')) return '📞';
+    if (n.includes('k2b') || n.includes('erp') || n.includes('sistema') || n.includes('genexus')) return '🏢';
+    if (n.includes('acceso') || n.includes('seguridad') || n.includes('password') || n.includes('clave')) return '🔒';
+    if (n.includes('software') || n.includes('aplicacion') || n.includes('office') || n.includes('outlook')) return '📦';
+    if (n.includes('aico') || n.includes('atencion') || n.includes('soporte')) return '🎧';
+    return '💡';
+  };
 
   const cargarRecetas = async () => {
     try {
@@ -134,6 +151,9 @@ export default function RecetasManager() {
     try {
       const res = await api.post(`/recetas/${recetaId}/votar`, { tipo });
       setRecetas(prev => prev.map(r => (r.id === recetaId ? res.data.receta : r)));
+      if (recetaSeleccionada && recetaSeleccionada.id === recetaId) {
+        setRecetaSeleccionada(res.data.receta);
+      }
       setMensajeVoto(prev => ({ ...prev, [recetaId]: tipo === 'UTIL' ? '¡Gracias por valorar! 👍' : 'Gracias por el reporte' }));
       setTimeout(() => {
         setMensajeVoto(prev => {
@@ -160,7 +180,7 @@ export default function RecetasManager() {
               📚 Base de Conocimientos & Guías Técnicas
             </h2>
             <p style={{ fontSize: '0.85rem', color: '#64748B', marginTop: '0.2rem' }}>
-              Soluciones paso a paso para resolver incidentes comunes.
+              Soluciones paso a paso para resolver incidentes comunes. Haz clic en cualquier tarjeta para ver el procedimiento completo.
             </p>
           </div>
 
@@ -199,7 +219,7 @@ export default function RecetasManager() {
         </div>
       </div>
 
-      {/* Lista de Recetas */}
+      {/* Lista de Recetas en formato Cuadrado */}
       {loading ? (
         <div className="spinner">Cargando base de conocimientos…</div>
       ) : recetas.length === 0 ? (
@@ -208,120 +228,211 @@ export default function RecetasManager() {
           <p style={{ fontSize: '0.85rem' }}>Prueba con otro término de búsqueda o categoría.</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+        <div className="solution-card-grid">
           {recetas.map(r => (
-            <div key={r.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderTop: '3px solid #022E5B' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <span className="badge badge-cat">📁 {r.categoria?.nombre || 'General'}</span>
-                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#047857', background: '#ECFDF5', padding: '0.2rem 0.5rem', borderRadius: '6px', fontWeight: 700, border: '1px solid #A7F3D0' }}>
-                      ⭐ {r.usos} {r.usos === 1 ? 'uso' : 'usos'}
-                    </span>
-                  </div>
-                </div>
+            <div
+              key={r.id}
+              className="solution-square-card"
+              onClick={() => setRecetaSeleccionada(r)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setRecetaSeleccionada(r); }}
+              title="Haz clic para ver la solución completa"
+            >
+              {/* Header de la tarjeta */}
+              <div className="solution-card-header">
+                <span className="badge badge-cat">
+                  {getCategoryIcon(r.categoria?.nombre)} {r.categoria?.nombre || 'General'}
+                </span>
+                <span className="solution-card-usos" title={`${r.usos} veces aplicada`}>
+                  ⭐ {r.usos} {r.usos === 1 ? 'uso' : 'usos'}
+                </span>
+              </div>
 
-                <h3 style={{ fontSize: '1.05rem', color: '#022E5B', marginBottom: '0.65rem', fontWeight: 800 }}>
+              {/* Cuerpo central: Ícono y Título */}
+              <div className="solution-card-body">
+                <div className="solution-card-icon-circle">
+                  {getCategoryIcon(r.categoria?.nombre)}
+                </div>
+                <h3 className="solution-card-title">
                   {r.titulo}
                 </h3>
 
-                {/* Chips de Palabras Clave / Keywords */}
+                {/* Keywords resumidas */}
                 {r.keywords && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.75rem' }}>
-                    {r.keywords.split(',').map((kw, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          fontSize: '0.7rem',
-                          background: '#EFF6FF',
-                          color: '#1D4ED8',
-                          padding: '0.15rem 0.45rem',
-                          borderRadius: '4px',
-                          border: '1px solid #DBEAFE',
-                          fontWeight: 600,
-                        }}
-                      >
+                  <div className="solution-card-tags">
+                    {r.keywords.split(',').slice(0, 3).map((kw, i) => (
+                      <span key={i} className="solution-tag-chip">
                         #{kw.trim()}
                       </span>
                     ))}
+                    {r.keywords.split(',').length > 3 && (
+                      <span className="solution-tag-more">+{r.keywords.split(',').length - 3}</span>
+                    )}
                   </div>
                 )}
-
-                <div style={{ background: '#F8FAFC', padding: '0.85rem', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                  <RichTextViewer content={r.solucion} />
-                </div>
               </div>
 
-              <div>
-                {/* Sección de Votación / Utilidad */}
-                <div className="portal-receta-footer">
-                  <div className="portal-receta-vote-area">
-                    <span className="portal-receta-vote-label">¿Te sirvió esta solución?</span>
-                    <div className="portal-receta-votos" role="group" aria-label="Valorar receta">
-                    <button
-                      type="button"
-                      disabled={votandoId === r.id}
-                      onClick={() => handleVotar(r.id, 'UTIL')}
-                      className={`portal-voto-btn portal-voto-util ${r.mi_voto === 'UTIL' ? 'active' : ''}`}
-                      title="Esta solución me fue útil"
-                    >
-                      <span className="portal-voto-icon" aria-hidden="true">👍</span>
-                      <span className="portal-voto-copy">
-                        <span>Útil</span>
-                        <strong>{r.votos_util || 0}</strong>
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      disabled={votandoId === r.id}
-                      onClick={() => handleVotar(r.id, 'NO_UTIL')}
-                      className={`portal-voto-btn portal-voto-no-util ${r.mi_voto === 'NO_UTIL' ? 'active' : ''}`}
-                      title="No me sirvió esta solución"
-                    >
-                      <span className="portal-voto-icon" aria-hidden="true">👎</span>
-                      <span className="portal-voto-copy">
-                        <span>No útil</span>
-                        <strong>{r.votos_no_util || 0}</strong>
-                      </span>
-                    </button>
-                    </div>
-                  </div>
-
-                  {r.mi_voto && (
-                    <span className="portal-voto-actual">
-                      Tu voto: <strong>{r.mi_voto === 'UTIL' ? 'Útil 👍' : 'No útil 👎'}</strong>
+              {/* Pie de la tarjeta */}
+              <div className="solution-card-footer">
+                <span className="solution-view-action">
+                  <span>Ver Solución</span>
+                  <span className="solution-view-arrow">→</span>
+                </span>
+                {(r.votos_util > 0 || r.votos_no_util > 0) && (
+                  <div className="solution-card-rating">
+                    <span className="solution-rating-pill" title={`${r.votos_util || 0} personas la calificaron como útil`}>
+                      👍 {r.votos_util || 0}
                     </span>
-                  )}
-
-                  {mensajeVoto[r.id] && (
-                    <span style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 600 }}>
-                      {mensajeVoto[r.id]}
-                    </span>
-                  )}
-                </div>
-
-                {user?.es_tecnico && (
-                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', borderTop: '1px solid #F1F5F9', paddingTop: '0.65rem' }}>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      style={{ flex: 1 }}
-                      onClick={() => abrirModalEditar(r)}
-                    >
-                      ✏️ Editar
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      style={{ padding: '0.4rem 0.6rem' }}
-                      onClick={() => handleEliminarReceta(r.id)}
-                      title="Eliminar receta"
-                    >
-                      🗑️
-                    </button>
                   </div>
                 )}
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal de Detalle de Solución Completa */}
+      {recetaSeleccionada && (
+        <div className="modal-overlay" onClick={() => setRecetaSeleccionada(null)}>
+          <div
+            className="modal-content modal-lg solution-modal-detail"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del Modal */}
+            <div className="solution-modal-header">
+              <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start', flex: 1 }}>
+                <div className="solution-modal-icon-badge">
+                  {getCategoryIcon(recetaSeleccionada.categoria?.nombre)}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
+                    <span className="badge badge-cat">
+                      📁 {recetaSeleccionada.categoria?.nombre || 'General'}
+                    </span>
+                    <span className="solution-card-usos">
+                      ⭐ {recetaSeleccionada.usos} {recetaSeleccionada.usos === 1 ? 'uso registrado' : 'usos registrados'}
+                    </span>
+                  </div>
+                  <h2 className="solution-modal-title">
+                    {recetaSeleccionada.titulo}
+                  </h2>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="solution-modal-close"
+                onClick={() => setRecetaSeleccionada(null)}
+                title="Cerrar solución"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Tags del Modal */}
+            {recetaSeleccionada.keywords && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.25rem' }}>
+                {recetaSeleccionada.keywords.split(',').map((kw, i) => (
+                  <span key={i} className="solution-tag-chip" style={{ background: '#EFF6FF', color: '#1D4ED8', borderColor: '#BFDBFE' }}>
+                    #{kw.trim()}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Procedimiento Completo con TipTap Viewer */}
+            <div className="solution-modal-body">
+              <div className="solution-modal-body-header">
+                <span>📋 Procedimiento de Solución Paso a Paso:</span>
+              </div>
+              <div className="solution-modal-body-content">
+                <RichTextViewer content={recetaSeleccionada.solucion} />
+              </div>
+            </div>
+
+            {/* Footer con Votación y Acciones */}
+            <div className="solution-modal-footer">
+              <div className="portal-receta-vote-area">
+                <span className="portal-receta-vote-label">¿Te sirvió esta solución?</span>
+                <div className="portal-receta-votos" role="group" aria-label="Valorar receta">
+                  <button
+                    type="button"
+                    disabled={votandoId === recetaSeleccionada.id}
+                    onClick={() => handleVotar(recetaSeleccionada.id, 'UTIL')}
+                    className={`portal-voto-btn portal-voto-util ${recetaSeleccionada.mi_voto === 'UTIL' ? 'active' : ''}`}
+                    title="Esta solución me fue útil"
+                  >
+                    <span className="portal-voto-icon" aria-hidden="true">👍</span>
+                    <span className="portal-voto-copy">
+                      <span>Útil</span>
+                      <strong>{recetaSeleccionada.votos_util || 0}</strong>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={votandoId === recetaSeleccionada.id}
+                    onClick={() => handleVotar(recetaSeleccionada.id, 'NO_UTIL')}
+                    className={`portal-voto-btn portal-voto-no-util ${recetaSeleccionada.mi_voto === 'NO_UTIL' ? 'active' : ''}`}
+                    title="No me sirvió esta solución"
+                  >
+                    <span className="portal-voto-icon" aria-hidden="true">👎</span>
+                    <span className="portal-voto-copy">
+                      <span>No útil</span>
+                      <strong>{recetaSeleccionada.votos_no_util || 0}</strong>
+                    </span>
+                  </button>
+                </div>
+
+                {recetaSeleccionada.mi_voto && (
+                  <span className="portal-voto-actual">
+                    Tu voto: <strong>{recetaSeleccionada.mi_voto === 'UTIL' ? 'Útil 👍' : 'No útil 👎'}</strong>
+                  </span>
+                )}
+
+                {mensajeVoto[recetaSeleccionada.id] && (
+                  <span style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 600 }}>
+                    {mensajeVoto[recetaSeleccionada.id]}
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                {user?.es_tecnico && (
+                  <>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        const target = recetaSeleccionada;
+                        setRecetaSeleccionada(null);
+                        abrirModalEditar(target);
+                      }}
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => {
+                        const targetId = recetaSeleccionada.id;
+                        setRecetaSeleccionada(null);
+                        handleEliminarReceta(targetId);
+                      }}
+                      title="Eliminar receta"
+                    >
+                      🗑️ Eliminar
+                    </button>
+                  </>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  style={{ padding: '0.5rem 1.25rem', fontWeight: 700 }}
+                  onClick={() => setRecetaSeleccionada(null)}
+                >
+                  Entendido / Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

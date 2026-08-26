@@ -14,9 +14,26 @@ export default function PortalPublico() {
   const [catFiltro, setCatFiltro] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // Modal para ver solución completa
+  const [recetaSeleccionada, setRecetaSeleccionada] = useState(null);
+
   // Votación (solo para usuarios autenticados)
   const [votandoId, setVotandoId] = useState(null);
   const [mensajeVoto, setMensajeVoto] = useState({});
+
+  const getCategoryIcon = (nombre = '') => {
+    const n = (nombre || '').toLowerCase();
+    if (n.includes('computadora') || n.includes('hardware') || n.includes('pc') || n.includes('pantalla')) return '💻';
+    if (n.includes('impresora') || n.includes('fotocopiadora') || n.includes('toner') || n.includes('hoja')) return '🖨️';
+    if (n.includes('red') || n.includes('internet') || n.includes('cableado') || n.includes('vpn')) return '🌐';
+    if (n.includes('wifi') || n.includes('inalámbrica') || n.includes('conectividad')) return '📶';
+    if (n.includes('telef') || n.includes('interno') || n.includes('voip') || n.includes('llamada')) return '📞';
+    if (n.includes('k2b') || n.includes('erp') || n.includes('sistema') || n.includes('genexus')) return '🏢';
+    if (n.includes('acceso') || n.includes('seguridad') || n.includes('password') || n.includes('clave')) return '🔒';
+    if (n.includes('software') || n.includes('aplicacion') || n.includes('office') || n.includes('outlook')) return '📦';
+    if (n.includes('aico') || n.includes('atencion') || n.includes('soporte')) return '🎧';
+    return '💡';
+  };
 
   const cargarRecetas = async () => {
     try {
@@ -48,6 +65,9 @@ export default function PortalPublico() {
     try {
       const res = await api.post(`/recetas/${recetaId}/votar`, { tipo });
       setRecetas(prev => prev.map(r => (r.id === recetaId ? res.data.receta : r)));
+      if (recetaSeleccionada && recetaSeleccionada.id === recetaId) {
+        setRecetaSeleccionada(res.data.receta);
+      }
       setMensajeVoto(prev => ({
         ...prev,
         [recetaId]: tipo === 'UTIL' ? '¡Gracias por valorar! 👍' : 'Gracias por el reporte',
@@ -126,7 +146,7 @@ export default function PortalPublico() {
           )}
         </div>
 
-        {/* Grid de Recetas */}
+        {/* Grid de Soluciones Cuadradas */}
         {loading ? (
           <div className="spinner">Cargando base de conocimientos…</div>
         ) : recetas.length === 0 ? (
@@ -145,84 +165,186 @@ export default function PortalPublico() {
             )}
           </div>
         ) : (
-          <div className="portal-recetas-grid">
+          <div className="solution-card-grid">
             {recetas.map(r => (
-              <div key={r.id} className="portal-receta-card">
-                <div className="portal-receta-top">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <span className="badge badge-cat">📁 {r.categoria?.nombre || 'General'}</span>
-                    <span className="portal-receta-usos">
-                      ⭐ {r.usos} {r.usos === 1 ? 'uso' : 'usos'}
-                    </span>
+              <div
+                key={r.id}
+                className="solution-square-card"
+                onClick={() => setRecetaSeleccionada(r)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setRecetaSeleccionada(r); }}
+                title="Haz clic para ver la solución completa paso a paso"
+              >
+                {/* Header de la tarjeta */}
+                <div className="solution-card-header">
+                  <span className="badge badge-cat">
+                    {getCategoryIcon(r.categoria?.nombre)} {r.categoria?.nombre || 'General'}
+                  </span>
+                  <span className="solution-card-usos" title={`${r.usos} veces aplicada`}>
+                    ⭐ {r.usos} {r.usos === 1 ? 'uso' : 'usos'}
+                  </span>
+                </div>
+
+                {/* Cuerpo central: Ícono y Título */}
+                <div className="solution-card-body">
+                  <div className="solution-card-icon-circle">
+                    {getCategoryIcon(r.categoria?.nombre)}
                   </div>
+                  <h3 className="solution-card-title">
+                    {r.titulo}
+                  </h3>
 
-                  <h3 className="portal-receta-titulo">{r.titulo}</h3>
-
-                  {/* Keywords */}
+                  {/* Keywords resumidas */}
                   {r.keywords && (
-                    <div className="portal-receta-keywords">
-                      {r.keywords.split(',').map((kw, i) => (
-                        <span key={i} className="portal-keyword-chip">
+                    <div className="solution-card-tags">
+                      {r.keywords.split(',').slice(0, 3).map((kw, i) => (
+                        <span key={i} className="solution-tag-chip">
                           #{kw.trim()}
                         </span>
                       ))}
+                      {r.keywords.split(',').length > 3 && (
+                        <span className="solution-tag-more">+{r.keywords.split(',').length - 3}</span>
+                      )}
                     </div>
                   )}
-
-                  {/* Solución */}
-                  <div className="portal-receta-solucion">
-                    <RichTextViewer content={r.solucion} />
-                  </div>
                 </div>
 
-                {/* Footer: Votación */}
-                <div className="portal-receta-footer">
-                  <div className="portal-receta-vote-area">
-                    <span className="portal-receta-vote-label">¿Te sirvió esta solución?</span>
-                    <div className="portal-receta-votos" role="group" aria-label="Valorar receta">
-                    <button
-                      type="button"
-                      disabled={votandoId === r.id || !isAuthenticated}
-                      onClick={() => handleVotar(r.id, 'UTIL')}
-                      className={`portal-voto-btn portal-voto-util ${r.mi_voto === 'UTIL' ? 'active' : ''}`}
-                      title={isAuthenticated ? 'Esta solución me fue útil' : 'Iniciá sesión para votar'}
-                    >
-                      <span className="portal-voto-icon" aria-hidden="true">👍</span>
-                      <span className="portal-voto-copy">
-                        <span>Útil</span>
-                        <strong>{r.votos_util || 0}</strong>
+                {/* Pie de la tarjeta */}
+                <div className="solution-card-footer">
+                  <span className="solution-view-action">
+                    <span>Ver Solución</span>
+                    <span className="solution-view-arrow">→</span>
+                  </span>
+                  {(r.votos_util > 0 || r.votos_no_util > 0) && (
+                    <div className="solution-card-rating">
+                      <span className="solution-rating-pill" title={`${r.votos_util || 0} personas la calificaron como útil`}>
+                        👍 {r.votos_util || 0}
                       </span>
-                    </button>
-                    <button
-                      type="button"
-                      disabled={votandoId === r.id || !isAuthenticated}
-                      onClick={() => handleVotar(r.id, 'NO_UTIL')}
-                      className={`portal-voto-btn portal-voto-no-util ${r.mi_voto === 'NO_UTIL' ? 'active' : ''}`}
-                      title={isAuthenticated ? 'No me sirvió esta solución' : 'Iniciá sesión para votar'}
-                    >
-                      <span className="portal-voto-icon" aria-hidden="true">👎</span>
-                      <span className="portal-voto-copy">
-                        <span>No útil</span>
-                        <strong>{r.votos_no_util || 0}</strong>
-                      </span>
-                    </button>
                     </div>
-                  </div>
-
-                  {r.mi_voto && (
-                    <span className="portal-voto-actual">
-                      Tu voto: <strong>{r.mi_voto === 'UTIL' ? 'Útil 👍' : 'No útil 👎'}</strong>
-                    </span>
-                  )}
-
-                  {mensajeVoto[r.id] && (
-                    <span style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 600 }}>
-                      {mensajeVoto[r.id]}
-                    </span>
                   )}
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Modal de Detalle de Solución Completa */}
+        {recetaSeleccionada && (
+          <div className="modal-overlay" onClick={() => setRecetaSeleccionada(null)}>
+            <div
+              className="modal-content modal-lg solution-modal-detail"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header del Modal */}
+              <div className="solution-modal-header">
+                <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start', flex: 1 }}>
+                  <div className="solution-modal-icon-badge">
+                    {getCategoryIcon(recetaSeleccionada.categoria?.nombre)}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
+                      <span className="badge badge-cat">
+                        📁 {recetaSeleccionada.categoria?.nombre || 'General'}
+                      </span>
+                      <span className="solution-card-usos">
+                        ⭐ {recetaSeleccionada.usos} {recetaSeleccionada.usos === 1 ? 'uso registrado' : 'usos registrados'}
+                      </span>
+                    </div>
+                    <h2 className="solution-modal-title">
+                      {recetaSeleccionada.titulo}
+                    </h2>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="solution-modal-close"
+                  onClick={() => setRecetaSeleccionada(null)}
+                  title="Cerrar solución"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Tags del Modal */}
+              {recetaSeleccionada.keywords && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.25rem' }}>
+                  {recetaSeleccionada.keywords.split(',').map((kw, i) => (
+                    <span key={i} className="solution-tag-chip" style={{ background: '#EFF6FF', color: '#1D4ED8', borderColor: '#BFDBFE' }}>
+                      #{kw.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Procedimiento Completo con TipTap Viewer */}
+              <div className="solution-modal-body">
+                <div className="solution-modal-body-header">
+                  <span>📋 Procedimiento de Solución Paso a Paso:</span>
+                </div>
+                <div className="solution-modal-body-content">
+                  <RichTextViewer content={recetaSeleccionada.solucion} />
+                </div>
+              </div>
+
+              {/* Footer con Votación */}
+              <div className="solution-modal-footer">
+                <div className="portal-receta-vote-area">
+                  <span className="portal-receta-vote-label">¿Te sirvió esta solución?</span>
+                  <div className="portal-receta-votos" role="group" aria-label="Valorar receta">
+                    <button
+                      type="button"
+                      disabled={votandoId === recetaSeleccionada.id || !isAuthenticated}
+                      onClick={() => handleVotar(recetaSeleccionada.id, 'UTIL')}
+                      className={`portal-voto-btn portal-voto-util ${recetaSeleccionada.mi_voto === 'UTIL' ? 'active' : ''}`}
+                      title={isAuthenticated ? 'Esta solución me fue útil' : 'Iniciá sesión para valorar'}
+                    >
+                      <span className="portal-voto-icon" aria-hidden="true">👍</span>
+                      <span className="portal-voto-copy">
+                        <span>Útil</span>
+                        <strong>{recetaSeleccionada.votos_util || 0}</strong>
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={votandoId === recetaSeleccionada.id || !isAuthenticated}
+                      onClick={() => handleVotar(recetaSeleccionada.id, 'NO_UTIL')}
+                      className={`portal-voto-btn portal-voto-no-util ${recetaSeleccionada.mi_voto === 'NO_UTIL' ? 'active' : ''}`}
+                      title={isAuthenticated ? 'No me sirvió esta solución' : 'Iniciá sesión para valorar'}
+                    >
+                      <span className="portal-voto-icon" aria-hidden="true">👎</span>
+                      <span className="portal-voto-copy">
+                        <span>No útil</span>
+                        <strong>{recetaSeleccionada.votos_no_util || 0}</strong>
+                      </span>
+                    </button>
+                  </div>
+
+                  {recetaSeleccionada.mi_voto && (
+                    <span className="portal-voto-actual">
+                      Tu voto: <strong>{recetaSeleccionada.mi_voto === 'UTIL' ? 'Útil 👍' : 'No útil 👎'}</strong>
+                    </span>
+                  )}
+
+                  {mensajeVoto[recetaSeleccionada.id] && (
+                    <span style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 600 }}>
+                      {mensajeVoto[recetaSeleccionada.id]}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    style={{ padding: '0.5rem 1.25rem', fontWeight: 700 }}
+                    onClick={() => setRecetaSeleccionada(null)}
+                  >
+                    Entendido / Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
