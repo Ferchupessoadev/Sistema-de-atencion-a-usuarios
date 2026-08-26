@@ -222,14 +222,14 @@ export default function ProfilePage() {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="profile-pwd-nueva">Nueva contraseña</label>
+                <label htmlFor="profile-pwd-nueva">Nueva contraseña (mín. 8 caracteres, letras y números)</label>
                 <input
                   id="profile-pwd-nueva"
                   type="password"
                   value={contrasenaNueva}
                   onChange={e => setContrasenaNueva(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
               <div className="form-group">
@@ -240,7 +240,7 @@ export default function ProfilePage() {
                   value={contrasenaConfirm}
                   onChange={e => setContrasenaConfirm(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
               <button

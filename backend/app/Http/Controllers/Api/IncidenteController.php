@@ -84,10 +84,10 @@ class IncidenteController extends Controller
         $targetUserId = $user->id;
 
         $incidente = Incidente::create([
-            'descripcion'  => $validated['descripcion'],
+            'descripcion'  => self::sanitizeRichText($validated['descripcion']),
             'id_categoria' => $validated['id_categoria'],
             'id_usuario'   => $targetUserId,
-            'interno'      => $validated['interno'] ?? ($targetUser->interno ?? null),
+            'interno'      => $validated['interno'] ?? ($user->interno ?? null),
             'prioridad'    => $validated['prioridad'] ?? Incidente::PRIORIDAD_MEDIA,
             'estado'       => Incidente::ESTADO_ABIERTO,
             'id_tecnico'   => $user->hasRole(['tecnico']) ? ($validated['id_tecnico'] ?? null) : null,
@@ -151,10 +151,13 @@ class IncidenteController extends Controller
                     $tituloReceta = $request->input('titulo_receta') 
                         ?: ('Solución para: ' . \Illuminate\Support\Str::limit($incidente->descripcion, 50));
 
-                    Boceto::create([
-                        'titulo' => $tituloReceta,
-                        'solucion_previa' => $request->solucion_texto,
+                    $nuevaReceta = Receta::create([
+                        'titulo'       => $tituloReceta,
+                        'solucion'     => self::sanitizeRichText($request->solucion_texto),
+                        'id_categoria' => $incidente->id_categoria,
+                        'usos'         => 1,
                     ]);
+                    $incidente->id_receta = $nuevaReceta->id;
                 } elseif ($request->filled('id_receta') && $request->id_receta != $incidente->id_receta) {
                     // Si se asoció una receta existente, incrementar contador de uso
                     $receta = Receta::find($request->id_receta);
@@ -181,7 +184,7 @@ class IncidenteController extends Controller
                 $incidente->id_tecnico = $request->id_tecnico;
             }
             if ($request->filled('descripcion')) {
-                $incidente->descripcion = $request->descripcion;
+                $incidente->descripcion = self::sanitizeRichText($request->descripcion);
             }
 
             $incidente->save();
@@ -195,7 +198,7 @@ class IncidenteController extends Controller
                 'descripcion' => 'required|string|min:5|max:50000',
             ]);
 
-            $incidente->descripcion = $request->descripcion;
+            $incidente->descripcion = self::sanitizeRichText($request->descripcion);
             $incidente->save();
         }
 
@@ -228,7 +231,7 @@ class IncidenteController extends Controller
 
         // RN-003: Disparar notificación real en base de datos al usuario
         $unidad = $validated['unidad_especializada'] ?? 'Soporte Especializado';
-        $motivo = $validated['motivo'];
+        $motivo = self::sanitizeRichText($validated['motivo']);
         
         $incidente->usuario->notify(new \App\Notifications\IncidenteDerivadoNotification($incidente, $unidad, $motivo));
 
@@ -247,6 +250,45 @@ class IncidenteController extends Controller
             'incidente'    => $incidente->fresh()->load(['usuario', 'tecnico', 'categoria', 'receta']),
             'notificacion' => $notificacion,
         ]);
+    }
+
+    /**
+     * Sanitiza texto enriquecido HTML permitiendo solo etiquetas seguras (previene Stored XSS).
+     */
+    private static function sanitizeRichText(?string $html): ?string
+    {
+        if ($html === null) {
+            return null;
+        }
+
+        $allowedTags = '<p><br><b><strong><i><em><u><s><strike><h1><h2><h3><h4><h5><h6><ul><ol><li><blockquote><pre><code><hr><a><span><div>';
+        $stripped = strip_tags($html, $allowedTags);
+
+        // Remover manejadores de eventos (onclick, onerror, onload, etc.) y protocolos javascript:
+        $sanitized = preg_replace('/\s*on\w+\s*=\s*(["\']).*?\1/i', '', $stripped);
+        $sanitized = preg_replace('/href\s*=\s*(["\'])\s*javascript:[^"\']*\1/i', 'href="#"', $sanitized);
+
+        return trim($sanitized);
+    }
+
+    /**
+     * Sanitiza valores contra CSV / Formula Injection (CWE-1236).
+     */
+    private function sanitizeCsvField(?string $value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        $clean = str_replace(["\r", "\n"], ' ', strip_tags($value));
+        $trimmed = ltrim($clean);
+
+        // Si comienza con caracteres que activan fórmulas en Excel/Calc, prefijar con comilla simple
+        if ($trimmed !== '' && in_array($trimmed[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+            return "'" . $clean;
+        }
+
+        return $clean;
     }
 
     /**
@@ -297,14 +339,14 @@ class IncidenteController extends Controller
                     $inc->created_at ? $inc->created_at->format('d/m/Y H:i') : '',
                     $inc->estado,
                     $inc->prioridad,
-                    $inc->categoria ? $inc->categoria->nombre : 'Sin Categoria',
-                    $inc->usuario ? $inc->usuario->nombre . ' (' . $inc->usuario->correo . ')' : '',
-                    $inc->interno ?? ($inc->usuario->interno ?? 'Sin registrar'),
-                    $inc->tecnico ? $inc->tecnico->nombre : 'Sin Asignar',
-                    str_replace(["\r", "\n"], ' ', $inc->descripcion),
+                    $this->sanitizeCsvField($inc->categoria ? $inc->categoria->nombre : 'Sin Categoria'),
+                    $this->sanitizeCsvField($inc->usuario ? $inc->usuario->nombre . ' (' . $inc->usuario->correo . ')' : ''),
+                    $this->sanitizeCsvField($inc->interno ?? ($inc->usuario->interno ?? 'Sin registrar')),
+                    $this->sanitizeCsvField($inc->tecnico ? $inc->tecnico->nombre : 'Sin Asignar'),
+                    $this->sanitizeCsvField($inc->descripcion),
                     $inc->resolucion ? $inc->resolucion->format('d/m/Y H:i') : 'Pendiente',
                     $tiempoHoras !== '' ? $tiempoHoras . ' h' : 'N/A',
-                    $inc->receta ? $inc->receta->titulo : 'N/A',
+                    $this->sanitizeCsvField($inc->receta ? $inc->receta->titulo : 'N/A'),
                 ], ';');
             }
 
