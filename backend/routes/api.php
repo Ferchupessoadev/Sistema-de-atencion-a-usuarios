@@ -40,6 +40,8 @@ Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function () {
     // Perfil de usuario
     Route::get('/profile',          [ProfileController::class, 'show']);
     Route::put('/profile',          [ProfileController::class, 'update']);
+    Route::post('/profile/foto',    [ProfileController::class, 'uploadFoto']);
+    Route::delete('/profile/foto',  [ProfileController::class, 'removeFoto']);
     Route::put('/profile/password', [ProfileController::class, 'changePassword']);
 
     // Listado de usuarios (solo técnicos)

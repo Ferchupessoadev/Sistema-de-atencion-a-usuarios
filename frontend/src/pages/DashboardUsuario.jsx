@@ -139,21 +139,52 @@ export default function DashboardUsuario() {
           <div>
             {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
 
-            {/* Resumen de estadísticas */}
+            {/* Resumen de estadísticas interactivas */}
             <div className="stats-grid">
-              <div className="stat-box">
+              <div
+                className={`stat-box clickable ${filtroEstado === 'TODOS' ? 'active' : ''}`}
+                onClick={() => setFiltroEstado('TODOS')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFiltroEstado('TODOS'); }}
+                title="Toca para ver todos tus incidentes"
+              >
                 <div className="stat-number">{incidentes.length}</div>
                 <div className="stat-label">Total Mis Incidentes</div>
               </div>
-              <div className="stat-box">
+
+              <div
+                className={`stat-box clickable ${filtroEstado === 'ABIERTO' ? 'active' : ''}`}
+                onClick={() => setFiltroEstado(prev => (prev === 'ABIERTO' ? 'TODOS' : 'ABIERTO'))}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFiltroEstado(prev => (prev === 'ABIERTO' ? 'TODOS' : 'ABIERTO')); }}
+                title="Toca para filtrar incidentes Abiertos"
+              >
                 <div className="stat-number" style={{ color: '#b45309' }}>{totalAbiertos} / 3</div>
                 <div className="stat-label">Abiertos</div>
               </div>
-              <div className="stat-box">
+
+              <div
+                className={`stat-box clickable ${filtroEstado === 'EN_CURSO' ? 'active' : ''}`}
+                onClick={() => setFiltroEstado(prev => (prev === 'EN_CURSO' ? 'TODOS' : 'EN_CURSO'))}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFiltroEstado(prev => (prev === 'EN_CURSO' ? 'TODOS' : 'EN_CURSO')); }}
+                title="Toca para filtrar incidentes En Atención"
+              >
                 <div className="stat-number" style={{ color: '#1d4ed8' }}>{totalEnCurso}</div>
                 <div className="stat-label">En Atención</div>
               </div>
-              <div className="stat-box">
+
+              <div
+                className={`stat-box clickable ${filtroEstado === 'RESUELTO' ? 'active' : ''}`}
+                onClick={() => setFiltroEstado(prev => (prev === 'RESUELTO' ? 'TODOS' : 'RESUELTO'))}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFiltroEstado(prev => (prev === 'RESUELTO' ? 'TODOS' : 'RESUELTO')); }}
+                title="Toca para filtrar incidentes Resueltos"
+              >
                 <div className="stat-number" style={{ color: '#047857' }}>{totalResueltos}</div>
                 <div className="stat-label">Resueltos</div>
               </div>
