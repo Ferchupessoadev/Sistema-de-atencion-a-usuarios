@@ -50,7 +50,7 @@ export default function ResolverIncidentePage() {
         setCategorias(resCat.data);
 
         // Pre-cargar valores por defecto
-        setTituloReceta(`Solución para: ${resInc.data.descripcion.substring(0, 50)}`);
+        setTituloReceta(`Solución para...`);
         setIdCategoriaReceta(resInc.data.id_categoria || (resCat.data[0]?.id ?? ''));
 
         if (resRec.data.length > 0) {
