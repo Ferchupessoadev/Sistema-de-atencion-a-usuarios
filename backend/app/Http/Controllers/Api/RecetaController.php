@@ -59,6 +59,12 @@ class RecetaController extends Controller
     {
         $receta = Receta::with(['categoria', 'incidentes'])->findOrFail($id);
 
+        $usuarioId = auth('sanctum')->id();
+        $receta->setAttribute(
+            'mi_voto',
+            $usuarioId ? $receta->votos()->where('id_usuario', $usuarioId)->value('tipo') : null
+        );
+
         return response()->json($receta);
     }
 

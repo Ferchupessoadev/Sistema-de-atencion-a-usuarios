@@ -8,6 +8,7 @@ import DashboardTecnico from './pages/DashboardTecnico';
 import DashboardUsuario from './pages/DashboardUsuario';
 import ProfilePage from './pages/ProfilePage';
 import ResolverIncidentePage from './pages/ResolverIncidentePage';
+import RecetaDetallePage from './pages/RecetaDetallePage';
 
 // Guard: requiere autenticación
 function ProtectedRoute({ children }) {
@@ -34,6 +35,10 @@ function AppRoutes() {
     <Routes>
       {/* Portal Público — página principal, visible para todos */}
       <Route path="/" element={<PortalPublico />} />
+
+      {/* Vista y panel de Solución / Receta individual (pública y accesible por URL) */}
+      <Route path="/recetas/:id" element={<RecetaDetallePage />} />
+      <Route path="/receta/:id" element={<RecetaDetallePage />} />
 
       {/* Login público */}
       <Route
