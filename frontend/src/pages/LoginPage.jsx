@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import HeaderPublico from '../components/HeaderPublico';
 
@@ -95,12 +95,13 @@ export default function LoginPage() {
           </form>
 
           <div style={{ textAlign: 'center', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #E2E8F0' }}>
-            <a
-              href="/"
+            <span style={{ fontSize: '0.85rem', color: '#64748B' }}>¿No tienes una cuenta? </span>
+            <Link
+              to="/registro"
               style={{ fontSize: '0.85rem', color: '#022E5B', fontWeight: 600, textDecoration: 'none' }}
             >
-              ← Volver al Portal Público
-            </a>
+              Registrate
+            </Link>
           </div>
         </div>
       </div>
