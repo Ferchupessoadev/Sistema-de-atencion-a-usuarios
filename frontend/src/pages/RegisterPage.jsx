@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import HeaderPublico from '../components/HeaderPublico';
@@ -29,9 +29,9 @@ export default function RegisterPage() {
     try {
       const user = await register(form);
       if (user.es_tecnico) {
-        navigate('/tecnico');
+        navigate('/tecnico', { replace: true });
       } else {
-        navigate('/usuario');
+        navigate('/usuario', { replace: true });
       }
     } catch (err) {
       // Mostrar errores de validación de Laravel (422)
@@ -50,125 +50,93 @@ export default function RegisterPage() {
   return (
     <>
       <HeaderPublico />
-      <div style={styles.container}>
-        <div style={styles.card}>
-          <h1 style={styles.title}>Sistema de Soluciones</h1>
-          <h2 style={styles.subtitle}>Crear Cuenta</h2>
 
-          <form onSubmit={handleSubmit} style={styles.form}>
-            <div style={styles.field}>
-              <label htmlFor="nombre" style={styles.label}>Nombre completo</label>
+      <div className="container" style={{ maxWidth: '440px', paddingTop: '4rem', paddingBottom: '3rem' }}>
+        <div className="card" style={{ padding: '2.5rem 2.25rem', borderTop: '4px solid #022E5B' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.25rem' }}>🎫</div>
+            <h1 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#022E5B', letterSpacing: '-0.02em' }}>
+              Sistema de Soluciones
+            </h1>
+            <p style={{ color: '#64748B', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+              Crear una nueva cuenta
+            </p>
+          </div>
+
+          {errors.general && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{errors.general}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+              <label htmlFor="nombre">Nombre completo</label>
               <input
                 id="nombre"
                 type="text"
                 name="nombre"
                 value={form.nombre}
                 onChange={handleChange}
-                required
-                style={styles.input}
                 placeholder="Juan Pérez"
+                required
+                autoComplete="name"
               />
-              {errors.nombre && <span style={styles.fieldError}>{errors.nombre[0]}</span>}
+              {errors.nombre && <span style={{ color: '#dc2626', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{errors.nombre[0]}</span>}
             </div>
 
-            <div style={styles.field}>
-              <label htmlFor="correo-reg" style={styles.label}>Correo electrónico</label>
+            <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+              <label htmlFor="correo-reg">Correo electrónico</label>
               <input
                 id="correo-reg"
                 type="email"
                 name="correo"
                 value={form.correo}
                 onChange={handleChange}
-                required
-                style={styles.input}
                 placeholder="usuario@empresa.com"
+                required
+                autoComplete="email"
               />
-              {errors.correo && <span style={styles.fieldError}>{errors.correo[0]}</span>}
+              {errors.correo && <span style={{ color: '#dc2626', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{errors.correo[0]}</span>}
             </div>
 
-            <div style={styles.field}>
-              <label htmlFor="contrasena-reg" style={styles.label}>Contraseña (mín. 8 caracteres, letras y números)</label>
+            <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+              <label htmlFor="contrasena-reg">Contraseña</label>
               <input
                 id="contrasena-reg"
                 type="password"
                 name="contrasena"
                 value={form.contrasena}
                 onChange={handleChange}
+                placeholder="••••••••"
                 required
                 minLength={8}
-                style={styles.input}
-                placeholder="••••••••"
+                autoComplete="new-password"
               />
-              {errors.contrasena && <span style={styles.fieldError}>{errors.contrasena[0]}</span>}
+              <small style={{ color: '#64748B', fontSize: '0.75rem', marginTop: '0.2rem', display: 'block' }}>
+                Mín. 8 caracteres (letras y números)
+              </small>
+              {errors.contrasena && <span style={{ color: '#dc2626', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{errors.contrasena[0]}</span>}
             </div>
-
-            {errors.general && <p style={styles.error}>{errors.general}</p>}
 
             <button
               id="btn-register"
               type="submit"
+              className="btn btn-primary"
               disabled={loading}
-              style={{ ...styles.button, opacity: loading ? 0.7 : 1 }}
+              style={{ width: '100%', marginTop: '0.75rem' }}
             >
               {loading ? 'Registrando...' : 'Crear Cuenta'}
             </button>
           </form>
 
-          <p style={styles.loginLink}>
-            ¿Ya tenés cuenta?{' '}
-            <Link to="/login" style={styles.link}>Iniciar sesión</Link>
-          </p>
+          <div style={{ textAlign: 'center', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #E2E8F0' }}>
+            <span style={{ fontSize: '0.85rem', color: '#64748B' }}>¿Ya tenés cuenta? </span>
+            <Link
+              to="/login"
+              style={{ fontSize: '0.85rem', color: '#022E5B', fontWeight: 600, textDecoration: 'none' }}
+            >
+              Iniciar sesión
+            </Link>
+          </div>
         </div>
       </div>
     </>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f0f2f5',
-    fontFamily: 'Arial, sans-serif',
-    padding: '1rem',
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: '2rem',
-    borderRadius: '8px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-    width: '100%',
-    maxWidth: '420px',
-  },
-  title: { margin: '0 0 0.25rem', fontSize: '1.1rem', color: '#555', textAlign: 'center', fontWeight: 'normal' },
-  subtitle: { margin: '0 0 1.5rem', fontSize: '1.5rem', color: '#222', textAlign: 'center' },
-  form: { display: 'flex', flexDirection: 'column', gap: '1rem' },
-  field: { display: 'flex', flexDirection: 'column', gap: '0.3rem' },
-  label: { fontSize: '0.9rem', color: '#444', fontWeight: 'bold' },
-  input: { padding: '0.6rem 0.8rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '1rem' },
-  checkboxField: { display: 'flex', alignItems: 'center', gap: '0.5rem' },
-  checkboxLabel: { fontSize: '0.9rem', color: '#444', cursor: 'pointer' },
-  button: {
-    padding: '0.75rem',
-    backgroundColor: '#2563eb',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    marginTop: '0.5rem',
-  },
-  error: {
-    color: '#dc2626',
-    backgroundColor: '#fee2e2',
-    padding: '0.5rem 0.75rem',
-    borderRadius: '4px',
-    fontSize: '0.9rem',
-    margin: 0,
-  },
-  fieldError: { color: '#dc2626', fontSize: '0.8rem' },
-  loginLink: { textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem', color: '#555' },
-  link: { color: '#2563eb' },
-};

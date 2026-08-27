@@ -51,15 +51,6 @@ export default function DashboardTecnico() {
   const [unidadEspecializada, setUnidadEspecializada] = useState('');
   const [motivoDerivacion, setMotivoDerivacion] = useState('');
 
-  // Modal Nuevo Incidente (Técnico)
-  const [modalNuevoIncidente, setModalNuevoIncidente] = useState(false);
-  const [nuevoIncCategoria, setNuevoIncCategoria] = useState('');
-  const [nuevoIncPrioridad, setNuevoIncPrioridad] = useState('MEDIA');
-  const [nuevoIncInterno, setNuevoIncInterno] = useState('');
-  const [nuevoIncDescripcion, setNuevoIncDescripcion] = useState('');
-  const [nuevoIncUsuarioId, setNuevoIncUsuarioId] = useState('');
-  const [errorNuevoInc, setErrorNuevoInc] = useState('');
-
   // Mensajes y estados
   const [guardando, setGuardando] = useState(false);
   const [errorAccion, setErrorAccion] = useState('');
@@ -174,48 +165,6 @@ export default function DashboardTecnico() {
     }
   };
 
-  // Crear incidente desde consola técnica
-  const handleCrearIncidenteTecnico = async (e) => {
-    e.preventDefault();
-    setErrorNuevoInc('');
-
-    const textoLimpio = nuevoIncDescripcion.replace(/<[^>]*>/g, '').trim();
-    if (!nuevoIncDescripcion || textoLimpio.length < 5) {
-      setErrorNuevoInc('Por favor escribe una descripción del problema (mínimo 5 caracteres).');
-      return;
-    }
-
-    setGuardando(true);
-    try {
-      const payload = {
-        id_categoria: nuevoIncCategoria || (categorias[0]?.id ?? ''),
-        descripcion: nuevoIncDescripcion,
-        prioridad: nuevoIncPrioridad,
-        interno: nuevoIncInterno || null,
-      };
-      if (nuevoIncUsuarioId) {
-        payload.id_usuario = nuevoIncUsuarioId;
-      }
-
-      await api.post('/incidentes', payload);
-
-      setMensajeExito('¡Incidente registrado exitosamente en el sistema!');
-      setModalNuevoIncidente(false);
-      setNuevoIncDescripcion('');
-      setNuevoIncInterno('');
-      setNuevoIncUsuarioId('');
-      cargarDatos();
-      setTimeout(() => setMensajeExito(''), 4000);
-    } catch (err) {
-      const msg = err.response?.data?.errors?.id_usuario?.[0]
-        || err.response?.data?.errors?.descripcion?.[0]
-        || err.response?.data?.message
-        || 'Error al registrar el incidente.';
-      setErrorNuevoInc(msg);
-    } finally {
-      setGuardando(false);
-    }
-  };
 
   // Estadísticas
   const totalAbiertos = incidentes.filter(i => i.estado === 'ABIERTO').length;
@@ -298,24 +247,6 @@ export default function DashboardTecnico() {
           </div>
 
           <div className="dashboard-tabs-actions" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button
-              id="btn-tecnico-nuevo-incidente"
-              className="btn btn-primary btn-sm"
-              onClick={() => {
-                setErrorNuevoInc('');
-                if (categorias.length > 0 && !nuevoIncCategoria) {
-                  setNuevoIncCategoria(categorias[0].id);
-                }
-                if (usuarios.length === 0) {
-                  api.get('/users').then(res => setUsuarios(res.data)).catch(() => {});
-                }
-                setModalNuevoIncidente(true);
-              }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700 }}
-              title="Registrar un nuevo incidente en la Mesa de Ayuda"
-            >
-              ➕ Registrar Incidente
-            </button>
             <button
               id="btn-exportar-csv"
               className="btn btn-secondary btn-sm"
@@ -827,141 +758,6 @@ export default function DashboardTecnico() {
                     disabled={guardando}
                   >
                     {guardando ? 'Derivando…' : '↗️ Confirmar Derivación'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Modal Registrar Nuevo Incidente desde Consola Técnica */}
-        {modalNuevoIncidente && (
-          <div className="modal-overlay">
-            <div className="modal-content modal-lg">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <span style={{ fontSize: '1.8rem' }}>🎫</span>
-                  <div>
-                    <h2 style={{ fontSize: '1.3rem', color: 'var(--c-navy)', fontWeight: 800, margin: 0 }}>
-                      Registrar Incidente en Mesa de Ayuda
-                    </h2>
-                    <span style={{ fontSize: '0.785rem', color: '#64748B' }}>
-                      Carga de incidente técnico con asignación directa de categoría y nivel de prioridad
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setModalNuevoIncidente(false)}
-                  style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#94A3B8' }}
-                  title="Cerrar modal"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {errorNuevoInc && <div className="alert alert-error">{errorNuevoInc}</div>}
-
-              <form onSubmit={handleCrearIncidenteTecnico}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label htmlFor="tec-modal-cat" style={{ fontWeight: 600, color: '#1E293B' }}>
-                      Categoría <span style={{ color: '#EF4444' }}>*</span>
-                    </label>
-                    <select
-                      id="tec-modal-cat"
-                      value={nuevoIncCategoria}
-                      onChange={(e) => setNuevoIncCategoria(e.target.value)}
-                      required
-                    >
-                      {categorias.map(cat => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.nombre}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label htmlFor="tec-modal-prioridad" style={{ fontWeight: 600, color: '#1E293B' }}>
-                      Prioridad Inicial <span style={{ color: '#EF4444' }}>*</span>
-                    </label>
-                    <select
-                      id="tec-modal-prioridad"
-                      value={nuevoIncPrioridad}
-                      onChange={(e) => setNuevoIncPrioridad(e.target.value)}
-                      required
-                    >
-                      <option value="BAJA">BAJA</option>
-                      <option value="MEDIA">MEDIA</option>
-                      <option value="ALTA">ALTA (Crítica)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem', marginBottom: '1.2rem' }}>
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label htmlFor="tec-modal-usuario" style={{ fontWeight: 600, color: '#1E293B' }}>
-                      Usuario Solicitante / Afectado (Opcional)
-                    </label>
-                    <select
-                      id="tec-modal-usuario"
-                      value={nuevoIncUsuarioId}
-                      onChange={(e) => setNuevoIncUsuarioId(e.target.value)}
-                    >
-                      <option value="">A mi nombre ({user?.nombre})</option>
-                      {usuarios.map(u => (
-                        <option key={u.id} value={u.id}>
-                          {u.nombre} ({u.correo}) {u.interno ? `· Int. ${u.interno}` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label htmlFor="tec-modal-interno" style={{ fontWeight: 600, color: '#1E293B' }}>
-                      Interno de Contacto
-                    </label>
-                    <input
-                      id="tec-modal-interno"
-                      type="text"
-                      value={nuevoIncInterno}
-                      onChange={(e) => setNuevoIncInterno(e.target.value)}
-                      placeholder="Ej. 3105, 3777..."
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                  <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', fontWeight: 600, color: '#1E293B' }}>
-                    <span>Descripción Detallada del Incidente <span style={{ color: '#EF4444' }}>*</span></span>
-                    <span style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 400 }}>Editor con formato enriquecido</span>
-                  </label>
-                  <RichTextEditor
-                    value={nuevoIncDescripcion}
-                    onChange={setNuevoIncDescripcion}
-                    placeholder="Describe detalladamente el incidente técnico (síntomas, equipos involucrados, mensajes de error en pantalla, etc.)..."
-                    minHeight="200px"
-                  />
-                </div>
-
-                <div className="modal-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    style={{ flex: 1 }}
-                    onClick={() => setModalNuevoIncidente(false)}
-                    disabled={guardando}
-                  >
-                    ← Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    style={{ flex: 1.5, padding: '0.75rem 1.25rem', fontSize: '0.95rem' }}
-                    disabled={guardando}
-                  >
-                    {guardando ? 'Guardando Incidente…' : '✅ Registrar Incidente'}
                   </button>
                 </div>
               </form>

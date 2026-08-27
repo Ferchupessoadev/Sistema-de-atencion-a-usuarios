@@ -65,10 +65,6 @@ export const DashboardNavbar = ({
                 {/* Campana de Notificaciones */}
                 <NotificationBell />
 
-                {/* Badge de Rol */}
-                <span className={`badge ${isTecnico ? 'badge-tecnico' : 'badge-usuario'}`} style={config.badgeStyle}>
-                    {config.badgeText}
-                </span>
 
                 {/* Menú Desplegable de Usuario (Estilo Facebook) */}
                 <div className="user-dropdown-container" ref={dropdownRef}>
@@ -81,7 +77,7 @@ export const DashboardNavbar = ({
                                 <img src={user.foto_url} alt={user.nombre} className="navbar-avatar-img" />
                             ) : (
                                 <span className="navbar-avatar-initials">
-                                {user?.nombre ? user.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'}
+                                    {user?.nombre ? user.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'}
                                 </span>
                             )}
                         </div>
@@ -94,7 +90,12 @@ export const DashboardNavbar = ({
                     {dropdownOpen && (
                         <div className="user-dropdown-menu">
                             <div className="user-dropdown-header">
-                                <p className="user-dropdown-title">{user?.nombre}</p>
+                                <p className="user-dropdown-title" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {user?.nombre} 
+                                    <span className={`badge ${isTecnico ? 'badge-tecnico' : 'badge-usuario'}`} style={{...config.badgeStyle, width: 'max-content'}}>
+                                        {config.badgeText}
+                                    </span>
+                                </p>
                                 <p className="user-dropdown-subtitle">{user?.email || config.subtitle}</p>
                             </div>
 
