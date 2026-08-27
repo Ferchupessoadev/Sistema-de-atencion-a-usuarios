@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import NotificationBell from '../components/NotificationBell';
 import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
+import { DashboardNavbar } from '../components/Dashboard/DashboardHeader';
 
 const EMOJIS_SUGERIDOS = [
   '💻', '🖨️', '🌐', '📶', '📞', '🏢', '📦', '🔒',
@@ -155,45 +155,15 @@ export default function CategoriaDetallePage() {
       <DashboardResponsiveStyles />
 
       {/* Header Institucional */}
-      <nav className="dashboard-nav">
-        <div className="dashboard-nav-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <span style={{ fontSize: '1.6rem' }}>🏷️</span>
-          <div>
-            <h1>Gestión de Categoría</h1>
-            <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
-              Panel de Configuración de Mesa de Ayuda
-            </span>
-          </div>
-        </div>
-
-        <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button
-            id="btn-volver-categorias"
-            className="btn btn-outline-header btn-sm"
-            onClick={handleVolver}
-            style={{ fontWeight: 700 }}
-          >
-            ← Volver a Categorías
-          </button>
-          <NotificationBell />
-          {user?.foto_url ? (
-            <img src={user.foto_url} alt={user.nombre} className="navbar-avatar-img" />
-          ) : (
-            <span className="navbar-avatar-initials">
-              {user?.nombre ? user.nombre.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'}
-            </span>
-          )}
-          <span className="badge badge-tecnico" style={{ background: '#DBEAFE', color: '#022E5B' }}>Técnico</span>
-          <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
-          <button
-            id="btn-logout-categoria"
-            className="btn btn-outline-header btn-sm"
-            onClick={handleLogout}
-          >
-            Cerrar sesión
-          </button>
-        </div>
-      </nav>
+      <DashboardNavbar
+        role="tecnico"
+        user={user}
+        onLogout={handleLogout}
+        title="Gestión de Categoría"
+        subtitle="Panel de Configuración de Mesa de Ayuda"
+        icon="🏷️"
+        backButton={{ label: '← Volver a Categorías', onClick: handleVolver }}
+      />
 
       {/* Contenedor Principal */}
       <div className="dashboard-body" style={{ maxWidth: '980px', margin: '2rem auto', padding: '0 1rem' }}>

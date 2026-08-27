@@ -5,8 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import HeaderPublico from '../components/HeaderPublico';
 import RichTextViewer from '../components/RichTextViewer';
 import RichTextEditor from '../components/RichTextEditor';
-import NotificationBell from '../components/NotificationBell';
 import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
+import { DashboardNavbar } from '../components/Dashboard/DashboardHeader';
 
 export default function RecetaDetallePage() {
   const { id } = useParams();
@@ -78,6 +78,11 @@ export default function RecetaDetallePage() {
     } else {
       navigate('/');
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   const handleVotar = async (tipo) => {
@@ -181,25 +186,15 @@ export default function RecetaDetallePage() {
 
       {/* Header según tipo de usuario */}
       {isAuthenticated && user?.es_tecnico ? (
-        <nav className="dashboard-nav">
-          <div className="dashboard-nav-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <span style={{ fontSize: '1.6rem' }}>🛠️</span>
-            <div>
-              <h1>Base de Conocimientos CTM</h1>
-              <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
-                Guía Técnica de Solución #{receta.id}
-              </span>
-            </div>
-          </div>
-          <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button className="btn btn-outline-header btn-sm" onClick={handleVolver}>
-              ← Volver
-            </button>
-            <NotificationBell />
-            <span className="badge badge-tecnico" style={{ background: '#DBEAFE', color: '#022E5B' }}>Técnico</span>
-            <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
-          </div>
-        </nav>
+        <DashboardNavbar
+          role="tecnico"
+          user={user}
+          onLogout={handleLogout}
+          title="Base de Conocimientos CTM"
+          subtitle={`Guía Técnica de Solución #${receta.id}`}
+          icon="🛠️"
+          backButton={{ label: '← Volver', onClick: handleVolver }}
+        />
       ) : (
         <HeaderPublico />
       )}

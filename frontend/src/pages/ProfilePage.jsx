@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { DashboardNavbar } from '../components/Dashboard/DashboardHeader';
+import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
 
 export default function ProfilePage() {
   const { user, updateUser, logout } = useAuth();
@@ -178,40 +180,17 @@ export default function ProfilePage() {
 
   return (
     <div className="dashboard">
+      <DashboardResponsiveStyles />
       {/* Header */}
-      <nav className="dashboard-nav">
-        <div className="dashboard-nav-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <span style={{ fontSize: '1.6rem' }}>👤</span>
-          <div>
-            <h1>Mi Perfil</h1>
-            <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
-              Gestión de cuenta personal y foto
-            </span>
-          </div>
-        </div>
-        <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button
-            id="btn-volver-dashboard"
-            className="btn btn-outline-header btn-sm"
-            onClick={() => navigate(destino)}
-          >
-            ← Volver al Panel
-          </button>
-          {fotoUrl ? (
-            <img src={fotoUrl} alt={user?.nombre} className="navbar-avatar-img" />
-          ) : (
-            <span className="navbar-avatar-initials">{getInitials(user?.nombre)}</span>
-          )}
-          <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
-          <button
-            id="btn-logout-profile"
-            className="btn btn-outline-header btn-sm"
-            onClick={handleLogout}
-          >
-            Cerrar sesión
-          </button>
-        </div>
-      </nav>
+      <DashboardNavbar
+        role={user?.es_tecnico ? 'tecnico' : 'usuario'}
+        user={user}
+        onLogout={handleLogout}
+        title="Mi Perfil"
+        subtitle="Gestión de cuenta personal y foto"
+        icon="👤"
+        backButton={{ label: '← Volver al Panel', to: destino }}
+      />
 
       <div className="profile-body">
         {/* Avatar + Info */}

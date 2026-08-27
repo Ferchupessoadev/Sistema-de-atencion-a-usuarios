@@ -6,7 +6,13 @@ import './DashboardNavbar.css';
 export const DashboardNavbar = ({
     role = 'usuario', // 'tecnico', 'usuario' o 'administrador'
     user,
-    onLogout
+    onLogout,
+    // Props opcionales para personalizar el header en sub-páginas
+    title,        // Título personalizado (ej: "Mi Perfil", "Resolver Incidente #5")
+    subtitle,     // Subtítulo personalizado
+    icon,         // Ícono personalizado (emoji)
+    backButton,   // { label: '← Volver', to: '/tecnico' } o null
+    extraActions, // Elementos React extra para poner antes del dropdown
 }) => {
     const navigate = useNavigate();
     const isTecnico = role === 'tecnico';
@@ -15,8 +21,9 @@ export const DashboardNavbar = ({
     const dropdownRef = useRef(null);
 
     const config = {
-        icon: isTecnico ? '🛠️' : '🎫',
-        subtitle: isTecnico ? 'Consola Técnica de Gestión' : 'Portal de Usuario',
+        icon: icon || (isTecnico ? '🛠️' : '🎫'),
+        title: title || 'Sistema de Soluciones',
+        subtitle: subtitle || (isTecnico ? 'Consola Técnica de Gestión' : 'Portal de Usuario'),
         badgeText: isTecnico ? 'Técnico' : 'Usuario',
         badgeStyle: isTecnico
             ? { background: '#DBEAFE', color: '#022E5B' }
@@ -40,7 +47,7 @@ export const DashboardNavbar = ({
             <div className="dashboard-nav-brand">
                 <span className="dashboard-nav-icon">{config.icon}</span>
                 <div>
-                    <h1>Sistema de Soluciones</h1>
+                    <h1>{config.title}</h1>
                     <span className="dashboard-nav-subtitle">
                         {config.subtitle} {user?.interno && `· Int. ${user.interno}`}
                     </span>
@@ -49,9 +56,20 @@ export const DashboardNavbar = ({
 
             {/* Actions / Right side */}
             <div className="dashboard-nav-actions">
+
+                {/* Botón "Volver" personalizado (para sub-páginas) */}
+                {backButton && (
+                    <button
+                        className="btn btn-outline-header btn-sm"
+                        onClick={backButton.onClick || (() => navigate(backButton.to))}
+                        title={backButton.label}
+                    >
+                        {backButton.label}
+                    </button>
+                )}
                 
-                {/* Botón extra solo para el usuario común */}
-                {!isTecnico && (
+                {/* Botón extra solo para el usuario común (en dashboards principales) */}
+                {!backButton && !isTecnico && (
                     <button
                         id="btn-portal-publico"
                         className="btn btn-outline-header btn-sm"
@@ -61,6 +79,9 @@ export const DashboardNavbar = ({
                         🏠 Portal
                     </button>
                 )}
+
+                {/* Acciones extra inyectadas por la página */}
+                {extraActions}
 
                 {/* Campana de Notificaciones */}
                 <NotificationBell />

@@ -5,8 +5,8 @@ import api from '../services/api';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextViewer from '../components/RichTextViewer';
 import SearchableSelect from '../components/SearchableSelect';
-import NotificationBell from '../components/NotificationBell';
 import DashboardResponsiveStyles from '../components/DashboardResponsiveStyles';
+import { DashboardNavbar } from '../components/Dashboard/DashboardHeader';
 
 export default function ResolverIncidentePage() {
   const { id } = useParams();
@@ -149,35 +149,15 @@ export default function ResolverIncidentePage() {
       <DashboardResponsiveStyles />
 
       {/* Header */}
-      <nav className="dashboard-nav">
-        <div className="dashboard-nav-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <span style={{ fontSize: '1.6rem' }}>🛠️</span>
-          <div>
-            <h1>Resolver Incidente #{incidente.id}</h1>
-            <span style={{ fontSize: '0.725rem', color: '#93C5FD', letterSpacing: '0.04em', fontWeight: 600 }}>
-              Consola de Atención y Respuesta Técnica
-            </span>
-          </div>
-        </div>
-        <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button
-            className="btn btn-outline-header btn-sm"
-            onClick={() => navigate('/tecnico')}
-            title="Volver a la Consola"
-          >
-            ← Volver a la Consola
-          </button>
-          <NotificationBell />
-          <span className="badge badge-tecnico" style={{ background: '#DBEAFE', color: '#022E5B' }}>Técnico</span>
-          <span style={{ fontSize: '0.9rem', color: '#FFFFFF', fontWeight: 600 }}>{user?.nombre}</span>
-          <button
-            className="btn btn-outline-header btn-sm"
-            onClick={handleLogout}
-          >
-            Cerrar sesión
-          </button>
-        </div>
-      </nav>
+      <DashboardNavbar
+        role="tecnico"
+        user={user}
+        onLogout={handleLogout}
+        title={`Resolver Incidente #${incidente.id}`}
+        subtitle="Consola de Atención y Respuesta Técnica"
+        icon="🛠️"
+        backButton={{ label: '← Volver a la Consola', to: '/tecnico' }}
+      />
 
       <div className="dashboard-body" style={{ maxWidth: '960px' }}>
         {exitoMsg && <div className="alert alert-success">{exitoMsg}</div>}
